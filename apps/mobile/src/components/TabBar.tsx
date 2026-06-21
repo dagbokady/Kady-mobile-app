@@ -27,6 +27,13 @@ export default function TabBar({ state, navigation }: any) {
     const insets = useSafeAreaInsets();
     const activeName: string = state.routes[state.index]?.name ?? '';
 
+    // Masque la barre sur les écrans de détail (chat, carnet, paramètres…) :
+    // chaque onglet imbrique une Stack ; on n'affiche la barre que sur son index.
+    const activeTab = state.routes[state.index];
+    const nested = activeTab?.state;
+    const nestedName = nested && typeof nested.index === 'number' ? nested.routes?.[nested.index]?.name : undefined;
+    if (nestedName && nestedName !== 'index') return null;
+
     const go = (name: string) => {
         const route = state.routes.find((r: any) => r.name === name);
         if (!route) return;

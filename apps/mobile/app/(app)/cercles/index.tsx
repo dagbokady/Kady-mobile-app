@@ -187,7 +187,7 @@ export default function Cercles() {
                                 </View>
                                 <View style={s.limitBottom}>
                                     <Text style={s.limitNote}>Cercles illimités avec Premium</Text>
-                                    <PressableScale onPress={() => router.push('/(app)/profil/prenium')}>
+                                    <PressableScale onPress={() => router.push('/(app)/profil/premium')}>
                                         <LinearGradient colors={gradients.rose} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.limitBtn}>
                                             <Ionicons name="diamond" size={13} color="#fff" />
                                             <Text style={s.limitBtnTxt}>Passer Premium</Text>

@@ -63,7 +63,7 @@ export const dmMessages = [
     { id: 'd1', moi: false, contenu: 'Salut Awa ! J\'ai adoré ton message dans le Cercle 😊', heure: '10:30' },
     { id: 'd2', moi: true, contenu: 'Merci Koffi ! Toi aussi tu connais bien la cuisine 👀', heure: '10:35' },
     { id: 'd3', moi: false, contenu: 'On se fait ce maquis ce week-end alors ?', heure: '10:40' },
-    { id: 'd4', moi: true, contenu: 'Avec plaisir, à très vite !', heure: '10:42' },
+    { id: 'd4', moi: true, contenu: 'Avec plaisir, à très vite !', heure: '10:42' }
 ];
 
 export const NIVEAUX_RENCONTRE = ['L\'Inconnu', 'La Connaissance', 'L\'Ami(e)', 'La Confiance', 'L\'Intimité'];

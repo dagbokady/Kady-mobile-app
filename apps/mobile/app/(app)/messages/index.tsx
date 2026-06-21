@@ -62,7 +62,7 @@ export default function Messages() {
 
                 {/* assistant */}
                 <FadeInUp delay={90}>
-                    <PressableScale style={s.assistant} scaleTo={0.98}>
+                    <PressableScale style={s.assistant} scaleTo={0.98} onPress={() => router.push('/(app)/messages/r1')}>
                         <LinearGradient colors={['#5b6ad6', '#a463ff']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.assistantIcon}>
                             <Ionicons name="sparkles" size={20} color="#fff" />
                         </LinearGradient>

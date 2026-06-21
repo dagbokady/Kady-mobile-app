@@ -184,7 +184,7 @@ export default function Profil() {
                                 <Text style={s.premiumSub}>Cercles & DM illimités, statistiques, rythme personnel.</Text>
                             </View>
                         </View>
-                        <PressableScale onPress={() => router.push('/(app)/profil/prenium')}>
+                        <PressableScale onPress={() => router.push('/(app)/profil/premium')}>
                             <LinearGradient colors={gradients.rose} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.premiumBtn}>
                                 <Text style={s.premiumBtnTxt}>Découvrir Premium</Text>
                                 <Ionicons name="chevron-forward" size={16} color="#fff" />

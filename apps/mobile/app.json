@@ -5,19 +5,14 @@
     "scheme": "kady",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#2A0712"
-    },
+    "userInterfaceStyle": "light",
     "ios": { "supportsTablet": false, "bundleIdentifier": "ci.kady.app" },
-    "android": {
-      "package": "ci.kady.app",
-      "adaptiveIcon": { "foregroundImage": "./assets/icon.png", "backgroundColor": "#6E1330" }
-    },
-    "plugins": ["expo-router", "expo-font"],
+    "android": { "package": "ci.kady.app" },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      ["expo-splash-screen", { "backgroundColor": "#F6F2FB", "resizeMode": "contain" }]
+    ],
     "experiments": { "typedRoutes": true }
   }
 }
