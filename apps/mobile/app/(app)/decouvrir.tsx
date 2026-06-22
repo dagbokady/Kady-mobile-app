@@ -11,12 +11,15 @@ import { FadeInUp, PressableScale, animateLayout } from '../../src/components/mo
 import { fonts } from '../../src/theme/typography';
 import { spacing, radius } from '../../src/theme/spacing';
 import { colors, themeOf } from '../../src/theme/colors';
+import { useColors, type Palette } from '../../src/theme/theme';
 import { cerclesDecouvrir } from '../../src/data/mock';
 
 const FILTRES = ['Populaires', 'Proches', 'Actifs', 'Nouveaux'];
 
 export default function Decouvrir() {
     const router = useRouter();
+    const pal = useColors();
+    const s = makeStyles(pal);
     const [filtre, setFiltre] = useState('Populaires');
     const [ouvert, setOuvert] = useState<string | null>(null);
 
@@ -24,6 +27,13 @@ export default function Decouvrir() {
         animateLayout();
         setOuvert(ouvert === id ? null : id);
     };
+
+    const Reason = ({ icon, txt, color }: { icon: any; txt: string; color: string }) => (
+        <View style={[s.reason, { backgroundColor: color + '16' }]}>
+            <Ionicons name={icon} size={13} color={color} />
+            <Text style={[s.reasonTxt, { color }]}>{txt}</Text>
+        </View>
+    );
 
     return (
         <Screen>
@@ -58,7 +68,7 @@ export default function Decouvrir() {
                                         </View>
                                     </View>
                                     <View style={[s.chevron, open && { backgroundColor: t.soft }]}>
-                                        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={open ? t.solid : colors.dim} />
+                                        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={open ? t.solid : pal.ink(0.42)} />
                                     </View>
                                 </PressableScale>
 
@@ -97,22 +107,13 @@ export default function Decouvrir() {
     );
 }
 
-function Reason({ icon, txt, color }: { icon: any; txt: string; color: string }) {
-    return (
-        <View style={[s.reason, { backgroundColor: color + '16' }]}>
-            <Ionicons name={icon} size={13} color={color} />
-            <Text style={[s.reasonTxt, { color }]}>{txt}</Text>
-        </View>
-    );
-}
-
-const s = StyleSheet.create({
-    h1: { fontFamily: fonts.display, fontSize: 32, color: colors.cream, marginTop: spacing.md },
-    intro: { fontFamily: fonts.body, fontSize: 14, color: colors.muted, marginTop: 4, marginBottom: spacing.md },
+const makeStyles = (c: Palette) => StyleSheet.create({
+    h1: { fontFamily: fonts.display, fontSize: 32, color: c.text, marginTop: spacing.md },
+    intro: { fontFamily: fonts.body, fontSize: 14, color: c.ink(0.6), marginTop: 4, marginBottom: spacing.md },
     filtres: { gap: 9, paddingBottom: spacing.md },
     card: {
-        backgroundColor: colors.card, borderRadius: radius.lg, padding: spacing.md, overflow: 'hidden',
-        borderWidth: 0.5, borderColor: 'rgba(0,0,0,0.06)',
+        backgroundColor: c.card, borderRadius: radius.lg, padding: spacing.md, overflow: 'hidden',
+        borderWidth: 0.5, borderColor: c.border,
         shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.14, shadowRadius: 16, elevation: 4,
     },
     accent: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
@@ -121,19 +122,19 @@ const s = StyleSheet.create({
         width: 54, height: 54, borderRadius: 17, alignItems: 'center', justifyContent: 'center',
         shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 6, elevation: 4,
     },
-    nom: { fontFamily: fonts.displayMed, fontSize: 17, color: colors.cream, marginBottom: 7 },
+    nom: { fontFamily: fonts.displayMed, fontSize: 17, color: c.text, marginBottom: 7 },
     meta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     theme: { fontFamily: fonts.bodySemi, fontSize: 12 },
     chevron: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
     previewRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.md },
-    previewTxt: { fontFamily: fonts.bodyMed, fontSize: 12, color: colors.muted },
-    salle: { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 0.5, borderTopColor: colors.border, gap: spacing.md },
-    desc: { fontFamily: fonts.body, fontSize: 14, color: colors.cream, lineHeight: 21 },
-    why: { fontFamily: fonts.bodySemi, fontSize: 12, color: colors.muted, letterSpacing: 1, textTransform: 'uppercase' },
+    previewTxt: { fontFamily: fonts.bodyMed, fontSize: 12, color: c.ink(0.6) },
+    salle: { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 0.5, borderTopColor: c.border, gap: spacing.md },
+    desc: { fontFamily: fonts.body, fontSize: 14, color: c.text, lineHeight: 21 },
+    why: { fontFamily: fonts.bodySemi, fontSize: 12, color: c.ink(0.6), letterSpacing: 1, textTransform: 'uppercase' },
     whyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
     reason: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: radius.pill, paddingVertical: 6, paddingHorizontal: 11 },
     reasonTxt: { fontFamily: fonts.bodyMed, fontSize: 12 },
     rules: { borderRadius: radius.md, padding: spacing.md, gap: 4 },
     ruleTitle: { fontFamily: fonts.bodySemi, fontSize: 13, marginBottom: 4 },
-    rule: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, lineHeight: 20 },
+    rule: { fontFamily: fonts.body, fontSize: 13, color: c.ink(0.6), lineHeight: 20 },
 });

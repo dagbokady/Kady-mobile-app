@@ -1,6 +1,6 @@
 // src/components/TabBar.tsx
 // Barre d'onglets du design KADY : Accueil · Cercles · (➕ FAB) · Messages · Profil.
-// Onglet actif = encre #211633 + libellé gras ; inactif = estompé. FAB central surélevé.
+// Onglet actif = encre du thème + libellé gras ; inactif = estompé. FAB central surélevé.
 
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { PopIn } from './motion';
 import { colors, gradients } from '../theme/colors';
 import { fonts } from '../theme/typography';
+import { useColors, type Palette } from '../theme/theme';
 
 type Tab = { name: string; label: string; icon: keyof typeof Ionicons.glyphMap; badge?: number };
 
@@ -20,19 +21,28 @@ const TABS: Tab[] = [
     { name: 'profil', label: 'Profil', icon: 'person-outline' },
 ];
 
-const ACTIVE = '#211633';
-const INACTIVE = 'rgba(33,22,51,0.45)';
-
 export default function TabBar({ state, navigation }: any) {
     const insets = useSafeAreaInsets();
+    const c = useColors();
+    const styles = makeStyles(c);
+    const ACTIVE = c.text;
+    const INACTIVE = c.ink(0.45);
     const activeName: string = state.routes[state.index]?.name ?? '';
 
-    // Masque la barre sur les écrans de détail (chat, carnet, paramètres…) :
-    // chaque onglet imbrique une Stack ; on n'affiche la barre que sur son index.
+    // Masque la barre sur les écrans plein écran hors onglets (Créer, Notifications…)
+    const TAB_NAMES = ['accueil', 'cercles', 'messages', 'profil'];
+    if (!TAB_NAMES.includes(activeName)) return null;
+
+    // …et sur les écrans de détail : chaque onglet imbrique une Stack ; on n'affiche
+    // la barre que sur son index (chat, cercle detail, carnet, paramètres… la masquent).
     const activeTab = state.routes[state.index];
     const nested = activeTab?.state;
     const nestedName = nested && typeof nested.index === 'number' ? nested.routes?.[nested.index]?.name : undefined;
     if (nestedName && nestedName !== 'index') return null;
+
+    const fade = c.mode === 'dark'
+        ? (['rgba(20,15,30,0)', 'rgba(20,15,30,0.92)', c.bg[0]] as const)
+        : (['rgba(255,255,255,0)', 'rgba(255,255,255,0.92)', '#ffffff'] as const);
 
     const go = (name: string) => {
         const route = state.routes.find((r: any) => r.name === name);
@@ -60,17 +70,14 @@ export default function TabBar({ state, navigation }: any) {
 
     return (
         <View style={[styles.wrap, { paddingBottom: (insets.bottom || 8) + 6 }]}>
-            <LinearGradient
-                colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.92)', '#ffffff']}
-                style={StyleSheet.absoluteFill}
-            />
+            <LinearGradient colors={fade} style={StyleSheet.absoluteFill} />
             <View style={styles.row}>
                 <Item tab={TABS[0]} />
                 <Item tab={TABS[1]} />
 
                 {/* FAB central — créer un cercle */}
                 <View style={styles.fabSlot}>
-                    <Pressable onPress={() => go('cercles')} hitSlop={8}>
+                    <Pressable onPress={() => navigation.navigate('creer')} hitSlop={8}>
                         <PopIn from={0.85}>
                             <LinearGradient colors={gradients.rose} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fab}>
                                 <Ionicons name="add" size={28} color={colors.white} />
@@ -87,11 +94,11 @@ export default function TabBar({ state, navigation }: any) {
     );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: Palette) => StyleSheet.create({
     wrap: {
         position: 'relative',
         paddingTop: 10, paddingHorizontal: 18,
-        borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(33,22,51,0.06)',
+        borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border,
     },
     row: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 6 },
     item: { flex: 1, alignItems: 'center', gap: 5, paddingVertical: 6 },
@@ -100,13 +107,13 @@ const styles = StyleSheet.create({
     fab: {
         position: 'relative', top: -14, width: 58, height: 58, borderRadius: 20,
         alignItems: 'center', justifyContent: 'center',
-        shadowColor: '#ff6fc2', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.55, shadowRadius: 18, elevation: 10,
+        shadowColor: '#e02a73', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.55, shadowRadius: 18, elevation: 10,
     },
     badge: {
         position: 'absolute', top: -5, right: -9, minWidth: 16, height: 16, paddingHorizontal: 4,
-        borderRadius: 8, backgroundColor: colors.pink, borderWidth: 2, borderColor: '#fff',
+        borderRadius: 8, backgroundColor: colors.pink, borderWidth: 2, borderColor: c.mode === 'dark' ? c.bg[0] : '#fff',
         alignItems: 'center', justifyContent: 'center',
     },
     badgeTxt: { fontFamily: fonts.bodyBold, fontSize: 9, color: '#fff' },
-    homeBar: { alignSelf: 'center', marginTop: 8, width: 130, height: 5, borderRadius: 99, backgroundColor: 'rgba(33,22,51,0.22)' },
+    homeBar: { alignSelf: 'center', marginTop: 8, width: 130, height: 5, borderRadius: 99, backgroundColor: c.ink(0.22) },
 });

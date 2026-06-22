@@ -15,6 +15,8 @@ export default function AppLayout() {
             <Tabs.Screen name="messages" options={{ title: 'Messages' }} />
             <Tabs.Screen name="profil" options={{ title: 'Profil' }} />
             <Tabs.Screen name="decouvrir" options={{ href: null }} />
+            <Tabs.Screen name="creer" options={{ href: null }} />
+            <Tabs.Screen name="notifications" options={{ href: null }} />
         </Tabs>
     );
 }

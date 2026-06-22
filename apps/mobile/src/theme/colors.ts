@@ -3,15 +3,15 @@
 // violet → rose vif sur fond blanc lavande, encre profonde #211633.
 
 export const colors = {
-    // Marque (violet → rose)
-    wine: '#7c3aed',
-    wineLight: '#a463ff',
-    wine800: '#6d28d9',
+    // Marque (magenta → rose)
+    wine: '#d6286e',
+    wineLight: '#ff6aa9',
+    wine800: '#b01b5c',
     wine900: '#F4F1FA',
     ink: '#FFFFFF',          // fond principal
 
-    rose: '#7c3aed',         // accent principal (violet)
-    roseDeep: '#6d28d9',     // état pressé / texte accent
+    rose: '#d6286e',         // accent principal (magenta)
+    roseDeep: '#b01b5c',     // état pressé / texte accent
 
     // Palette d'accents (dégradés du design)
     coral: '#ff9d5c',
@@ -38,7 +38,7 @@ export const colors = {
 
     // Bordures & séparateurs
     border: 'rgba(33,22,51,0.08)',
-    borderRose: 'rgba(124,58,237,0.14)',
+    borderRose: 'rgba(214,40,110,0.14)',
     overlay: 'rgba(20,12,40,0.50)',
 
     // Utilitaires
@@ -48,15 +48,15 @@ export const colors = {
 } as const;
 
 export const gradients = {
-    rose: ['#a463ff', '#ff6fc2'] as const,                  // CTA principal
-    me: ['#a463ff', '#ff6fc2'] as const,                    // bulle "moi"
-    royal: ['#a463ff', '#ff6fc2'] as const,                 // premium
-    header: ['#a463ff', '#ff6fc2'] as const,
+    rose: ['#ff6aa9', '#e02a73'] as const,                  // CTA principal
+    me: ['#ff6aa9', '#e02a73'] as const,                    // bulle "moi"
+    royal: ['#ff6aa9', '#e02a73'] as const,                 // premium
+    header: ['#ff6aa9', '#e02a73'] as const,
     sunrise: ['#ff9d5c', '#d34d7e'] as const,               // chaud
     ocean: ['#7be0a0', '#2f9ac2'] as const,                 // frais
     wine: ['#ffffff', '#faf7fe', '#f6f2fb'] as const,       // fond écran (blanc lavande)
     card: ['#ffffff', '#faf7fe'] as const,
-    glow: ['rgba(164,99,255,0.18)', 'rgba(164,99,255,0)'] as const,
+    glow: ['rgba(255,106,169,0.18)', 'rgba(255,106,169,0)'] as const,
 } as const;
 
 /* ---------- Couleurs par thème de Cercle ---------- */
@@ -70,7 +70,7 @@ export const themeColors: Record<string, ThemeColor> = {
     'Cinéma': { from: '#9aa7d6', to: '#5b6aa8', solid: '#5b6aa8', soft: '#EEF0F8' },
     Foi: { from: '#7be0a0', to: '#2f9ac2', solid: '#1f9d57', soft: '#E6F7EE' },
     Sport: { from: '#8fd0ff', to: '#5a7fd6', solid: '#5a7fd6', soft: '#E9F2FE' },
-    default: { from: '#a463ff', to: '#ff6fc2', solid: '#7c3aed', soft: '#F3ECFD' },
+    default: { from: '#ff6aa9', to: '#e02a73', solid: '#d6286e', soft: '#FDE9F1' },
 };
 
 export function themeOf(key?: string): ThemeColor {

@@ -47,16 +47,18 @@ export const cercleMessages = [
 ];
 
 export type Relation = {
-    id: string; prenom: string; mode: 'rencontre' | 'amitie';
+    id: string; prenom: string; age: number; mode: 'rencontre' | 'amitie';
     niveau: number; cercle: string; dmOuvert: boolean;
-    dernier: string; heure: string; nonLus: number; avatarLocked: boolean;
-    avatar?: string; enLigne?: boolean;
+    enLigne?: boolean; grad: readonly [string, string];
 };
 
 export const relations: Relation[] = [
-    { id: 'r1', prenom: 'Koffi', mode: 'rencontre', niveau: 3, cercle: 'Les Gourmets', dmOuvert: true, dernier: 'Avec plaisir, à très vite !', heure: '10:42', nonLus: 2, avatarLocked: false, avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200', enLigne: true },
-    { id: 'r2', prenom: 'Mariam', mode: 'amitie', niveau: 4, cercle: 'Mélomanes 225', dmOuvert: true, dernier: 'Je t\'envoie la playlist 🎶', heure: 'Hier', nonLus: 0, avatarLocked: false, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200', enLigne: false },
-    { id: 'r3', prenom: 'Yao', mode: 'rencontre', niveau: 2, cercle: 'Globe-trotters', dmOuvert: false, dernier: 'Atteins le niveau 3 pour discuter en privé', heure: '—', nonLus: 0, avatarLocked: true, enLigne: false },
+    { id: 'awa', prenom: 'Awa', age: 26, mode: 'rencontre', niveau: 2, cercle: 'Voyageurs', dmOuvert: true, enLigne: true, grad: ['#ff9d5c', '#d34d7e'] },
+    { id: 'koffi', prenom: 'Koffi', age: 29, mode: 'amitie', niveau: 3, cercle: 'Basket du dimanche', dmOuvert: true, enLigne: true, grad: ['#7be0a0', '#2f9ac2'] },
+    { id: 'mariam', prenom: 'Mariam', age: 24, mode: 'rencontre', niveau: 3, cercle: "Cinéphiles d'Abidjan", dmOuvert: true, enLigne: false, grad: ['#b07bff', '#7a4fd6'] },
+    { id: 'fatou', prenom: 'Fatou', age: 31, mode: 'amitie', niveau: 4, cercle: 'Brunch & bonnes adresses', dmOuvert: true, enLigne: false, grad: ['#ffb45c', '#d3744d'] },
+    { id: 'yann', prenom: 'Yann', age: 27, mode: 'rencontre', niveau: 1, cercle: 'Entrepreneurs 225', dmOuvert: true, enLigne: false, grad: ['#8fd0ff', '#5a7fd6'] },
+    { id: 'sophie', prenom: 'Sophie', age: 28, mode: 'amitie', niveau: 2, cercle: 'Entrepreneurs 225', dmOuvert: true, enLigne: false, grad: ['#9aa7d6', '#5b6aa8'] },
 ];
 
 export const dmMessages = [

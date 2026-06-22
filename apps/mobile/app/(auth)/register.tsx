@@ -10,11 +10,14 @@ import { FadeInUp } from '../../src/components/motion';
 import { fonts } from '../../src/theme/typography';
 import { spacing, radius } from '../../src/theme/spacing';
 import { colors } from '../../src/theme/colors';
+import { useColors, type Palette } from '../../src/theme/theme';
 
 const INTERETS = ['Musique', 'Sport', 'Cuisine', 'Cinéma', 'Voyage', 'Lecture', 'Mode', 'Tech', 'Foi', 'Entrepreneuriat', 'Danse', 'Jeux vidéo'];
 
 export default function Register() {
     const router = useRouter();
+    const c = useColors();
+    const s = makeStyles(c);
     const [step, setStep] = useState(0);
     const [prenom, setPrenom] = useState('');
     const [email, setEmail] = useState('');
@@ -50,6 +53,10 @@ export default function Register() {
 
     const toggle = (i: string) => setInterets((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
 
+    const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+        <View style={{ gap: spacing.sm }}><Text style={s.label}>{label}</Text>{children}</View>
+    );
+
     return (
         <Screen>
             <ScreenHeader title="Inscription" back />
@@ -61,10 +68,10 @@ export default function Register() {
                 {step === 0 && (
                     <FadeInUp style={{ gap: spacing.md }}>
                         <Text style={s.title}>Qui es-tu ?</Text>
-                        <Field label="Prénom"><TextInput style={s.input} value={prenom} onChangeText={setPrenom} placeholder="Ton prénom" placeholderTextColor={colors.dim} /></Field>
-                        <Field label="Email"><TextInput style={s.input} value={email} onChangeText={setEmail} placeholder="toi@email.com" placeholderTextColor={colors.dim} autoCapitalize="none" keyboardType="email-address" /></Field>
+                        <Field label="Prénom"><TextInput style={s.input} value={prenom} onChangeText={setPrenom} placeholder="Ton prénom" placeholderTextColor={c.ink(0.42)} /></Field>
+                        <Field label="Email"><TextInput style={s.input} value={email} onChangeText={setEmail} placeholder="toi@email.com" placeholderTextColor={c.ink(0.42)} autoCapitalize="none" keyboardType="email-address" /></Field>
                         <Field label="Date de naissance">
-                            <TextInput style={s.input} value={naissance} onChangeText={setNaissance} placeholder="JJ/MM/AAAA" placeholderTextColor={colors.dim} keyboardType="numbers-and-punctuation" />
+                            <TextInput style={s.input} value={naissance} onChangeText={setNaissance} placeholder="JJ/MM/AAAA" placeholderTextColor={c.ink(0.42)} keyboardType="numbers-and-punctuation" />
                             <Text style={s.hint}>Réservé aux 18 ans et plus — vérifié à l'inscription.</Text>
                         </Field>
                     </FadeInUp>
@@ -79,7 +86,7 @@ export default function Register() {
                                 <Pill label="Homme" active={genre === 'homme'} onPress={() => setGenre('homme')} />
                             </View>
                         </Field>
-                        <Field label="Ville"><TextInput style={s.input} value={ville} onChangeText={setVille} placeholder="Abidjan, Bouaké…" placeholderTextColor={colors.dim} /></Field>
+                        <Field label="Ville"><TextInput style={s.input} value={ville} onChangeText={setVille} placeholder="Abidjan, Bouaké…" placeholderTextColor={c.ink(0.42)} /></Field>
                         <Field label="Centres d'intérêt">
                             <View style={s.rowWrap}>{INTERETS.map((i) => <Pill key={i} label={i} active={interets.includes(i)} onPress={() => toggle(i)} />)}</View>
                         </Field>
@@ -91,7 +98,7 @@ export default function Register() {
                         <Text style={s.title}>Presque fini</Text>
                         <Text style={s.body}>En rejoignant KADY, tu t'engages à respecter les autres membres. Pas de harcèlement, pas de coordonnées partagées avant la confiance établie.</Text>
                         <Pressable style={s.check} onPress={() => setCgu(!cgu)}>
-                            <View style={[s.box, cgu && s.boxOn]}>{cgu && <Ionicons name="checkmark" size={16} color={colors.white} />}</View>
+                            <View style={[s.box, cgu && s.boxOn]}>{cgu && <Ionicons name="checkmark" size={16} color={c.white} />}</View>
                             <Text style={s.checkTxt}>J'accepte les conditions d'utilisation et la politique de confidentialité.</Text>
                         </Pressable>
                     </FadeInUp>
@@ -107,32 +114,28 @@ export default function Register() {
     );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-    return <View style={{ gap: spacing.sm }}><Text style={s.label}>{label}</Text>{children}</View>;
-}
-
-const s = StyleSheet.create({
+const makeStyles = (c: Palette) => StyleSheet.create({
     steps: { flexDirection: 'row', gap: 6, marginBottom: spacing.lg },
-    stepBar: { flex: 1, height: 3, borderRadius: 2, backgroundColor: colors.cardLight },
-    stepBarOn: { backgroundColor: colors.rose },
-    title: { fontFamily: fonts.display, fontSize: 26, color: colors.cream, marginBottom: spacing.sm },
-    body: { fontFamily: fonts.body, fontSize: 15, color: colors.muted, lineHeight: 22 },
-    label: { fontFamily: fonts.bodyMed, fontSize: 14, color: colors.cream },
+    stepBar: { flex: 1, height: 3, borderRadius: 2, backgroundColor: c.field },
+    stepBarOn: { backgroundColor: c.accent },
+    title: { fontFamily: fonts.display, fontSize: 26, color: c.text, marginBottom: spacing.sm },
+    body: { fontFamily: fonts.body, fontSize: 15, color: c.ink(0.6), lineHeight: 22 },
+    label: { fontFamily: fonts.bodyMed, fontSize: 14, color: c.text },
     input: {
-        backgroundColor: colors.cardLight,
+        backgroundColor: c.field,
         borderWidth: 1,
-        borderColor: colors.border,
+        borderColor: c.border,
         borderRadius: radius.md,
-        color: colors.cream,
+        color: c.text,
         fontFamily: fonts.body,
         fontSize: 16,
         padding: 15,
     },
-    hint: { fontFamily: fonts.body, fontSize: 12, color: colors.dim, marginTop: 4 },
+    hint: { fontFamily: fonts.body, fontSize: 12, color: c.ink(0.42), marginTop: 4 },
     rowWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
     check: { flexDirection: 'row', gap: 12, alignItems: 'flex-start' },
-    box: { width: 24, height: 24, borderRadius: 7, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-    boxOn: { backgroundColor: colors.rose, borderColor: colors.rose },
-    checkTxt: { flex: 1, fontFamily: fonts.body, fontSize: 14, color: colors.muted, lineHeight: 20 },
+    box: { width: 24, height: 24, borderRadius: 7, borderWidth: 1.5, borderColor: c.border, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
+    boxOn: { backgroundColor: c.accent, borderColor: c.accent },
+    checkTxt: { flex: 1, fontFamily: fonts.body, fontSize: 14, color: c.ink(0.6), lineHeight: 20 },
     err: { fontFamily: fonts.bodyMed, fontSize: 14, color: colors.danger, marginTop: spacing.md },
 });

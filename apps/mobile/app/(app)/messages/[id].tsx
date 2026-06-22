@@ -1,188 +1,293 @@
-// app/(app)/messages/[id].tsx
-import React, { useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+// app/(app)/messages/[id].tsx — Chat privé (handoff "KADY Chat Prive.dc.html")
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Animated, Easing, StatusBar, Dimensions, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import Screen from '../../../src/components/Screen';
-import { Avatar, LevelDots } from '../../../src/components/ui';
-import { FadeInUp, PopIn, PressableScale, Pulse, Ripple } from '../../../src/components/motion';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Svg, { Defs, Pattern, Circle, Rect } from 'react-native-svg';
 import { fonts } from '../../../src/theme/typography';
-import { spacing, radius } from '../../../src/theme/spacing';
-import { colors } from '../../../src/theme/colors';
-import { relations, dmMessages, NIVEAUX_RENCONTRE, NIVEAUX_AMITIE } from '../../../src/data/mock';
+import { useColors, type Palette } from '../../../src/theme/theme';
+import { relations, NIVEAUX_RENCONTRE, NIVEAUX_AMITIE } from '../../../src/data/mock';
+import { useStore, pickImage } from '../../../src/store/app';
 
-export default function Conversation() {
+const { width, height } = Dimensions.get('window');
+const SEND_GRAD = ['#ff6aa9', '#e02a73'] as const;
+
+export default function ChatPrive() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
+    const insets = useSafeAreaInsets();
+    const c = useColors();
+    const s = makeStyles(c);
     const r = relations.find((x) => x.id === id) ?? relations[0];
     const labels = r.mode === 'rencontre' ? NIVEAUX_RENCONTRE : NIVEAUX_AMITIE;
-    const grad = r.mode === 'rencontre' ? (['#ff6fa8', '#d34d7e'] as const) : (['#5b6ad6', '#a463ff'] as const);
-    const accent = r.mode === 'rencontre' ? '#d6336c' : '#4f5bd5';
-    const [msgs, setMsgs] = useState(dmMessages);
-    const [txt, setTxt] = useState('');
+
+    const [draft, setDraft] = useState('');
+    const [playing, setPlaying] = useState(false);
+    const sent = useStore((st) => st.dm[r.id] ?? []);
+    const sendDM = useStore((st) => st.sendDM);
     const scroller = useRef<ScrollView>(null);
+    const hasText = draft.trim().length > 0;
 
     const send = () => {
-        if (!txt.trim()) return;
-        const filtre = txt.replace(/(\+?\d[\d\s]{7,}\d)|(\b\S+@\S+\.\S+\b)|(https?:\/\/\S+)/g, '•••');
-        setMsgs([...msgs, { id: String(Date.now()), moi: true, contenu: filtre, heure: 'maintenant' }]);
-        setTxt('');
+        const t = draft.trim();
+        if (!t) return;
+        sendDM(r.id, t);
+        setDraft('');
+        setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 50);
+    };
+    const sendImg = async () => {
+        const uri = await pickImage();
+        if (!uri) return;
+        sendDM(r.id, '', uri);
         setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 80);
     };
 
-    const Header = (
-        <LinearGradient colors={grad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={hd.bar}>
-            <Pressable onPress={() => router.back()} hitSlop={12} style={hd.iconBtn}>
-                <Ionicons name="chevron-back" size={24} color={colors.white} />
-            </Pressable>
-            <Avatar uri={r.avatar} name={r.prenom} size={38} />
-            <View style={{ flex: 1 }}>
-                <Text style={hd.title} numberOfLines={1}>{r.prenom}</Text>
-                <Text style={hd.sub}>{r.enLigne ? 'En ligne' : labels[r.niveau - 1]} · via {r.cercle}</Text>
-            </View>
-            <Pressable hitSlop={12} style={hd.iconBtn}>
-                <Ionicons name="ellipsis-horizontal" size={20} color={colors.white} />
-            </Pressable>
-        </LinearGradient>
-    );
-
-    if (!r.dmOuvert) {
-        return (
-            <Screen padded={false}>
-                {Header}
-                <View style={s.locked}>
-                    <PopIn>
-                        <View style={s.lockHalo}>
-                            <Ripple color={accent} size={120} />
-                            <LinearGradient colors={grad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.lockCircle}>
-                                <Ionicons name="lock-closed" size={40} color={colors.white} />
-                            </LinearGradient>
-                        </View>
-                    </PopIn>
-                    <FadeInUp delay={120}><Text style={s.lockTitle}>Conversation pas encore débloquée</Text></FadeInUp>
-                    <FadeInUp delay={200}>
-                        <Text style={s.lockSub}>
-                            Vous êtes au niveau « {labels[r.niveau - 1]} ». Le message privé s'ouvre à « {labels[2]} ». Continuez à échanger dans le Cercle {r.cercle}.
-                        </Text>
-                    </FadeInUp>
-                    <FadeInUp delay={280}><View style={s.lockDots}><LevelDots level={r.niveau} labels={labels} color={accent} /></View></FadeInUp>
-                    <FadeInUp delay={360}>
-                        <PressableScale onPress={() => router.back()}>
-                            <LinearGradient colors={grad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.lockBtn}>
-                                <Ionicons name="people" size={16} color={colors.white} />
-                                <Text style={s.lockBtnTxt}>Retourner au Cercle</Text>
-                            </LinearGradient>
-                        </PressableScale>
-                    </FadeInUp>
-                </View>
-            </Screen>
-        );
-    }
-
     return (
-        <Screen padded={false}>
-            {Header}
-            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-                <ScrollView
-                    ref={scroller}
-                    style={{ flex: 1 }}
-                    contentContainerStyle={s.chat}
-                    showsVerticalScrollIndicator={false}
-                    onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: false })}
-                >
-                    <View style={s.dayTag}><Text style={s.dayTagTxt}>Aujourd'hui</Text></View>
-                    {msgs.map((m, i) => (
-                        <FadeInUp key={m.id} delay={Math.min(i * 50, 300)} offset={10}>
-                            <View style={[s.bubbleRow, m.moi && { justifyContent: 'flex-end' }]}>
-                                {m.moi ? (
-                                    <LinearGradient colors={grad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.bubble, s.bubbleMe]}>
-                                        <Text style={s.txtMe}>{m.contenu}</Text>
-                                        <Text style={[s.heure, s.heureMe]}>{m.heure}</Text>
-                                    </LinearGradient>
-                                ) : (
-                                    <View style={[s.bubble, s.bubbleOther]}>
-                                        <Text style={s.txtOther}>{m.contenu}</Text>
-                                        <Text style={s.heure}>{m.heure}</Text>
-                                    </View>
-                                )}
-                            </View>
-                        </FadeInUp>
-                    ))}
-                </ScrollView>
-                <View style={s.inputBar}>
-                    <TextInput
-                        style={s.input} value={txt} onChangeText={setTxt}
-                        placeholder="Message privé…" placeholderTextColor={colors.dim} multiline
-                    />
-                    <PressableScale onPress={send} scaleTo={0.9}>
-                        <LinearGradient colors={grad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.send, { shadowColor: accent }]}>
-                            <Ionicons name="arrow-up" size={20} color={colors.white} />
+        <View style={s.root}>
+            <StatusBar barStyle={c.mode === 'dark' ? 'light-content' : 'dark-content'} backgroundColor="transparent" translucent />
+            <Svg width={width} height={height} style={StyleSheet.absoluteFill} pointerEvents="none">
+                <Defs>
+                    <Pattern id="dots" width={22} height={22} patternUnits="userSpaceOnUse">
+                        <Circle cx={1.4} cy={1.4} r={1.4} fill={c.dot} />
+                    </Pattern>
+                </Defs>
+                <Rect width={width} height={height} fill="url(#dots)" />
+            </Svg>
+            <View pointerEvents="none" style={s.blob} />
+
+            <View style={[s.topbar, { paddingTop: insets.top }]}>
+                <View style={s.headerRow}>
+                    <Pressable onPress={() => router.back()} hitSlop={10} style={s.back}>
+                        <Ionicons name="chevron-back" size={24} color={c.text} />
+                    </Pressable>
+                    <View>
+                        <LinearGradient colors={r.grad as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.avatar}>
+                            <Text style={s.avatarLetter}>{r.prenom.charAt(0).toUpperCase()}</Text>
                         </LinearGradient>
-                    </PressableScale>
+                        {r.enLigne && <View style={s.onlineDot} />}
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={s.name} numberOfLines={1}>{r.prenom}, {r.age}</Text>
+                        <Text style={[s.status, !r.enLigne && { color: c.ink(0.45) }]}>
+                            {r.enLigne ? 'En ligne' : labels[r.niveau - 1]}
+                        </Text>
+                    </View>
+                    <Pressable style={s.callBtn}><Ionicons name="videocam-outline" size={20} color={c.accent} /></Pressable>
+                    <Pressable style={s.callBtn}><Ionicons name="call-outline" size={19} color={c.accent} /></Pressable>
+                </View>
+
+                <Pressable onPress={() => router.back()} style={s.strip}>
+                    <Ionicons name="heart" size={14} color="#ff6fa8" />
+                    <Text style={s.stripTxt} numberOfLines={1}>
+                        <Text style={s.stripStrong}>{labels[r.niveau - 1]}</Text>
+                        <Text> · Niveau {r.niveau}/5 · via </Text>
+                        <Text style={s.stripCercle}>{r.cercle}</Text>
+                    </Text>
+                    <View style={{ flex: 1 }} />
+                    <View style={s.segs}>
+                        {[0, 1, 2, 3, 4].map((i) => (
+                            i < r.niveau
+                                ? <LinearGradient key={i} colors={['#ff6fa8', '#ff9d5c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.seg} />
+                                : <View key={i} style={[s.seg, { backgroundColor: c.ink(0.14) }]} />
+                        ))}
+                    </View>
+                </Pressable>
+            </View>
+
+            <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={insets.top + 8}>
+                <ScrollView ref={scroller} style={{ flex: 1 }} contentContainerStyle={s.chat} showsVerticalScrollIndicator={false}
+                    onContentSizeChange={() => scroller.current?.scrollToEnd({ animated: false })}>
+                    <View style={s.dateWrap}><Text style={s.datePill}>Aujourd'hui</Text></View>
+
+                    <View style={s.sysWrap}>
+                        <View style={s.sysNote}>
+                            <Ionicons name="lock-closed" size={12} color={c.accent} />
+                            <Text style={s.sysTxt}> Vous discutez car vous partagez le cercle <Text style={s.sysCercle}>{r.cercle}</Text></Text>
+                        </View>
+                    </View>
+
+                    <InBubble time="12:32">Coucou Didier ! Ravie de te croiser dans le cercle 😊</InBubble>
+                    <InBubble time="12:32" gap>Tu as déjà visité Assinie ? 🌴</InBubble>
+
+                    <OutBubble time="12:38">Salut {r.prenom} ! Oui plusieurs fois, c'est un de mes coins préférés 🙌</OutBubble>
+                    <OutBubble time="12:38" gap>On pourrait y organiser une sortie avec le cercle 👀</OutBubble>
+
+                    <View style={[s.rowIn, { marginBottom: 14 }]}>
+                        <View style={s.imageBubble}>
+                            <View style={s.imageInner}>
+                                <LinearGradient colors={['#7fe0d0', '#2f9aa8', '#1d3f66']} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={StyleSheet.absoluteFill} />
+                                <LinearGradient colors={['rgba(255,235,170,0.4)', 'transparent']} start={{ x: 0.8, y: 0 }} end={{ x: 0.2, y: 0.7 }} style={StyleSheet.absoluteFill} />
+                                <View style={[s.imageTag, { left: 8 }]}><Text style={s.imageTagTxt}>photo · plage</Text></View>
+                                <View style={[s.imageTag, { right: 8 }]}><Text style={s.imageTagTxt}>12:41</Text></View>
+                            </View>
+                            <Text style={s.imageCaption}>Regarde ce coucher de soleil 🌅</Text>
+                        </View>
+                    </View>
+
+                    <View style={[s.rowOut, { marginBottom: 14 }]}>
+                        <LinearGradient colors={c.outBubble} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.voice}>
+                            <Pressable onPress={() => setPlaying((p) => !p)} style={s.voicePlay}><Ionicons name={playing ? 'pause' : 'play'} size={14} color="#fff" /></Pressable>
+                            <View style={s.wave}>
+                                {[8, 16, 22, 14, 19, 9, 15, 11, 18, 7].map((h, i) => (
+                                    <View key={i} style={[s.waveBar, { height: h, backgroundColor: i < 3 ? '#ff6aa9' : i < 5 ? '#ff9dc4' : c.ink(0.25) }]} />
+                                ))}
+                            </View>
+                            <Text style={s.voiceDur}>0:14</Text>
+                            <View style={s.voiceMeta}>
+                                <Text style={s.outTime}>12:43</Text>
+                                <Ionicons name="checkmark-done" size={14} color={c.accent} />
+                            </View>
+                        </LinearGradient>
+                    </View>
+
+                    <InBubble time="12:45" gap>J'adore l'idée ! On en parle au prochain événement du cercle ?</InBubble>
+
+                    {sent.map((m) => <OutBubble key={m.id} time={m.time} image={m.image}>{m.text}</OutBubble>)}
+
+                    <TypingDots />
+                </ScrollView>
+
+                <View style={[s.inputWrap, { paddingBottom: insets.bottom + 9 }]}>
+                    <View style={s.inputPill}>
+                        <Pressable hitSlop={6}><Ionicons name="happy-outline" size={22} color={c.ink(0.45)} /></Pressable>
+                        <TextInput
+                            value={draft} onChangeText={setDraft} onSubmitEditing={send} returnKeyType="send"
+                            placeholder="Message" placeholderTextColor={c.ink(0.4)} style={s.input}
+                        />
+                        <Pressable hitSlop={6} onPress={sendImg}><Ionicons name="image-outline" size={21} color={c.ink(0.45)} /></Pressable>
+                        <Pressable hitSlop={6} onPress={sendImg}><Ionicons name="attach" size={22} color={c.ink(0.45)} /></Pressable>
+                    </View>
+                    <Pressable onPress={send}>
+                        <LinearGradient colors={SEND_GRAD} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.send}>
+                            <Ionicons name={hasText ? 'send' : 'mic'} size={hasText ? 19 : 21} color="#fff" />
+                        </LinearGradient>
+                    </Pressable>
                 </View>
             </KeyboardAvoidingView>
-        </Screen>
+        </View>
     );
 }
 
-const hd = StyleSheet.create({
-    bar: {
-        flexDirection: 'row', alignItems: 'center', gap: 10,
-        paddingHorizontal: spacing.md, paddingVertical: 12,
-        borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 12, elevation: 6,
-    },
-    iconBtn: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.18)' },
-    title: { fontFamily: fonts.displayMed, fontSize: 16, color: colors.white },
-    sub: { fontFamily: fonts.body, fontSize: 12, color: 'rgba(255,255,255,0.85)', marginTop: 1 },
-});
+function InBubble({ children, time, gap }: { children: React.ReactNode; time: string; gap?: boolean }) {
+    const s = makeStyles(useColors());
+    return (
+        <View style={[s.rowIn, { marginBottom: gap ? 14 : 5 }]}>
+            <View style={s.inBubble}>
+                <Text style={s.inText}>{children}</Text>
+                <Text style={s.inTime}>{time}</Text>
+            </View>
+        </View>
+    );
+}
 
-const s = StyleSheet.create({
-    locked: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingHorizontal: spacing.xl },
-    lockHalo: { alignItems: 'center', justifyContent: 'center', marginBottom: spacing.sm },
-    lockCircle: {
-        width: 96, height: 96, borderRadius: 48, alignItems: 'center', justifyContent: 'center',
-        shadowColor: colors.rose, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.28, shadowRadius: 20, elevation: 8,
-    },
-    lockTitle: { fontFamily: fonts.display, fontSize: 23, color: colors.cream, textAlign: 'center' },
-    lockSub: { fontFamily: fonts.body, fontSize: 15, color: colors.muted, textAlign: 'center', lineHeight: 22 },
-    lockDots: { marginTop: spacing.sm, alignItems: 'center' },
-    lockBtn: {
-        flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.sm,
-        borderRadius: radius.pill, paddingVertical: 13, paddingHorizontal: 22,
-    },
-    lockBtnTxt: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.white },
+function OutBubble({ children, time, gap, image }: { children?: React.ReactNode; time: string; gap?: boolean; image?: string }) {
+    const c = useColors();
+    const s = makeStyles(c);
+    const hasText = typeof children === 'string' ? children.length > 0 : !!children;
+    return (
+        <View style={[s.rowOut, { marginBottom: gap ? 14 : 5 }]}>
+            <LinearGradient colors={c.outBubble} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.outBubble, image && { padding: 4 }]}>
+                {image && <Image source={{ uri: image }} style={s.msgImage} />}
+                {hasText && <Text style={[s.outText, image && { paddingHorizontal: 9, paddingTop: 6 }]}>{children}</Text>}
+                <View style={[s.outMeta, image && !hasText && { position: 'absolute', right: 10, bottom: 8 }]}>
+                    <Text style={s.outTime}>{time}</Text>
+                    <Ionicons name="checkmark-done" size={14} color={c.accent} />
+                </View>
+            </LinearGradient>
+        </View>
+    );
+}
 
-    chat: { padding: spacing.lg, gap: spacing.sm },
-    dayTag: { alignSelf: 'center', backgroundColor: colors.cardLight, borderRadius: radius.pill, paddingVertical: 4, paddingHorizontal: 12, marginBottom: spacing.sm },
-    dayTagTxt: { fontFamily: fonts.bodyMed, fontSize: 11, color: colors.muted },
-    bubbleRow: { flexDirection: 'row', justifyContent: 'flex-start' },
-    bubble: { maxWidth: '80%', borderRadius: radius.lg, padding: 12 },
-    bubbleOther: { backgroundColor: colors.cardLight, borderBottomLeftRadius: 4 },
-    bubbleMe: {
-        borderBottomRightRadius: 4,
-        shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.12, shadowRadius: 8, elevation: 3,
+function TypingDots() {
+    const s = makeStyles(useColors());
+    const a0 = useRef(new Animated.Value(0)).current;
+    const a1 = useRef(new Animated.Value(0)).current;
+    const a2 = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        const mk = (v: Animated.Value, delay: number) =>
+            Animated.loop(Animated.sequence([
+                Animated.delay(delay),
+                Animated.timing(v, { toValue: 1, duration: 300, easing: Easing.out(Easing.ease), useNativeDriver: true }),
+                Animated.timing(v, { toValue: 0, duration: 300, easing: Easing.in(Easing.ease), useNativeDriver: true }),
+                Animated.delay(400 - delay),
+            ]));
+        const loops = [mk(a0, 0), mk(a1, 150), mk(a2, 300)];
+        loops.forEach((l) => l.start());
+        return () => loops.forEach((l) => l.stop());
+    }, []);
+    const dot = (v: Animated.Value, key: number) => (
+        <Animated.View key={key} style={[s.typingDot, {
+            transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [0, -5] }) }],
+            opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }),
+        }]} />
+    );
+    return <View style={[s.rowIn, { marginBottom: 4 }]}><View style={s.typing}>{dot(a0, 0)}{dot(a1, 1)}{dot(a2, 2)}</View></View>;
+}
+
+const makeStyles = (c: Palette) => StyleSheet.create({
+    root: { flex: 1, backgroundColor: c.chatBg },
+    blob: { position: 'absolute', top: 90, right: -60, width: 240, height: 240, borderRadius: 120, backgroundColor: c.auraBottom },
+
+    topbar: {
+        backgroundColor: c.glassHeader,
+        borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.border,
+        shadowColor: '#281950', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 3, zIndex: 30,
     },
-    txtOther: { fontFamily: fonts.body, fontSize: 15, color: colors.cream, lineHeight: 21 },
-    txtMe: { fontFamily: fonts.body, fontSize: 15, color: colors.white, lineHeight: 21 },
-    heure: { fontFamily: fonts.body, fontSize: 10, color: colors.dim, marginTop: 4, alignSelf: 'flex-end' },
-    heureMe: { color: 'rgba(255,255,255,0.75)' },
-    inputBar: {
-        flexDirection: 'row', alignItems: 'flex-end', gap: 10,
-        padding: spacing.md, borderTopWidth: 0.5, borderTopColor: colors.border,
-        backgroundColor: colors.card,
-    },
-    input: {
-        flex: 1, maxHeight: 110,
-        backgroundColor: colors.cardLight,
-        borderRadius: radius.lg,
-        borderWidth: 1, borderColor: colors.border,
-        color: colors.cream, fontFamily: fonts.body, fontSize: 15,
-        paddingHorizontal: 14, paddingVertical: 10,
-    },
-    send: {
-        width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center',
-        shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
-    },
+    headerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingTop: 6, paddingBottom: 11 },
+    back: { width: 30, height: 38, alignItems: 'center', justifyContent: 'center' },
+    avatar: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
+    avatarLetter: { fontFamily: fonts.display, fontSize: 17, color: '#fff' },
+    onlineDot: { position: 'absolute', bottom: 0, right: 0, width: 11, height: 11, borderRadius: 6, backgroundColor: '#43e08a', borderWidth: 2.5, borderColor: c.glassHeader },
+    name: { fontFamily: fonts.display, fontSize: 16, color: c.text },
+    status: { marginTop: 1, fontFamily: fonts.bodySemi, fontSize: 11.5, color: '#1f9d57' },
+    callBtn: { width: 40, height: 40, borderRadius: 13, backgroundColor: c.field, alignItems: 'center', justifyContent: 'center' },
+
+    strip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: 'rgba(255,111,168,0.10)', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(255,111,168,0.16)' },
+    stripTxt: { fontFamily: fonts.body, fontSize: 11.5, color: c.ink(0.6) },
+    stripStrong: { fontFamily: fonts.bodyBold, color: c.text },
+    stripCercle: { fontFamily: fonts.bodyBold, color: c.accentDeep },
+    segs: { flexDirection: 'row', gap: 3 },
+    seg: { width: 14, height: 4, borderRadius: 99 },
+
+    chat: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 18 },
+    dateWrap: { alignItems: 'center', marginBottom: 16 },
+    datePill: { paddingVertical: 5, paddingHorizontal: 13, borderRadius: 99, backgroundColor: c.card, borderWidth: 1, borderColor: c.border, fontFamily: fonts.bodySemi, fontSize: 11, color: c.ink(0.5) },
+    sysWrap: { alignItems: 'center', marginBottom: 16 },
+    sysNote: { maxWidth: 290, flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 14, backgroundColor: 'rgba(214,40,110,0.10)', borderWidth: 1, borderColor: 'rgba(214,40,110,0.18)' },
+    sysTxt: { flexShrink: 1, fontFamily: fonts.body, fontSize: 11, lineHeight: 16, color: c.ink(0.6), textAlign: 'center' },
+    sysCercle: { fontFamily: fonts.bodyBold, color: c.accentDeep },
+
+    rowIn: { flexDirection: 'row', justifyContent: 'flex-start' },
+    rowOut: { flexDirection: 'row', justifyContent: 'flex-end' },
+    inBubble: { maxWidth: '78%', paddingVertical: 9, paddingHorizontal: 13, borderRadius: 18, borderBottomLeftRadius: 5, backgroundColor: c.inBubble, shadowColor: '#281950', shadowOffset: { width: 0, height: 2 }, shadowOpacity: c.mode === 'dark' ? 0.3 : 0.14, shadowRadius: 6, elevation: 1 },
+    inText: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: c.text },
+    inTime: { marginTop: 3, textAlign: 'right', fontFamily: fonts.body, fontSize: 10, color: c.ink(0.4) },
+    outBubble: { maxWidth: '78%', paddingVertical: 9, paddingHorizontal: 13, borderRadius: 18, borderBottomRightRadius: 5, shadowColor: '#d6286e', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.18, shadowRadius: 6, elevation: 1 },
+    outText: { fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: c.outText },
+    msgImage: { width: 200, height: 200, borderRadius: 14, backgroundColor: 'rgba(0,0,0,0.05)' },
+    outMeta: { marginTop: 3, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4 },
+    outTime: { fontFamily: fonts.body, fontSize: 10, color: c.mode === 'dark' ? 'rgba(251,233,244,0.55)' : 'rgba(33,22,51,0.42)' },
+
+    imageBubble: { maxWidth: '72%', padding: 4, borderRadius: 18, borderBottomLeftRadius: 5, backgroundColor: c.inBubble, shadowColor: '#281950', shadowOffset: { width: 0, height: 2 }, shadowOpacity: c.mode === 'dark' ? 0.3 : 0.14, shadowRadius: 6, elevation: 1 },
+    imageInner: { height: 180, borderRadius: 15, borderBottomLeftRadius: 4, overflow: 'hidden' },
+    imageTag: { position: 'absolute', bottom: 8, paddingVertical: 3, paddingHorizontal: 7, borderRadius: 7, backgroundColor: 'rgba(0,0,0,0.3)' },
+    imageTagTxt: { fontFamily: fonts.bodyMed, fontSize: 9.5, color: 'rgba(255,255,255,0.9)' },
+    imageCaption: { paddingHorizontal: 8, paddingTop: 6, paddingBottom: 3, fontFamily: fonts.body, fontSize: 13.5, color: c.text },
+
+    voice: { maxWidth: '80%', flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 11, paddingHorizontal: 13, borderRadius: 18, borderBottomRightRadius: 5, shadowColor: '#d6286e', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.18, shadowRadius: 6, elevation: 1 },
+    voicePlay: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center', backgroundColor: '#ff6aa9', shadowColor: '#ff6aa9', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.55, shadowRadius: 8, elevation: 4 },
+    wave: { flexDirection: 'row', alignItems: 'center', gap: 2.5, height: 24 },
+    waveBar: { width: 3, borderRadius: 9 },
+    voiceDur: { fontFamily: fonts.body, fontSize: 11, color: c.mode === 'dark' ? 'rgba(251,233,244,0.6)' : 'rgba(33,22,51,0.5)' },
+    voiceMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end' },
+
+    typing: { paddingVertical: 11, paddingHorizontal: 15, borderRadius: 18, borderBottomLeftRadius: 5, backgroundColor: c.inBubble, flexDirection: 'row', alignItems: 'center', gap: 5, shadowColor: '#281950', shadowOffset: { width: 0, height: 2 }, shadowOpacity: c.mode === 'dark' ? 0.3 : 0.14, shadowRadius: 6, elevation: 1 },
+    typingDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#ff6aa9' },
+
+    inputWrap: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, paddingHorizontal: 12, paddingTop: 9, backgroundColor: c.chatBg },
+    inputPill: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 7, paddingLeft: 14, paddingRight: 8, borderRadius: 24, backgroundColor: c.card, borderWidth: 1, borderColor: c.border, shadowColor: '#281950', shadowOffset: { width: 0, height: 4 }, shadowOpacity: c.mode === 'dark' ? 0.3 : 0.16, shadowRadius: 12, elevation: 2 },
+    input: { flex: 1, minWidth: 0, fontFamily: fonts.body, fontSize: 14.5, color: c.text, paddingVertical: 4 },
+    send: { width: 46, height: 46, borderRadius: 23, alignItems: 'center', justifyContent: 'center', shadowColor: '#e02a73', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.6, shadowRadius: 14, elevation: 6 },
 });

@@ -6,14 +6,16 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { fonts } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
-import { colors, colorForName } from '../theme/colors';
+import { colorForName } from '../theme/colors';
+import { useColors, type Palette } from '../theme/theme';
 
 /* ---------- Avatar (anneau dégradé optionnel + initiales colorées) ---------- */
 function AvatarCircle({ uri, name = '?', size = 48, locked }: { uri?: string; name?: string; size?: number; locked?: boolean }) {
+    const c = useColors();
     const tint = colorForName(name);
     return (
         <View style={{ width: size, height: size }}>
-            <View style={[av.base, { width: size, height: size, borderRadius: size / 2, backgroundColor: uri ? colors.cardLight : tint + '22' }]}>
+            <View style={[av.base, { width: size, height: size, borderRadius: size / 2, backgroundColor: uri ? c.card2 : tint + '22' }]}>
                 {uri ? (
                     <Image source={{ uri }} style={{ width: size, height: size, borderRadius: size / 2 }} blurRadius={locked ? 18 : 0} />
                 ) : (
@@ -22,7 +24,7 @@ function AvatarCircle({ uri, name = '?', size = 48, locked }: { uri?: string; na
             </View>
             {locked && (
                 <View style={[av.lock, { borderRadius: size / 2 }]}>
-                    <Ionicons name="lock-closed" size={size * 0.32} color={colors.white} />
+                    <Ionicons name="lock-closed" size={size * 0.32} color="#fff" />
                 </View>
             )}
         </View>
@@ -32,6 +34,7 @@ function AvatarCircle({ uri, name = '?', size = 48, locked }: { uri?: string; na
 export function Avatar({
     uri, name = '?', size = 48, locked, ring,
 }: { uri?: string; name?: string; size?: number; locked?: boolean; ring?: readonly string[] }) {
+    const c = useColors();
     const circle = <AvatarCircle uri={uri} name={name} size={size} locked={locked} />;
     if (!ring) return circle;
     const gap = 2.5;
@@ -39,13 +42,14 @@ export function Avatar({
     return (
         <LinearGradient colors={ring as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
             style={{ width: outer, height: outer, borderRadius: outer / 2, alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ padding: gap, backgroundColor: '#fff', borderRadius: outer / 2 }}>{circle}</View>
+            <View style={{ padding: gap, backgroundColor: c.card, borderRadius: outer / 2 }}>{circle}</View>
         </LinearGradient>
     );
 }
 
 /* ---------- Pile d'avatars superposés ---------- */
 export function AvatarStack({ names, extra = 0, size = 28 }: { names: string[]; extra?: number; size?: number }) {
+    const c = useColors();
     return (
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {names.map((n, i) => {
@@ -53,7 +57,7 @@ export function AvatarStack({ names, extra = 0, size = 28 }: { names: string[]; 
                 return (
                     <View key={i} style={{
                         width: size, height: size, borderRadius: size / 2,
-                        backgroundColor: tint + '26', borderWidth: 2, borderColor: '#fff',
+                        backgroundColor: tint + '33', borderWidth: 2, borderColor: c.card,
                         alignItems: 'center', justifyContent: 'center',
                         marginLeft: i === 0 ? 0 : -size * 0.32,
                     }}>
@@ -64,10 +68,10 @@ export function AvatarStack({ names, extra = 0, size = 28 }: { names: string[]; 
             {extra > 0 && (
                 <View style={{
                     width: size, height: size, borderRadius: size / 2,
-                    backgroundColor: colors.cardLight, borderWidth: 2, borderColor: '#fff',
+                    backgroundColor: c.card2, borderWidth: 2, borderColor: c.card,
                     alignItems: 'center', justifyContent: 'center', marginLeft: -size * 0.32,
                 }}>
-                    <Text style={{ fontFamily: fonts.bodySemi, fontSize: size * 0.34, color: colors.muted }}>+{extra}</Text>
+                    <Text style={{ fontFamily: fonts.bodySemi, fontSize: size * 0.34, color: c.ink(0.6) }}>+{extra}</Text>
                 </View>
             )}
         </View>
@@ -76,7 +80,11 @@ export function AvatarStack({ names, extra = 0, size = 28 }: { names: string[]; 
 
 /* ---------- Card ---------- */
 export function Card({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
-    return <View style={[c.card, style]}>{children}</View>;
+    const c = useColors();
+    return <View style={[{
+        backgroundColor: c.card, borderRadius: radius.lg, borderWidth: 1, borderColor: c.border, padding: spacing.md,
+        shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: c.mode === 'dark' ? 0.3 : 0.07, shadowRadius: 14, elevation: 3,
+    }, style]}>{children}</View>;
 }
 
 /* ---------- Grades (XP du Cercle) ---------- */
@@ -92,13 +100,13 @@ export function GradeChip({ grade, solid }: { grade: keyof typeof GRADES; solid?
     if (solid) {
         return (
             <View style={[chip.base, { borderColor: 'transparent', backgroundColor: g.color }]}>
-                <Ionicons name={g.icon} size={12} color={colors.white} />
-                <Text style={[chip.txt, { color: colors.white }]}>{g.label}</Text>
+                <Ionicons name={g.icon} size={12} color="#fff" />
+                <Text style={[chip.txt, { color: '#fff' }]}>{g.label}</Text>
             </View>
         );
     }
     return (
-        <View style={[chip.base, { borderColor: g.color + '55', backgroundColor: g.color + '1A' }]}>
+        <View style={[chip.base, { borderColor: g.color + '55', backgroundColor: g.color + '26' }]}>
             <Ionicons name={g.icon} size={12} color={g.color} />
             <Text style={[chip.txt, { color: g.color }]}>{g.label}</Text>
         </View>
@@ -107,16 +115,16 @@ export function GradeChip({ grade, solid }: { grade: keyof typeof GRADES; solid?
 
 /* ---------- Badges ---------- */
 const BADGES: Record<string, { label: string; icon: keyof typeof Ionicons.glyphMap; color: string }> = {
-    pionnier: { label: 'Pionnier', icon: 'rocket', color: colors.violet },
-    verifie: { label: 'Vérifié', icon: 'checkmark-circle', color: colors.teal },
-    verifie_plus: { label: 'Vérifié+', icon: 'shield-checkmark', color: colors.sky },
-    membre_respectueux: { label: 'Respectueux', icon: 'heart', color: colors.pink },
+    pionnier: { label: 'Pionnier', icon: 'rocket', color: '#a78bfa' },
+    verifie: { label: 'Vérifié', icon: 'checkmark-circle', color: '#2fb8c0' },
+    verifie_plus: { label: 'Vérifié+', icon: 'shield-checkmark', color: '#5a7fd6' },
+    membre_respectueux: { label: 'Respectueux', icon: 'heart', color: '#ff6fa8' },
 };
 export function Badge({ code }: { code: keyof typeof BADGES }) {
     const b = BADGES[code];
     if (!b) return null;
     return (
-        <View style={[badge.base, { backgroundColor: b.color + '14' }]}>
+        <View style={[badge.base, { backgroundColor: b.color + '24' }]}>
             <Ionicons name={b.icon} size={14} color={b.color} />
             <Text style={[badge.txt, { color: b.color }]}>{b.label}</Text>
         </View>
@@ -124,7 +132,9 @@ export function Badge({ code }: { code: keyof typeof BADGES }) {
 }
 
 /* ---------- Progression des niveaux (Mode Rencontre / Amitié) ---------- */
-export function LevelDots({ level, max = 5, labels, color = colors.rose }: { level: number; max?: number; labels?: string[]; color?: string }) {
+export function LevelDots({ level, max = 5, labels, color }: { level: number; max?: number; labels?: string[]; color?: string }) {
+    const c = useColors();
+    const on0 = color ?? c.accent;
     return (
         <View>
             <View style={lv.row}>
@@ -132,106 +142,87 @@ export function LevelDots({ level, max = 5, labels, color = colors.rose }: { lev
                     const on = i < level;
                     return (
                         <React.Fragment key={i}>
-                            <View style={[lv.dot, on && { backgroundColor: color, borderColor: color }]} />
-                            {i < max - 1 && <View style={[lv.bar, on && i + 1 < level && { backgroundColor: color }]} />}
+                            <View style={[lv.dot, { backgroundColor: c.card2, borderColor: c.border }, on && { backgroundColor: on0, borderColor: on0 }]} />
+                            {i < max - 1 && <View style={[lv.bar, { backgroundColor: c.card2 }, on && i + 1 < level && { backgroundColor: on0 }]} />}
                         </React.Fragment>
                     );
                 })}
             </View>
-            {labels && <Text style={[lv.label, { color }]}>{labels[Math.min(level, max) - 1]}</Text>}
+            {labels && <Text style={[lv.label, { color: on0 }]}>{labels[Math.min(level, max) - 1]}</Text>}
         </View>
     );
 }
 
 /* ---------- Pill / chip sélectionnable ---------- */
 export function Pill({ label, active, onPress }: { label: string; active?: boolean; onPress?: () => void }) {
+    const c = useColors();
     if (active) {
         return (
             <Pressable onPress={onPress}>
-                <LinearGradient colors={['#a463ff', '#ff6fc2']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[pill.base, { borderColor: 'transparent' }]}>
-                    <Text style={[pill.txt, pill.txtOn]}>{label}</Text>
+                <LinearGradient colors={['#ff6aa9', '#e02a73']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[pill.base, { borderColor: 'transparent' }]}>
+                    <Text style={[pill.txt, { color: '#fff', fontFamily: fonts.bodySemi }]}>{label}</Text>
                 </LinearGradient>
             </Pressable>
         );
     }
     return (
-        <Pressable onPress={onPress} style={pill.base}>
-            <Text style={pill.txt}>{label}</Text>
+        <Pressable onPress={onPress} style={[pill.base, { borderColor: c.border }]}>
+            <Text style={[pill.txt, { color: c.ink(0.6) }]}>{label}</Text>
         </Pressable>
     );
 }
 
 /* ---------- En-tête d'écran ---------- */
-export function ScreenHeader({ title, back, right, tint = colors.rose }: { title?: string; back?: boolean; right?: React.ReactNode; tint?: string }) {
+export function ScreenHeader({ title, back, right, tint }: { title?: string; back?: boolean; right?: React.ReactNode; tint?: string }) {
     const router = useRouter();
+    const c = useColors();
     return (
         <View style={hd.row}>
             {back ? (
                 <Pressable onPress={() => router.back()} hitSlop={12} style={hd.icon}>
-                    <Ionicons name="chevron-back" size={26} color={tint} />
+                    <Ionicons name="chevron-back" size={26} color={tint ?? c.accent} />
                 </Pressable>
             ) : <View style={hd.icon} />}
-            <Text style={hd.title} numberOfLines={1}>{title}</Text>
+            <Text style={[hd.title, { color: c.text }]} numberOfLines={1}>{title}</Text>
             <View style={hd.icon}>{right}</View>
         </View>
     );
 }
 
 export function SectionTitle({ children }: { children: React.ReactNode }) {
-    return <Text style={s.section}>{children}</Text>;
+    const c = useColors();
+    return <Text style={[sct.section, { color: c.ink(0.6) }]}>{children}</Text>;
 }
 
-/* ---------- styles ---------- */
+/* ---------- styles (constantes non thématiques) ---------- */
 const av = StyleSheet.create({
     base: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
     initial: { fontFamily: fonts.displayMed },
-    lock: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: colors.overlay, alignItems: 'center', justifyContent: 'center' },
+    lock: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(20,12,40,0.5)', alignItems: 'center', justifyContent: 'center' },
 });
-
-const c = StyleSheet.create({
-    card: {
-        backgroundColor: colors.card,
-        borderRadius: radius.lg,
-        borderWidth: 0.5,
-        borderColor: 'rgba(0,0,0,0.07)',
-        padding: spacing.md,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.07,
-        shadowRadius: 14,
-        elevation: 3,
-    },
-});
-
 const chip = StyleSheet.create({
     base: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: 1, borderRadius: radius.pill, paddingVertical: 3, paddingHorizontal: 9 },
     txt: { fontFamily: fonts.bodySemi, fontSize: 11 },
 });
-
 const badge = StyleSheet.create({
     base: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: radius.pill, paddingVertical: 5, paddingHorizontal: 11 },
     txt: { fontFamily: fonts.bodyMed, fontSize: 12 },
 });
-
 const lv = StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'center' },
-    dot: { width: 11, height: 11, borderRadius: 6, backgroundColor: colors.cardLight, borderWidth: 1, borderColor: colors.border },
-    bar: { flex: 1, height: 2, backgroundColor: colors.cardLight, marginHorizontal: 2 },
+    dot: { width: 11, height: 11, borderRadius: 6, borderWidth: 1 },
+    bar: { flex: 1, height: 2, marginHorizontal: 2 },
     label: { fontFamily: fonts.bodyMed, fontSize: 12, marginTop: 6 },
 });
-
 const pill = StyleSheet.create({
-    base: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingVertical: 9, paddingHorizontal: 15, alignItems: 'center', justifyContent: 'center' },
-    txt: { fontFamily: fonts.body, fontSize: 14, color: colors.muted },
-    txtOn: { color: colors.white, fontFamily: fonts.bodySemi },
+    base: { borderWidth: 1, borderRadius: radius.pill, paddingVertical: 9, paddingHorizontal: 15, alignItems: 'center', justifyContent: 'center' },
+    txt: { fontFamily: fonts.body, fontSize: 14 },
 });
-
 const hd = StyleSheet.create({
     row: { flexDirection: 'row', alignItems: 'center', height: 52 },
     icon: { width: 40, alignItems: 'center', justifyContent: 'center' },
-    title: { flex: 1, textAlign: 'center', fontFamily: fonts.displayMed, fontSize: 17, color: colors.cream },
+    title: { flex: 1, textAlign: 'center', fontFamily: fonts.displayMed, fontSize: 17 },
 });
-
-const s = StyleSheet.create({
-    section: { fontFamily: fonts.bodySemi, fontSize: 12, letterSpacing: 1.2, color: colors.muted, textTransform: 'uppercase', marginBottom: spacing.sm },
+const sct = StyleSheet.create({
+    section: { fontFamily: fonts.bodySemi, fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: spacing.sm },
 });

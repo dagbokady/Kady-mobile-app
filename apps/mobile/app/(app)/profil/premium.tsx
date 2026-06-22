@@ -10,24 +10,27 @@ import { ScreenHeader } from '../../../src/components/ui';
 import { FadeInUp, PopIn } from '../../../src/components/motion';
 import { fonts } from '../../../src/theme/typography';
 import { spacing, radius } from '../../../src/theme/spacing';
-import { colors, gradients } from '../../../src/theme/colors';
+import { gradients } from '../../../src/theme/colors';
+import { useColors, type Palette } from '../../../src/theme/theme';
 
 const AVANTAGES = [
-    { icon: 'infinite', t: 'Cercles illimités', d: 'Rejoins autant de Cercles que tu veux.', color: colors.violet },
-    { icon: 'chatbubbles', t: 'DM illimités', d: 'Plus de limite de 3 conversations.', color: colors.pink },
-    { icon: 'stats-chart', t: 'Statistiques', d: 'Vois qui s\'intéresse à toi.', color: colors.teal },
-    { icon: 'color-palette', t: 'Personnalisation', d: 'Profil et thème à ton image.', color: colors.amber },
-    { icon: 'time', t: 'Ton rythme', d: 'Avance dans les niveaux à ta vitesse.', color: colors.sky },
+    { icon: 'infinite', t: 'Cercles illimités', d: 'Rejoins autant de Cercles que tu veux.', color: '#a78bfa' },
+    { icon: 'chatbubbles', t: 'DM illimités', d: 'Plus de limite de 3 conversations.', color: '#ff6fa8' },
+    { icon: 'stats-chart', t: 'Statistiques', d: "Vois qui s'intéresse à toi.", color: '#2fb8c0' },
+    { icon: 'color-palette', t: 'Personnalisation', d: 'Profil et thème à ton image.', color: '#ffb45c' },
+    { icon: 'time', t: 'Ton rythme', d: 'Avance dans les niveaux à ta vitesse.', color: '#5a7fd6' },
 ];
 
 export default function Premium() {
+    const c = useColors();
+    const s = makeStyles(c);
     return (
         <Screen>
             <ScreenHeader title="KADY Premium" back />
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: spacing.xl }}>
                 <PopIn>
                     <LinearGradient colors={gradients.royal} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
-                        <View style={s.heroLogo}><Logo size={48} color={colors.white} /></View>
+                        <View style={s.heroLogo}><Logo size={48} color="#fff" /></View>
                         <Text style={s.title}>Va plus loin avec Premium</Text>
                         <Text style={s.sub}>Tout KADY, sans limites. Annulable à tout moment.</Text>
                     </LinearGradient>
@@ -37,7 +40,7 @@ export default function Premium() {
                     {AVANTAGES.map((a, i) => (
                         <FadeInUp key={a.t} delay={100 + i * 70}>
                             <View style={s.item}>
-                                <View style={[s.itemIcon, { backgroundColor: a.color + '18' }]}><Ionicons name={a.icon as any} size={18} color={a.color} /></View>
+                                <View style={[s.itemIcon, { backgroundColor: a.color + '24' }]}><Ionicons name={a.icon as any} size={18} color={a.color} /></View>
                                 <View style={{ flex: 1 }}>
                                     <Text style={s.itemT}>{a.t}</Text>
                                     <Text style={s.itemD}>{a.d}</Text>
@@ -55,7 +58,7 @@ export default function Premium() {
 
                     <GradientButton label="Continuer le paiement" onPress={() => Linking.openURL('https://kady.ci/premium')} />
                     <View style={s.secure}>
-                        <Ionicons name="shield-checkmark" size={14} color={colors.muted} />
+                        <Ionicons name="shield-checkmark" size={14} color={c.ink(0.55)} />
                         <Text style={s.secureTxt}>Paiement sécurisé via mobile money sur kady.ci. Aucune commission de store ne s'applique.</Text>
                     </View>
                 </FadeInUp>
@@ -64,30 +67,30 @@ export default function Premium() {
     );
 }
 
-const s = StyleSheet.create({
+const makeStyles = (c: Palette) => StyleSheet.create({
     hero: {
         alignItems: 'center', gap: spacing.sm, marginTop: spacing.md, marginBottom: spacing.xl,
         borderRadius: radius.lg, paddingVertical: spacing.xl, paddingHorizontal: spacing.lg,
-        shadowColor: colors.violet, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 8,
+        shadowColor: '#a78bfa', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.3, shadowRadius: 20, elevation: 8,
     },
     heroLogo: { width: 80, height: 80, borderRadius: 40, backgroundColor: 'rgba(255,255,255,0.18)', alignItems: 'center', justifyContent: 'center' },
-    title: { fontFamily: fonts.display, fontSize: 26, color: colors.white, marginTop: spacing.sm, textAlign: 'center' },
+    title: { fontFamily: fonts.display, fontSize: 26, color: '#fff', marginTop: spacing.sm, textAlign: 'center' },
     sub: { fontFamily: fonts.body, fontSize: 15, color: 'rgba(255,255,255,0.92)', textAlign: 'center' },
     list: { gap: spacing.md, marginBottom: spacing.xl },
     item: { flexDirection: 'row', gap: spacing.md, alignItems: 'center' },
     itemIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-    itemT: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.cream },
-    itemD: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 2 },
+    itemT: { fontFamily: fonts.bodySemi, fontSize: 15, color: c.text },
+    itemD: { fontFamily: fonts.body, fontSize: 13, color: c.ink(0.6), marginTop: 2 },
     price: {
         alignItems: 'center',
-        backgroundColor: colors.card,
-        borderWidth: 1, borderColor: colors.borderRose,
+        backgroundColor: c.card,
+        borderWidth: 1, borderColor: 'rgba(255,140,190,0.3)',
         borderRadius: radius.lg, padding: spacing.lg, marginBottom: spacing.lg,
-        shadowColor: colors.rose, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 4,
+        shadowColor: '#e02a73', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 16, elevation: 4,
     },
-    priceAmount: { fontFamily: fonts.display, fontSize: 32, color: colors.cream },
-    priceMois: { fontFamily: fonts.body, fontSize: 16, color: colors.muted },
-    priceNote: { fontFamily: fonts.body, fontSize: 13, color: colors.muted, marginTop: 6 },
+    priceAmount: { fontFamily: fonts.display, fontSize: 32, color: c.text },
+    priceMois: { fontFamily: fonts.body, fontSize: 16, color: c.ink(0.6) },
+    priceNote: { fontFamily: fonts.body, fontSize: 13, color: c.ink(0.6), marginTop: 6 },
     secure: { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', marginTop: spacing.md },
-    secureTxt: { fontFamily: fonts.body, fontSize: 12, color: colors.muted, flexShrink: 1, textAlign: 'center' },
+    secureTxt: { fontFamily: fonts.body, fontSize: 12, color: c.ink(0.6), flexShrink: 1, textAlign: 'center' },
 });

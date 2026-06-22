@@ -1,6 +1,6 @@
 // app/(app)/profil/carnet.tsx
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Screen from '../../../src/components/Screen';
@@ -9,14 +9,8 @@ import { FadeInUp, PressableScale } from '../../../src/components/motion';
 import { gradients } from '../../../src/theme/colors';
 import { fonts } from '../../../src/theme/typography';
 import { spacing, radius } from '../../../src/theme/spacing';
-import { colors } from '../../../src/theme/colors';
-
-type Note = { id: string; type: 'note' | 'souvenir' | 'rappel'; contenu: string; date: string };
-
-const INIT: Note[] = [
-    { id: '1', type: 'souvenir', contenu: 'Koffi adore l\'attiéké poisson — penser à proposer le maquis de Cocody.', date: 'Aujourd\'hui' },
-    { id: '2', type: 'note', contenu: 'Mariam connaît plein de gospel ivoirien, lui demander des recommandations.', date: 'Hier' },
-];
+import { useColors, type Palette } from '../../../src/theme/theme';
+import { useStore } from '../../../src/store/app';
 
 const TYPES = {
     note: { icon: 'document-text', color: '#2BB7CF' },
@@ -25,12 +19,15 @@ const TYPES = {
 } as const;
 
 export default function Carnet() {
-    const [notes, setNotes] = useState(INIT);
+    const c = useColors();
+    const s = makeStyles(c);
+    const notes = useStore((st) => st.notes);
+    const addNote = useStore((st) => st.addNote);
     const [txt, setTxt] = useState('');
 
     const add = () => {
         if (!txt.trim()) return;
-        setNotes([{ id: String(Date.now()), type: 'note', contenu: txt, date: 'Maintenant' }, ...notes]);
+        addNote(txt.trim());
         setTxt('');
     };
 
@@ -38,7 +35,7 @@ export default function Carnet() {
         <Screen>
             <ScreenHeader title="Carnet personnel" back />
             <View style={s.privacy}>
-                <Ionicons name="lock-closed" size={13} color={colors.rose} />
+                <Ionicons name="lock-closed" size={13} color={c.accent} />
                 <Text style={s.privacyTxt}>Visible uniquement par toi. Personne d'autre n'y a accès.</Text>
             </View>
 
@@ -46,11 +43,11 @@ export default function Carnet() {
                 <TextInput
                     style={s.input} value={txt} onChangeText={setTxt}
                     placeholder="Une note, un souvenir, un rappel…"
-                    placeholderTextColor={colors.dim} multiline
+                    placeholderTextColor={c.ink(0.42)} multiline
                 />
                 <PressableScale onPress={add} scaleTo={0.9}>
                     <LinearGradient colors={gradients.rose} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.send}>
-                        <Ionicons name="add" size={22} color={colors.white} />
+                        <Ionicons name="add" size={22} color="#fff" />
                     </LinearGradient>
                 </PressableScale>
             </View>
@@ -62,7 +59,7 @@ export default function Carnet() {
                         <FadeInUp key={n.id} delay={i * 70}>
                             <Card style={{ borderLeftWidth: 3, borderLeftColor: t.color }}>
                                 <View style={s.noteHead}>
-                                    <View style={[s.noteType, { backgroundColor: t.color + '18' }]}>
+                                    <View style={[s.noteType, { backgroundColor: t.color + '26' }]}>
                                         <Ionicons name={t.icon as any} size={13} color={t.color} />
                                         <Text style={[s.noteTypeTxt, { color: t.color }]}>{n.type}</Text>
                                     </View>
@@ -78,21 +75,21 @@ export default function Carnet() {
     );
 }
 
-const s = StyleSheet.create({
+const makeStyles = (c: Palette) => StyleSheet.create({
     privacy: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: spacing.md },
-    privacyTxt: { fontFamily: fonts.body, fontSize: 12, color: colors.muted },
+    privacyTxt: { fontFamily: fonts.body, fontSize: 12, color: c.ink(0.6) },
     addBar: { flexDirection: 'row', gap: 10, alignItems: 'flex-end', marginBottom: spacing.lg },
     input: {
         flex: 1, minHeight: 48, maxHeight: 120,
-        backgroundColor: colors.cardLight,
-        borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
-        color: colors.cream, fontFamily: fonts.body, fontSize: 15,
+        backgroundColor: c.card2,
+        borderRadius: radius.md, borderWidth: 1, borderColor: c.border,
+        color: c.text, fontFamily: fonts.body, fontSize: 15,
         paddingHorizontal: 14, paddingVertical: 12,
     },
-    send: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.rose, alignItems: 'center', justifyContent: 'center' },
+    send: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
     noteHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
     noteType: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingVertical: 3, paddingHorizontal: 9, borderRadius: 100 },
     noteTypeTxt: { fontFamily: fonts.bodySemi, fontSize: 11, textTransform: 'capitalize' },
-    date: { fontFamily: fonts.body, fontSize: 11, color: colors.dim },
-    contenu: { fontFamily: fonts.body, fontSize: 15, color: colors.cream, lineHeight: 22 },
+    date: { fontFamily: fonts.body, fontSize: 11, color: c.ink(0.4) },
+    contenu: { fontFamily: fonts.body, fontSize: 15, color: c.text, lineHeight: 22 },
 });
