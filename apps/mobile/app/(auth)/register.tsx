@@ -5,19 +5,23 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Screen from '../../src/components/Screen';
 import GradientButton from '../../src/components/GradientButton';
+import AgeRange from '../../src/components/AgeRange';
 import { ScreenHeader, Pill } from '../../src/components/ui';
 import { FadeInUp } from '../../src/components/motion';
 import { fonts } from '../../src/theme/typography';
 import { spacing, radius } from '../../src/theme/spacing';
 import { colors } from '../../src/theme/colors';
 import { useColors, type Palette } from '../../src/theme/theme';
+import { useStore, DEFAULT_PREFS } from '../../src/store/app';
 
 const INTERETS = ['Musique', 'Sport', 'Cuisine', 'Cinéma', 'Voyage', 'Lecture', 'Mode', 'Tech', 'Foi', 'Entrepreneuriat', 'Danse', 'Jeux vidéo'];
+const STEPS = [0, 1, 2, 3];
 
 export default function Register() {
     const router = useRouter();
     const c = useColors();
     const s = makeStyles(c);
+    const setPrefs = useStore((st) => st.setPrefs);
     const [step, setStep] = useState(0);
     const [prenom, setPrenom] = useState('');
     const [email, setEmail] = useState('');
@@ -25,6 +29,11 @@ export default function Register() {
     const [genre, setGenre] = useState('');
     const [ville, setVille] = useState('');
     const [interets, setInterets] = useState<string[]>([]);
+    // Préférences : qui chercher + tranche d'âge du partenaire (l'écart avec soi).
+    const [lookingFor, setLookingFor] = useState<'femmes' | 'hommes' | 'tout'>(DEFAULT_PREFS.lookingFor);
+    const [mode, setMode] = useState<'rencontre' | 'amitie' | 'les_deux'>(DEFAULT_PREFS.mode);
+    const [ageMin, setAgeMin] = useState(DEFAULT_PREFS.ageMin);
+    const [ageMax, setAgeMax] = useState(DEFAULT_PREFS.ageMax);
     const [cgu, setCgu] = useState(false);
     const [err, setErr] = useState('');
 
@@ -35,33 +44,30 @@ export default function Register() {
         const diff = Date.now() - birth.getTime();
         return Math.floor(diff / (365.25 * 24 * 3600 * 1000));
     };
+    const monAge = calcAge(naissance);
 
     const next = () => {
         setErr('');
         if (step === 0) {
             if (!prenom.trim()) return setErr('Indique ton prénom.');
             if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setErr('Email invalide.');
-            const age = calcAge(naissance);
-            if (age === null) return setErr('Date au format JJ/MM/AAAA.');
-            if (age < 18) return setErr('KADY est réservé aux 18 ans et plus.');
+            if (monAge === null) return setErr('Date au format JJ/MM/AAAA.');
+            if (monAge < 18) return setErr('KADY est réservé aux 18 ans et plus.');
         }
         if (step === 1 && !genre) return setErr('Choisis ton genre.');
-        if (step === 2 && !cgu) return setErr('Tu dois accepter les conditions.');
-        if (step < 2) setStep(step + 1);
-        else router.replace('/verification');
+        if (step === 3 && !cgu) return setErr('Tu dois accepter les conditions.');
+        if (step < 3) return setStep(step + 1);
+        setPrefs({ lookingFor, ageMin, ageMax, mode });
+        router.replace('/verification');
     };
 
     const toggle = (i: string) => setInterets((p) => (p.includes(i) ? p.filter((x) => x !== i) : [...p, i]));
-
-    const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
-        <View style={{ gap: spacing.sm }}><Text style={s.label}>{label}</Text>{children}</View>
-    );
 
     return (
         <Screen>
             <ScreenHeader title="Inscription" back />
             <View style={s.steps}>
-                {[0, 1, 2].map((i) => <View key={i} style={[s.stepBar, i <= step && s.stepBarOn]} />)}
+                {STEPS.map((i) => <View key={i} style={[s.stepBar, i <= step && s.stepBarOn]} />)}
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: spacing.xxl }}>
@@ -95,6 +101,30 @@ export default function Register() {
 
                 {step === 2 && (
                     <FadeInUp style={{ gap: spacing.lg }}>
+                        <Text style={s.title}>Tu recherches…</Text>
+                        <Text style={s.body}>On s'en sert pour te proposer des Cercles et des profils qui te correspondent.</Text>
+                        <Field label="Avec qui veux-tu te connecter ?">
+                            <View style={s.rowWrap}>
+                                <Pill label="Des femmes" active={lookingFor === 'femmes'} onPress={() => setLookingFor('femmes')} />
+                                <Pill label="Des hommes" active={lookingFor === 'hommes'} onPress={() => setLookingFor('hommes')} />
+                                <Pill label="Tout le monde" active={lookingFor === 'tout'} onPress={() => setLookingFor('tout')} />
+                            </View>
+                        </Field>
+                        <Field label="Type de connexion">
+                            <View style={s.rowWrap}>
+                                <Pill label="Rencontre" active={mode === 'rencontre'} onPress={() => setMode('rencontre')} />
+                                <Pill label="Amitié" active={mode === 'amitie'} onPress={() => setMode('amitie')} />
+                                <Pill label="Les deux" active={mode === 'les_deux'} onPress={() => setMode('les_deux')} />
+                            </View>
+                        </Field>
+                        <Field label="Tranche d'âge de ton/ta partenaire">
+                            <AgeRange min={ageMin} max={ageMax} onChange={(lo, hi) => { setAgeMin(lo); setAgeMax(hi); }} monAge={monAge ?? undefined} />
+                        </Field>
+                    </FadeInUp>
+                )}
+
+                {step === 3 && (
+                    <FadeInUp style={{ gap: spacing.lg }}>
                         <Text style={s.title}>Presque fini</Text>
                         <Text style={s.body}>En rejoignant KADY, tu t'engages à respecter les autres membres. Pas de harcèlement, pas de coordonnées partagées avant la confiance établie.</Text>
                         <Pressable style={s.check} onPress={() => setCgu(!cgu)}>
@@ -108,10 +138,17 @@ export default function Register() {
             </ScrollView>
 
             <View style={{ paddingBottom: spacing.md }}>
-                <GradientButton label={step < 2 ? 'Continuer' : 'Créer mon compte'} onPress={next} />
+                <GradientButton label={step < 3 ? 'Continuer' : 'Créer mon compte'} onPress={next} />
             </View>
         </Screen>
     );
+}
+
+// Défini au niveau module : une identité de composant stable évite que le
+// TextInput enfant ne soit démonté/remonté à chaque frappe (clavier qui se ferme).
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+    const s = makeStyles(useColors());
+    return <View style={{ gap: spacing.sm }}><Text style={s.label}>{label}</Text>{children}</View>;
 }
 
 const makeStyles = (c: Palette) => StyleSheet.create({

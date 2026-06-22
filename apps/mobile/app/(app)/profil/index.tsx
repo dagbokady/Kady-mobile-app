@@ -1,6 +1,6 @@
 // app/(app)/profil/index.tsx — Profil (handoff "KADY Profil.dc.html")
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Animated, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, Animated, Image, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -10,6 +10,7 @@ import { fonts } from '../../../src/theme/typography';
 import { gradients } from '../../../src/theme/colors';
 import { useColors, useTheme, type Palette } from '../../../src/theme/theme';
 import { useStore, pickImage } from '../../../src/store/app';
+import { interestMeta } from '../../../src/data/interests';
 
 const PAD = 22;
 
@@ -25,24 +26,18 @@ const PHOTOS = [
     ['#7be0a0', '#2f9ac2', '#274a8c'],
 ] as const;
 
-const INTERESTS = [
-    { t: '✈️ Voyage', bg: 'rgba(255,157,107,0.12)', bd: 'rgba(255,157,107,0.25)', c: '#ff9d5c' },
-    { t: '🏀 Basket', bg: 'rgba(123,224,160,0.1)', bd: 'rgba(123,224,160,0.25)', c: '#43e08a' },
-    { t: '🎬 Cinéma', bg: 'rgba(143,157,255,0.12)', bd: 'rgba(143,157,255,0.25)', c: '#8f9dff' },
-    { t: '🍲 Cuisine ivoirienne', bg: 'rgba(255,111,168,0.12)', bd: 'rgba(255,111,168,0.25)', c: '#ff6fa8' },
-    { t: '📷 Photographie', bg: 'rgba(255,140,190,0.12)', bd: 'rgba(255,140,190,0.25)', c: '#ff8cbe' },
-    { t: '💼 Entrepreneuriat', bg: 'rgba(143,208,255,0.12)', bd: 'rgba(143,208,255,0.25)', c: '#8fd0ff' },
-] as const;
-
 export default function Profil() {
     const router = useRouter();
     const c = useColors();
     const { dark, toggle } = useTheme();
     const s = makeStyles(c);
+    const { width } = useWindowDimensions();
+    const cell = (width - PAD * 2 - 20) / 3; // 3 colonnes, 2 espaces de 10
     const pause = useStore((st) => st.pause);
     const setPause = useStore((st) => st.setPause);
     const photos = useStore((st) => st.photos);
     const addPhoto = useStore((st) => st.addPhoto);
+    const profile = useStore((st) => st.profile);
     const knob = React.useRef(new Animated.Value(pause ? 1 : 0)).current;
     const togglePause = () => {
         const v = !pause;
@@ -68,7 +63,7 @@ export default function Profil() {
                     <View>
                         <LinearGradient colors={['#8fd0ff', '#ff6aa9', '#e02a73', '#8fd0ff']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.avatarRing}>
                             <LinearGradient colors={['#5a7fd6', '#7a4fd6', '#2a1c5e']} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={s.avatar}>
-                                <Text style={s.avatarLetter}>D</Text>
+                                <Text style={s.avatarLetter}>{profile.prenom.charAt(0)}</Text>
                             </LinearGradient>
                         </LinearGradient>
                         <LinearGradient colors={['#3aa0ff', '#5a7fd6']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.avatarCheck}>
@@ -77,7 +72,7 @@ export default function Profil() {
                     </View>
 
                     <View style={s.nameRow}>
-                        <Text style={s.name}>Didier, 32</Text>
+                        <Text style={s.name}>{profile.prenom}, {profile.age}</Text>
                         <View style={s.verif}>
                             <Ionicons name="shield-checkmark" size={11} color="#3aa0ff" />
                             <Text style={s.verifTxt}>Vérifié+</Text>
@@ -85,13 +80,13 @@ export default function Profil() {
                     </View>
                     <View style={s.locRow}>
                         <Ionicons name="location-outline" size={14} color={c.ink(0.55)} />
-                        <Text style={s.locTxt}>Abidjan · Cocody</Text>
+                        <Text style={s.locTxt}>{profile.ville}{profile.quartier ? ` · ${profile.quartier}` : ''}</Text>
                         <Text style={s.locDot}>·</Text>
                         <Ionicons name="diamond" size={12} color="#8fd0ff" />
                         <Text style={s.gradeTxt}>Diamant</Text>
                     </View>
-                    <Text style={s.bio}>Passionné de voyages et de basket. J'aime les vraies conversations et découvrir de nouveaux endroits autour d'Abidjan. 🌍</Text>
-                    <PressableScale style={s.editBtn} onPress={() => router.push('/(app)/profil/parametres')}>
+                    <Text style={s.bio}>{profile.bio}</Text>
+                    <PressableScale style={s.editBtn} onPress={() => router.push('/(app)/profil/modifier')}>
                         <Ionicons name="create-outline" size={15} color={c.accentDeep} />
                         <Text style={s.editBtnTxt}>Modifier le profil</Text>
                     </PressableScale>
@@ -144,34 +139,37 @@ export default function Profil() {
                     </View>
                     <View style={s.photoGrid}>
                         {PHOTOS.map((g, i) => (
-                            <LinearGradient key={i} colors={g as any} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={s.photo}>
+                            <LinearGradient key={i} colors={g as any} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[s.photo, { width: cell }]}>
                                 {i === 0 && <View style={s.principal}><Text style={s.principalTxt}>Principale</Text></View>}
                             </LinearGradient>
                         ))}
-                        {photos.map((uri, i) => <Image key={`p${i}`} source={{ uri }} style={s.photo} />)}
-                        {photos.length === 0 && <><LockedPhoto label="Niveau 5" /><LockedPhoto label="Réciprocité" /></>}
-                        <Pressable style={s.photoAdd} onPress={pickPhoto}><Ionicons name="add" size={24} color={c.accent} /></Pressable>
+                        {photos.map((uri, i) => <Image key={`p${i}`} source={{ uri }} style={[s.photo, { width: cell }]} />)}
+                        {photos.length === 0 && <><LockedPhoto label="Niveau 5" cell={cell} /><LockedPhoto label="Réciprocité" cell={cell} /></>}
+                        <Pressable style={[s.photoAdd, { width: cell }]} onPress={pickPhoto}><Ionicons name="add" size={24} color={c.accent} /></Pressable>
                     </View>
                 </FadeInUp>
 
                 <FadeInUp delay={290}>
                     <Section icon="heart" title="Centres d'intérêt" />
                     <View style={s.interests}>
-                        {INTERESTS.map((it) => (
-                            <View key={it.t} style={[s.interest, { backgroundColor: it.bg, borderColor: it.bd }]}>
-                                <Text style={[s.interestTxt, { color: it.c }]}>{it.t}</Text>
-                            </View>
-                        ))}
+                        {profile.interets.map((label) => {
+                            const m = interestMeta(label);
+                            return (
+                                <View key={label} style={[s.interest, { backgroundColor: m.color + '1f', borderColor: m.color + '55' }]}>
+                                    <Text style={[s.interestTxt, { color: m.color }]}>{m.emoji} {label}</Text>
+                                </View>
+                            );
+                        })}
                     </View>
                 </FadeInUp>
 
                 <FadeInUp delay={330}>
                     <View style={s.menu}>
                         <MenuItem icon="book-outline" tint="#ff6fa8" title="Carnet personnel" sub="Notes & souvenirs privés" tag="Privé" onPress={() => router.push('/(app)/profil/carnet')} />
-                        <MenuItem icon="git-network-outline" tint="#8f9dff" title="Carte des relations" sub="Vos cercles & connexions" />
+                        <MenuItem icon="git-network-outline" tint="#8f9dff" title="Carte des relations" sub="Vos cercles & connexions" onPress={() => router.push('/(app)/profil/relations')} />
                         <MenuPause checked={pause} knob={knob} onToggle={togglePause} />
                         <MenuItem icon="moon-outline" tint="#a78bfa" title="Mode sombre" sub={dark ? 'Activé' : 'Désactivé'} toggle checked={dark} onPress={toggle} />
-                        <MenuItem icon="heart-outline" tint="#ff9d5c" title="Mode de connexion" sub="Rencontre & Amitié" />
+                        <MenuItem icon="heart-outline" tint="#ff9d5c" title="Mode de connexion" sub="Rencontre, Amitié & âge" onPress={() => router.push('/(app)/profil/preferences')} />
                         <MenuItem icon="shield-outline" tint="#43e08a" title="Confidentialité & sécurité" sub="Blocage, masquage, signalement" onPress={() => router.push('/(app)/profil/parametres')} />
                     </View>
                 </FadeInUp>
@@ -228,11 +226,11 @@ function Section({ icon, title, noMargin }: { icon: any; title: string; noMargin
     );
 }
 
-function LockedPhoto({ label }: { label: string }) {
+function LockedPhoto({ label, cell }: { label: string; cell: number }) {
     const c = useColors();
     const s = makeStyles(c);
     return (
-        <View style={[s.photo, s.photoLocked]}>
+        <View style={[s.photo, s.photoLocked, { width: cell }]}>
             <Ionicons name="lock-closed" size={20} color={c.ink(0.5)} />
             <Text style={s.photoLockedTxt}>{label}</Text>
         </View>
@@ -326,12 +324,12 @@ const makeStyles = (c: Palette) => StyleSheet.create({
     photoHead: { marginTop: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     photoCount: { fontFamily: fonts.body, fontSize: 12, color: c.ink(0.4) },
     photoGrid: { marginTop: 13, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    photo: { width: '31.5%', aspectRatio: 3 / 4, borderRadius: 16, overflow: 'hidden' },
+    photo: { aspectRatio: 3 / 4, borderRadius: 16, overflow: 'hidden' },
     principal: { position: 'absolute', top: 8, left: 8, paddingVertical: 3, paddingHorizontal: 8, borderRadius: 99, backgroundColor: 'rgba(0,0,0,0.45)' },
     principalTxt: { fontFamily: fonts.bodyBold, fontSize: 9.5, color: '#fff' },
     photoLocked: { backgroundColor: c.field, borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center', gap: 7 },
     photoLockedTxt: { fontFamily: fonts.bodySemi, fontSize: 9.5, color: c.ink(0.5), textAlign: 'center' },
-    photoAdd: { width: '31.5%', aspectRatio: 3 / 4, borderRadius: 16, backgroundColor: 'rgba(255,106,169,0.08)', borderWidth: 1.5, borderColor: 'rgba(255,140,190,0.4)', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
+    photoAdd: { aspectRatio: 3 / 4, borderRadius: 16, backgroundColor: 'rgba(255,106,169,0.08)', borderWidth: 1.5, borderColor: 'rgba(255,140,190,0.4)', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
 
     interests: { marginTop: 13, flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
     interest: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 99, borderWidth: 1 },

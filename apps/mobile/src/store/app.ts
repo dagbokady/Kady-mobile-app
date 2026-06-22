@@ -12,6 +12,26 @@ export type CreatedCercle = {
     membres: number; max: number;
 };
 export type Note = { id: string; type: 'note' | 'souvenir' | 'rappel'; contenu: string; date: string };
+export type Prefs = {
+    lookingFor: 'femmes' | 'hommes' | 'tout';
+    ageMin: number;
+    ageMax: number;
+    mode: 'rencontre' | 'amitie' | 'les_deux';
+};
+
+export const DEFAULT_PREFS: Prefs = { lookingFor: 'tout', ageMin: 24, ageMax: 38, mode: 'rencontre' };
+export const AGE_FLOOR = 18;
+export const AGE_CEIL = 75;
+
+export type Profile = { prenom: string; age: number; ville: string; quartier: string; bio: string; interets: string[] };
+export const DEFAULT_PROFILE: Profile = {
+    prenom: 'Didier',
+    age: 32,
+    ville: 'Abidjan',
+    quartier: 'Cocody',
+    bio: "Passionné de voyages et de basket. J'aime les vraies conversations et découvrir de nouveaux endroits autour d'Abidjan. 🌍",
+    interets: ['Voyage', 'Basket', 'Cinéma', 'Cuisine', 'Photographie', 'Entrepreneuriat'],
+};
 
 export function nowTime(): string {
     const d = new Date();
@@ -76,6 +96,12 @@ type State = {
     setPause: (b: boolean) => void;
     setNotifsPush: (b: boolean) => void;
 
+    prefs: Prefs;
+    setPrefs: (p: Partial<Prefs>) => void;
+
+    profile: Profile;
+    setProfile: (p: Partial<Profile>) => void;
+
     theme: 'light' | 'dark';
     toggleTheme: () => void;
     setTheme: (t: 'light' | 'dark') => void;
@@ -118,11 +144,17 @@ export const useStore = create<State>()(
             setPause: (b) => set({ pause: b }),
             setNotifsPush: (b) => set({ notifsPush: b }),
 
+            prefs: DEFAULT_PREFS,
+            setPrefs: (p) => set((s) => ({ prefs: { ...s.prefs, ...p } })),
+
+            profile: DEFAULT_PROFILE,
+            setProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
+
             theme: 'light',
             toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
             setTheme: (t) => set({ theme: t }),
 
-            reset: () => set({ dm: {}, cercle: {}, joined: [], created: [], rsvp: {}, notifsRead: [], notifsDismissed: [], request: 'pending', photos: [], notes: SEED_NOTES, pause: false, notifsPush: true }),
+            reset: () => set({ dm: {}, cercle: {}, joined: [], created: [], rsvp: {}, notifsRead: [], notifsDismissed: [], request: 'pending', photos: [], notes: SEED_NOTES, pause: false, notifsPush: true, prefs: DEFAULT_PREFS, profile: DEFAULT_PROFILE }),
         }),
         { name: 'kady-store-v1', storage: createJSONStorage(() => AsyncStorage) },
     ),

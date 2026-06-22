@@ -1,6 +1,6 @@
 // app/(app)/accueil.tsx — Accueil (handoff "KADY Home.dc.html")
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, Dimensions, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, useWindowDimensions, Animated, Easing } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,7 +12,6 @@ import { useColors, type Palette } from '../../src/theme/theme';
 import { useStore } from '../../src/store/app';
 
 const PAD = 22;
-const HERO_W = Dimensions.get('window').width - PAD * 2;
 const BRAND = ['#ff6aa9', '#e02a73'] as const;
 
 type Slide = { grad: string[]; chip?: string; title: string; sub: string };
@@ -64,7 +63,7 @@ export default function Accueil() {
         <Screen padded={false}>
             <FadeInUp>
                 <View style={s.header}>
-                    <Pressable style={s.iconBtn}><Ionicons name="menu" size={20} color={c.text} /></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => router.push('/(app)/decouvrir')}><Ionicons name="compass-outline" size={20} color={c.text} /></Pressable>
                     <View style={s.brand}>
                         <KadyMark />
                         <Text style={s.wordmark}>KADY</Text>
@@ -201,6 +200,8 @@ export default function Accueil() {
 function HeroCarousel({ onPress }: { onPress: () => void }) {
     const c = useColors();
     const s = makeStyles(c);
+    const { width } = useWindowDimensions();
+    const HERO_W = width - PAD * 2;
     const [i, setI] = useState(0);
     const tx = useRef(new Animated.Value(0)).current;
 

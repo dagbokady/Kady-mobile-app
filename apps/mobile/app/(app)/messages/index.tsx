@@ -43,7 +43,7 @@ export default function Messages() {
                             <Text style={s.h1sub}>Nées de vos cercles partagés</Text>
                         </View>
                     </View>
-                    <Pressable style={s.iconBtn}><Ionicons name="create-outline" size={20} color={c.text} /></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => router.push('/(app)/cercles')}><Ionicons name="create-outline" size={20} color={c.text} /></Pressable>
                 </View>
             </FadeInUp>
 

@@ -76,7 +76,7 @@ export default function Creer() {
                     </FadeInUp>
 
                     <FadeInUp delay={100}>
-                        <QuickItem icon="calendar-outline" color="#ff9d5c" title="Proposer une activité" sub="Sortie, soirée, événement d'un cercle" />
+                        <QuickItem icon="calendar-outline" color="#ff9d5c" title="Proposer une activité" sub="Sortie, soirée, événement d'un cercle" onPress={() => router.push('/(app)/cercles')} />
                     </FadeInUp>
                     <FadeInUp delay={140}>
                         <QuickItem icon="person-add-outline" color="#8f9dff" title="Inviter des amis" sub="Partagez KADY et gagnez de l'XP" onPress={shareInvite} />

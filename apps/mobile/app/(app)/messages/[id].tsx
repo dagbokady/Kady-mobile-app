@@ -1,6 +1,6 @@
 // app/(app)/messages/[id].tsx — Chat privé (handoff "KADY Chat Prive.dc.html")
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Animated, Easing, StatusBar, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Animated, Easing, StatusBar, useWindowDimensions, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,13 +11,13 @@ import { useColors, type Palette } from '../../../src/theme/theme';
 import { relations, NIVEAUX_RENCONTRE, NIVEAUX_AMITIE } from '../../../src/data/mock';
 import { useStore, pickImage } from '../../../src/store/app';
 
-const { width, height } = Dimensions.get('window');
 const SEND_GRAD = ['#ff6aa9', '#e02a73'] as const;
 
 export default function ChatPrive() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { width, height } = useWindowDimensions();
     const c = useColors();
     const s = makeStyles(c);
     const r = relations.find((x) => x.id === id) ?? relations[0];
@@ -43,6 +43,10 @@ export default function ChatPrive() {
         sendDM(r.id, '', uri);
         setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 80);
     };
+    const lockedCall = (kind: string) =>
+        Alert.alert(`${kind} verrouillé`, `Les appels ${kind.toLowerCase()} se débloquent au niveau « La Confiance ». Continuez à échanger pour y arriver 💫`);
+    const addEmoji = () => setDraft((d) => d + '😊');
+    const openProfile = () => router.push(`/(app)/membre/${r.id}`);
 
     return (
         <View style={s.root}>
@@ -62,20 +66,22 @@ export default function ChatPrive() {
                     <Pressable onPress={() => router.back()} hitSlop={10} style={s.back}>
                         <Ionicons name="chevron-back" size={24} color={c.text} />
                     </Pressable>
-                    <View>
-                        <LinearGradient colors={r.grad as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.avatar}>
-                            <Text style={s.avatarLetter}>{r.prenom.charAt(0).toUpperCase()}</Text>
-                        </LinearGradient>
-                        {r.enLigne && <View style={s.onlineDot} />}
-                    </View>
-                    <View style={{ flex: 1 }}>
-                        <Text style={s.name} numberOfLines={1}>{r.prenom}, {r.age}</Text>
-                        <Text style={[s.status, !r.enLigne && { color: c.ink(0.45) }]}>
-                            {r.enLigne ? 'En ligne' : labels[r.niveau - 1]}
-                        </Text>
-                    </View>
-                    <Pressable style={s.callBtn}><Ionicons name="videocam-outline" size={20} color={c.accent} /></Pressable>
-                    <Pressable style={s.callBtn}><Ionicons name="call-outline" size={19} color={c.accent} /></Pressable>
+                    <Pressable onPress={openProfile} style={s.headerId}>
+                        <View>
+                            <LinearGradient colors={r.grad as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.avatar}>
+                                <Text style={s.avatarLetter}>{r.prenom.charAt(0).toUpperCase()}</Text>
+                            </LinearGradient>
+                            {r.enLigne && <View style={s.onlineDot} />}
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <Text style={s.name} numberOfLines={1}>{r.prenom}, {r.age}</Text>
+                            <Text style={[s.status, !r.enLigne && { color: c.ink(0.45) }]}>
+                                {r.enLigne ? 'En ligne' : labels[r.niveau - 1]}
+                            </Text>
+                        </View>
+                    </Pressable>
+                    <Pressable style={s.callBtn} onPress={() => lockedCall('Appel vidéo')}><Ionicons name="videocam-outline" size={20} color={c.accent} /></Pressable>
+                    <Pressable style={s.callBtn} onPress={() => lockedCall('Appel audio')}><Ionicons name="call-outline" size={19} color={c.accent} /></Pressable>
                 </View>
 
                 <Pressable onPress={() => router.back()} style={s.strip}>
@@ -151,7 +157,7 @@ export default function ChatPrive() {
 
                 <View style={[s.inputWrap, { paddingBottom: insets.bottom + 9 }]}>
                     <View style={s.inputPill}>
-                        <Pressable hitSlop={6}><Ionicons name="happy-outline" size={22} color={c.ink(0.45)} /></Pressable>
+                        <Pressable hitSlop={6} onPress={addEmoji}><Ionicons name="happy-outline" size={22} color={c.ink(0.45)} /></Pressable>
                         <TextInput
                             value={draft} onChangeText={setDraft} onSubmitEditing={send} returnKeyType="send"
                             placeholder="Message" placeholderTextColor={c.ink(0.4)} style={s.input}
@@ -236,6 +242,7 @@ const makeStyles = (c: Palette) => StyleSheet.create({
         shadowColor: '#281950', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 12, elevation: 3, zIndex: 30,
     },
     headerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 14, paddingTop: 6, paddingBottom: 11 },
+    headerId: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
     back: { width: 30, height: 38, alignItems: 'center', justifyContent: 'center' },
     avatar: { width: 42, height: 42, borderRadius: 21, alignItems: 'center', justifyContent: 'center' },
     avatarLetter: { fontFamily: fonts.display, fontSize: 17, color: '#fff' },

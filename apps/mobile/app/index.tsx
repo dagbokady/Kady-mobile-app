@@ -1,6 +1,6 @@
 // app/index.tsx
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Pressable, Dimensions, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, Pressable, useWindowDimensions, Animated, Easing } from 'react-native';
 import { useRouter } from 'expo-router';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import Screen from '../src/components/Screen';
@@ -11,12 +11,11 @@ import { spacing } from '../src/theme/spacing';
 import { fonts } from '../src/theme/typography';
 import { useColors, type Palette } from '../src/theme/theme';
 
-const { width } = Dimensions.get('window');
-
 export default function Welcome() {
     const router = useRouter();
     const c = useColors();
-    const styles = makeStyles(c);
+    const { width } = useWindowDimensions();
+    const styles = makeStyles(c, width);
     const spin = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -79,7 +78,7 @@ export default function Welcome() {
     );
 }
 
-const makeStyles = (c: Palette) => StyleSheet.create({
+const makeStyles = (c: Palette, width: number) => StyleSheet.create({
     root: { flex: 1, justifyContent: 'space-between', paddingVertical: spacing.xl },
     decor: { position: 'absolute', top: -width * 0.22, alignSelf: 'center', opacity: 1 },
 

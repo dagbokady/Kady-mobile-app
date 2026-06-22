@@ -1,6 +1,6 @@
 // app/(app)/cercles/[id].tsx — Cercle Detail / salle d'accueil (handoff "KADY Cercle Detail.dc.html")
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, StatusBar, Share } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable, StatusBar, Share, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,12 +12,12 @@ import { useColors, type Palette } from '../../../src/theme/theme';
 import { mesCercles, cerclesDecouvrir } from '../../../src/data/mock';
 import { useStore } from '../../../src/store/app';
 
-type Member = { initial: string; grad: readonly string[]; name: string; sub: string; you?: boolean; subColor?: string; tag?: string; tagBg?: string; tagBd?: string; tagColor?: string; online?: boolean; lien?: boolean };
+type Member = { id?: string; initial: string; grad: readonly string[]; name: string; sub: string; you?: boolean; subColor?: string; tag?: string; tagBg?: string; tagBd?: string; tagColor?: string; online?: boolean; lien?: boolean };
 const MEMBERS: Member[] = [
     { initial: 'D', grad: ['#5a7fd6', '#7a4fd6'], name: 'Didier', you: true, sub: 'Fondateur', tag: 'Admin', tagBg: 'rgba(255,210,122,0.16)', tagBd: 'rgba(255,210,122,0.35)', tagColor: '#e0a93a', online: false },
-    { initial: 'A', grad: ['#ff9d5c', '#d34d7e'], name: 'Awa, 26', sub: 'En ligne', subColor: '#1f9d57', online: true, lien: true },
-    { initial: 'K', grad: ['#7be0a0', '#2f9ac2'], name: 'Koffi, 29', sub: 'En ligne', subColor: '#1f9d57', online: true },
-    { initial: 'S', grad: ['#b07bff', '#7a4fd6'], name: 'Sophie, 28', sub: 'Vu il y a 1 h', tag: 'Nouvelle', tagBg: 'rgba(123,224,160,0.14)', tagBd: 'rgba(123,224,160,0.3)', tagColor: '#1f9d57', online: false },
+    { id: 'awa', initial: 'A', grad: ['#ff9d5c', '#d34d7e'], name: 'Awa, 26', sub: 'En ligne', subColor: '#1f9d57', online: true, lien: true },
+    { id: 'koffi', initial: 'K', grad: ['#7be0a0', '#2f9ac2'], name: 'Koffi, 29', sub: 'En ligne', subColor: '#1f9d57', online: true },
+    { id: 'sophie', initial: 'S', grad: ['#b07bff', '#7a4fd6'], name: 'Sophie, 28', sub: 'Vu il y a 1 h', tag: 'Nouvelle', tagBg: 'rgba(123,224,160,0.14)', tagBd: 'rgba(123,224,160,0.3)', tagColor: '#1f9d57', online: false },
 ];
 
 export default function CercleDetail() {
@@ -35,6 +35,14 @@ export default function CercleDetail() {
     const leave = useStore((st) => st.leave);
     const onLeave = () => { leave(c.id); router.back(); };
     const onInvite = () => { Share.share({ message: `Rejoins le cercle « ${c.nom} » sur KADY 💫 https://kady.ci` }).catch(() => {}); };
+    const onMore = () => {
+        Alert.alert(c.nom, undefined, [
+            { text: 'Partager le cercle', onPress: onInvite },
+            { text: 'Règles du cercle', onPress: () => Alert.alert('Règles du cercle', '· Respect et bienveillance avant tout\n· Pas de coordonnées partagées en public\n· On reste dans le thème') },
+            { text: 'Signaler', style: 'destructive', onPress: () => Alert.alert('Signalement envoyé', "Merci, notre équipe de modération va l'examiner.") },
+            { text: 'Annuler', style: 'cancel' },
+        ]);
+    };
 
     return (
         <View style={s.root}>
@@ -48,7 +56,7 @@ export default function CercleDetail() {
                         <Pressable onPress={() => router.back()} style={s.glassBtn}><Ionicons name="chevron-back" size={20} color="#fff" /></Pressable>
                         <View style={{ flexDirection: 'row', gap: 9 }}>
                             <Pressable style={s.glassBtn} onPress={onInvite}><Ionicons name="share-social-outline" size={18} color="#fff" /></Pressable>
-                            <Pressable style={s.glassBtn}><Ionicons name="ellipsis-vertical" size={18} color="#fff" /></Pressable>
+                            <Pressable style={s.glassBtn} onPress={onMore}><Ionicons name="ellipsis-vertical" size={18} color="#fff" /></Pressable>
                         </View>
                     </View>
 
@@ -151,11 +159,11 @@ export default function CercleDetail() {
                                 <Ionicons name="people-outline" size={18} color={cc.accent} />
                                 <Text style={s.sectionTitle}>Membres</Text>
                             </View>
-                            <Pressable><Text style={s.seeAll}>Voir tous</Text></Pressable>
+                            <Pressable onPress={openChat}><Text style={s.seeAll}>Voir tous</Text></Pressable>
                         </View>
                         <View style={{ gap: 4 }}>
                             {MEMBERS.map((m, i) => (
-                                <View key={i} style={s.member}>
+                                <Pressable key={i} style={s.member} onPress={() => m.id && router.push(`/(app)/membre/${m.id}`)} disabled={!m.id}>
                                     <View>
                                         <LinearGradient colors={m.grad as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.memberAv}>
                                             <Text style={s.memberAvTxt}>{m.initial}</Text>
@@ -177,7 +185,8 @@ export default function CercleDetail() {
                                             <Text style={[s.memberTagTxt, { color: m.tagColor }]}>{m.tag}</Text>
                                         </View>
                                     )}
-                                </View>
+                                    {m.id && <Ionicons name="chevron-forward" size={16} color={cc.ink(0.3)} />}
+                                </Pressable>
                             ))}
                         </View>
                     </FadeInUp>

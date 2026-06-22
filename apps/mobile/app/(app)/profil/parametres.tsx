@@ -1,6 +1,6 @@
 // app/(app)/profil/parametres.tsx
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Switch, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Switch, Pressable, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Screen from '../../../src/components/Screen';
@@ -20,7 +20,16 @@ export default function Parametres() {
     const setPause = useStore((st) => st.setPause);
     const notifs = useStore((st) => st.notifsPush);
     const setNotifs = useStore((st) => st.setNotifsPush);
+    const reset = useStore((st) => st.reset);
     const trackColor = { true: c.accent, false: c.ink(0.18) };
+
+    const deleteAccount = () => {
+        Alert.alert('Supprimer mon compte', 'Cette action est définitive : tes Cercles, messages et données seront effacés.', [
+            { text: 'Annuler', style: 'cancel' },
+            { text: 'Supprimer', style: 'destructive', onPress: () => { reset(); router.replace('/'); } },
+        ]);
+    };
+    const web = (path: string) => Linking.openURL(`https://kady.ci/${path}`).catch(() => {});
 
     return (
         <Screen>
@@ -71,10 +80,10 @@ export default function Parametres() {
                 <FadeInUp delay={210}>
                     <SectionTitle>Sécurité & confidentialité</SectionTitle>
                     <View style={s.card}>
-                        <Item icon="person-remove" color="#ff9d5c" label="Personnes bloquées" value="2" />
-                        <Item icon="flag" color="#ffb45c" label="Mes signalements" value="0" />
-                        <Item icon="eye-off" color="#a78bfa" label="Personnes masquées" value="1" />
-                        <Item icon="document-text" color="#2fb8c0" label="Politique de confidentialité" last />
+                        <Item icon="person-remove" color="#ff9d5c" label="Personnes bloquées" value="2" onPress={() => Alert.alert('Personnes bloquées', '• Yann B.\n• Compte 225\n\nUne personne bloquée ne peut plus te contacter ni voir ton profil.')} />
+                        <Item icon="flag" color="#ffb45c" label="Mes signalements" value="0" onPress={() => Alert.alert('Mes signalements', 'Aucun signalement en cours. Merci d\'aider à garder KADY sûr. 🙏')} />
+                        <Item icon="eye-off" color="#a78bfa" label="Personnes masquées" value="1" onPress={() => Alert.alert('Personnes masquées', '• Sophie K.\n\nLes profils masqués n\'apparaissent plus dans tes suggestions.')} />
+                        <Item icon="document-text" color="#2fb8c0" label="Politique de confidentialité" onPress={() => web('confidentialite')} last />
                     </View>
                 </FadeInUp>
 
@@ -82,9 +91,9 @@ export default function Parametres() {
                 <FadeInUp delay={280}>
                     <SectionTitle>Compte</SectionTitle>
                     <View style={s.card}>
-                        <Item icon="mail" color="#5a7fd6" label="Modifier l'email" />
-                        <Item icon="key" color="#ffd27a" label="Changer le mot de passe" />
-                        <Item icon="trash" color="#ef5350" label="Supprimer mon compte" danger last />
+                        <Item icon="mail" color="#5a7fd6" label="Modifier l'email" onPress={() => web('compte')} />
+                        <Item icon="key" color="#ffd27a" label="Changer le mot de passe" onPress={() => web('compte')} />
+                        <Item icon="trash" color="#ef5350" label="Supprimer mon compte" danger last onPress={deleteAccount} />
                     </View>
                 </FadeInUp>
 
@@ -99,12 +108,12 @@ export default function Parametres() {
     );
 }
 
-function Item({ icon, label, value, danger, last, color }: { icon: any; label: string; value?: string; danger?: boolean; last?: boolean; color?: string }) {
+function Item({ icon, label, value, danger, last, color, onPress }: { icon: any; label: string; value?: string; danger?: boolean; last?: boolean; color?: string; onPress?: () => void }) {
     const c = useColors();
     const s = makeStyles(c);
     const tint = danger ? '#ef5350' : (color ?? c.ink(0.6));
     return (
-        <Pressable style={[s.item, !last && s.itemBorder]}>
+        <Pressable style={[s.item, !last && s.itemBorder]} onPress={onPress}>
             <View style={[s.itemIcon, { backgroundColor: tint + '22' }]}>
                 <Ionicons name={icon} size={16} color={tint} />
             </View>

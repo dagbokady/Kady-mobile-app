@@ -72,7 +72,7 @@ export default function Cercles() {
                         <Text style={s.h1}>Cercles</Text>
                         <Text style={s.h1sub}>Là où tout commence</Text>
                     </View>
-                    <Pressable style={s.iconBtn}><Ionicons name="options-outline" size={20} color={c.text} /></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => router.push('/(app)/decouvrir')}><Ionicons name="options-outline" size={20} color={c.text} /></Pressable>
                 </View>
             </FadeInUp>
 
@@ -164,7 +164,7 @@ export default function Cercles() {
                         <FadeInUp delay={160}>
                             <View style={[s.listHead, { marginTop: 24 }]}>
                                 <Text style={s.listHeadTitle}>Près de vous</Text>
-                                <Pressable style={s.seeAll}><Text style={s.seeAllTxt}>Tout voir</Text><Ionicons name="chevron-forward" size={14} color={c.accent} /></Pressable>
+                                <Pressable style={s.seeAll} onPress={() => router.push('/(app)/decouvrir')}><Text style={s.seeAllTxt}>Tout voir</Text><Ionicons name="chevron-forward" size={14} color={c.accent} /></Pressable>
                             </View>
                         </FadeInUp>
 

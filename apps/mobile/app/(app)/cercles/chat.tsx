@@ -1,6 +1,6 @@
 // app/(app)/cercles/chat.tsx — Chat de cercle / groupe (handoff "KADY Chat Groupe.dc.html")
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Animated, Easing, StatusBar, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Animated, Easing, StatusBar, useWindowDimensions, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,23 +12,32 @@ import { themeOf } from '../../../src/theme/colors';
 import { useColors, type Palette } from '../../../src/theme/theme';
 import { useStore, pickImage } from '../../../src/store/app';
 
-const { width, height } = Dimensions.get('window');
 const SEND_GRAD = ['#ff6aa9', '#e02a73'] as const;
 
 export default function ChatGroupe() {
     const { nom, theme } = useLocalSearchParams<{ nom?: string; theme?: string }>();
     const router = useRouter();
     const insets = useSafeAreaInsets();
+    const { width, height } = useWindowDimensions();
     const c = useColors();
     const s = makeStyles(c);
     const t = themeOf(theme);
     const title = nom || 'Voyageurs';
 
     const [draft, setDraft] = useState('');
+    const [going, setGoing] = useState(false);
     const sent = useStore((st) => st.cercle[title] ?? []);
     const sendCercle = useStore((st) => st.sendCercle);
     const scroller = useRef<ScrollView>(null);
     const hasText = draft.trim().length > 0;
+    const addEmoji = () => setDraft((d) => d + '😊');
+    const groupCall = () => Alert.alert('Appel de groupe', `Lance un appel audio avec les membres en ligne de « ${title} » ?`, [{ text: 'Annuler', style: 'cancel' }, { text: 'Appeler', onPress: () => Alert.alert('Bientôt', "L'appel de groupe arrive très vite 💫") }]);
+    const onMore = () => Alert.alert(title, undefined, [
+        { text: 'Règles du cercle', onPress: () => Alert.alert('Règles du cercle', '· Respect et bienveillance avant tout\n· Pas de coordonnées partagées en public\n· On reste dans le thème') },
+        { text: 'Quitter la conversation', onPress: () => router.back() },
+        { text: 'Signaler', style: 'destructive', onPress: () => Alert.alert('Signalement envoyé', "Merci, notre équipe va l'examiner.") },
+        { text: 'Annuler', style: 'cancel' },
+    ]);
 
     const send = () => {
         const v = draft.trim();
@@ -64,8 +73,8 @@ export default function ChatGroupe() {
                         </View>
                         <Text style={s.sub}>8 membres · <Text style={s.subOnline}>5 en ligne</Text></Text>
                     </View>
-                    <Pressable style={s.callBtn}><Ionicons name="videocam-outline" size={20} color={c.accent} /></Pressable>
-                    <Pressable hitSlop={8} style={s.menuBtn}><Ionicons name="ellipsis-vertical" size={19} color={c.text} /></Pressable>
+                    <Pressable style={s.callBtn} onPress={groupCall}><Ionicons name="videocam-outline" size={20} color={c.accent} /></Pressable>
+                    <Pressable hitSlop={8} style={s.menuBtn} onPress={onMore}><Ionicons name="ellipsis-vertical" size={19} color={c.text} /></Pressable>
                 </View>
 
                 <View style={s.strip}>
@@ -118,7 +127,7 @@ export default function ChatGroupe() {
                                         ))}
                                         <View style={[s.eventAv, s.eventExtra]}><Text style={s.eventExtraTxt}>+2</Text></View>
                                     </View>
-                                    <Pressable><LinearGradient colors={SEND_GRAD} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.eventBtn}><Text style={s.eventBtnTxt}>Je viens</Text></LinearGradient></Pressable>
+                                    <Pressable onPress={() => setGoing((g) => !g)}><LinearGradient colors={SEND_GRAD} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.eventBtn}><Text style={s.eventBtnTxt}>{going ? "J'y serai ✓" : 'Je viens'}</Text></LinearGradient></Pressable>
                                 </View>
                             </LinearGradient>
                             <Text style={s.eventTime}>11:15</Text>
@@ -136,7 +145,7 @@ export default function ChatGroupe() {
 
                 <View style={[s.inputWrap, { paddingBottom: insets.bottom + 9 }]}>
                     <View style={s.inputPill}>
-                        <Pressable hitSlop={6}><Ionicons name="happy-outline" size={22} color={c.ink(0.45)} /></Pressable>
+                        <Pressable hitSlop={6} onPress={addEmoji}><Ionicons name="happy-outline" size={22} color={c.ink(0.45)} /></Pressable>
                         <TextInput value={draft} onChangeText={setDraft} onSubmitEditing={send} returnKeyType="send" placeholder="Message au cercle" placeholderTextColor={c.ink(0.4)} style={s.input} />
                         <Pressable hitSlop={6} onPress={sendImg}><Ionicons name="attach" size={22} color={c.ink(0.45)} /></Pressable>
                         <Pressable hitSlop={6} onPress={sendImg}><Ionicons name="image-outline" size={21} color={c.ink(0.45)} /></Pressable>

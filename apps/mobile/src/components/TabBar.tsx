@@ -1,6 +1,8 @@
 // src/components/TabBar.tsx
-// Barre d'onglets du design KADY : Accueil · Cercles · (➕ FAB) · Messages · Profil.
-// Onglet actif = encre du thème + libellé gras ; inactif = estompé. FAB central surélevé.
+// Barre d'onglets KADY : Accueil · Cercles · (➕ FAB) · Messages · Profil.
+// Surface arrondie ancrée en bas, onglet actif mis en valeur par une pastille
+// magenta (icône pleine + libellé). FAB central surélevé. S'adapte à la zone
+// sûre de chaque appareil (encoche, barre gestuelle).
 
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
@@ -25,8 +27,7 @@ export default function TabBar({ state, navigation }: any) {
     const insets = useSafeAreaInsets();
     const c = useColors();
     const styles = makeStyles(c);
-    const ACTIVE = c.text;
-    const INACTIVE = c.ink(0.45);
+    const INACTIVE = c.ink(0.5);
     const activeName: string = state.routes[state.index]?.name ?? '';
 
     // Masque la barre sur les écrans plein écran hors onglets (Créer, Notifications…)
@@ -40,10 +41,6 @@ export default function TabBar({ state, navigation }: any) {
     const nestedName = nested && typeof nested.index === 'number' ? nested.routes?.[nested.index]?.name : undefined;
     if (nestedName && nestedName !== 'index') return null;
 
-    const fade = c.mode === 'dark'
-        ? (['rgba(20,15,30,0)', 'rgba(20,15,30,0.92)', c.bg[0]] as const)
-        : (['rgba(255,255,255,0)', 'rgba(255,255,255,0.92)', '#ffffff'] as const);
-
     const go = (name: string) => {
         const route = state.routes.find((r: any) => r.name === name);
         if (!route) return;
@@ -54,33 +51,34 @@ export default function TabBar({ state, navigation }: any) {
 
     const Item = ({ tab }: { tab: Tab }) => {
         const focused = activeName === tab.name || activeName.startsWith(tab.name + '/');
-        const color = focused ? ACTIVE : INACTIVE;
+        const icon = (focused ? tab.icon.replace('-outline', '') : tab.icon) as keyof typeof Ionicons.glyphMap;
         return (
-            <Pressable onPress={() => go(tab.name)} style={styles.item} hitSlop={6}>
-                <View>
-                    <Ionicons name={tab.icon} size={23} color={color} />
+            <Pressable onPress={() => go(tab.name)} style={({ pressed }) => [styles.item, pressed && { opacity: 0.55 }]} hitSlop={8}>
+                <View style={[styles.iconWrap, focused && styles.iconWrapOn]}>
+                    <Ionicons name={icon} size={22} color={focused ? c.accent : INACTIVE} />
                     {!!tab.badge && (
                         <View style={styles.badge}><Text style={styles.badgeTxt}>{tab.badge}</Text></View>
                     )}
                 </View>
-                <Text style={[styles.label, { color, fontFamily: focused ? fonts.bodyBold : fonts.bodySemi }]}>{tab.label}</Text>
+                <Text style={[styles.label, { color: focused ? c.accent : INACTIVE, fontFamily: focused ? fonts.bodyBold : fonts.bodySemi }]} numberOfLines={1}>
+                    {tab.label}
+                </Text>
             </Pressable>
         );
     };
 
     return (
-        <View style={[styles.wrap, { paddingBottom: (insets.bottom || 8) + 6 }]}>
-            <LinearGradient colors={fade} style={StyleSheet.absoluteFill} />
+        <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, 10) + 4 }]}>
             <View style={styles.row}>
                 <Item tab={TABS[0]} />
                 <Item tab={TABS[1]} />
 
                 {/* FAB central — créer un cercle */}
                 <View style={styles.fabSlot}>
-                    <Pressable onPress={() => navigation.navigate('creer')} hitSlop={8}>
+                    <Pressable onPress={() => navigation.navigate('creer')} hitSlop={10}>
                         <PopIn from={0.85}>
                             <LinearGradient colors={gradients.rose} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.fab}>
-                                <Ionicons name="add" size={28} color={colors.white} />
+                                <Ionicons name="add" size={30} color={colors.white} />
                             </LinearGradient>
                         </PopIn>
                     </Pressable>
@@ -89,31 +87,34 @@ export default function TabBar({ state, navigation }: any) {
                 <Item tab={TABS[2]} />
                 <Item tab={TABS[3]} />
             </View>
-            <View style={styles.homeBar} />
         </View>
     );
 }
 
 const makeStyles = (c: Palette) => StyleSheet.create({
     wrap: {
-        position: 'relative',
-        paddingTop: 10, paddingHorizontal: 18,
-        borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border,
+        backgroundColor: c.card,
+        borderTopLeftRadius: 28, borderTopRightRadius: 28,
+        borderWidth: 1, borderBottomWidth: 0, borderColor: c.border,
+        paddingTop: 12, paddingHorizontal: 12,
+        shadowColor: '#281950', shadowOffset: { width: 0, height: -6 }, shadowOpacity: c.mode === 'dark' ? 0.4 : 0.1, shadowRadius: 18, elevation: 16,
     },
-    row: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 6 },
-    item: { flex: 1, alignItems: 'center', gap: 5, paddingVertical: 6 },
-    label: { fontSize: 10.5 },
-    fabSlot: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    row: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+    item: { flex: 1, alignItems: 'center', gap: 5, paddingTop: 2 },
+    iconWrap: { minWidth: 46, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
+    iconWrapOn: { backgroundColor: c.mode === 'dark' ? 'rgba(255,122,176,0.18)' : 'rgba(255,106,169,0.14)' },
+    label: { fontSize: 10.5, letterSpacing: 0.2 },
+    fabSlot: { flex: 1, alignItems: 'center', justifyContent: 'flex-start' },
     fab: {
-        position: 'relative', top: -14, width: 58, height: 58, borderRadius: 20,
+        top: -22, width: 60, height: 60, borderRadius: 22,
         alignItems: 'center', justifyContent: 'center',
-        shadowColor: '#e02a73', shadowOffset: { width: 0, height: 12 }, shadowOpacity: 0.55, shadowRadius: 18, elevation: 10,
+        borderWidth: 4, borderColor: c.card,
+        shadowColor: '#e02a73', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.5, shadowRadius: 16, elevation: 24,
     },
     badge: {
-        position: 'absolute', top: -5, right: -9, minWidth: 16, height: 16, paddingHorizontal: 4,
-        borderRadius: 8, backgroundColor: colors.pink, borderWidth: 2, borderColor: c.mode === 'dark' ? c.bg[0] : '#fff',
+        position: 'absolute', top: -3, right: 2, minWidth: 16, height: 16, paddingHorizontal: 4,
+        borderRadius: 8, backgroundColor: colors.pink, borderWidth: 2, borderColor: c.card,
         alignItems: 'center', justifyContent: 'center',
     },
     badgeTxt: { fontFamily: fonts.bodyBold, fontSize: 9, color: '#fff' },
-    homeBar: { alignSelf: 'center', marginTop: 8, width: 130, height: 5, borderRadius: 99, backgroundColor: c.ink(0.22) },
 });
