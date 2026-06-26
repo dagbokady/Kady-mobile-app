@@ -109,6 +109,9 @@ export default function Decouvrir() {
                                 theme={cc.theme}
                                 membres={cc.membres}
                                 max={cc.max}
+                                grade={cc.grade}
+                                expireDans={cc.expireDans}
+                                apercu={cc.apercu}
                                 joined={joined.includes(cc.id)}
                                 onOpen={() => router.push(`/(app)/cercles/${cc.id}`)}
                                 onJoin={() => { join(cc.id); useToast.getState().show(`Tu as rejoint ${cc.nom}`); }}
