@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Screen from '../../../src/components/Screen';
 import { ScreenHeader, SectionTitle, Pill } from '../../../src/components/ui';
-import AgeRange from '../../../src/components/AgeRange';
+import RangeSlider from '../../../src/components/RangeSlider';
 import { FadeInUp } from '../../../src/components/motion';
 import { fonts } from '../../../src/theme/typography';
 import { spacing } from '../../../src/theme/spacing';
@@ -49,7 +49,7 @@ export default function Preferences() {
 
                 <FadeInUp delay={180}>
                     <SectionTitle>Tranche d'âge recherchée</SectionTitle>
-                    <AgeRange min={prefs.ageMin} max={prefs.ageMax} onChange={(lo, hi) => setPrefs({ ageMin: lo, ageMax: hi })} monAge={32} />
+                    <RangeSlider min={prefs.ageMin} max={prefs.ageMax} onChange={(lo, hi) => setPrefs({ ageMin: lo, ageMax: hi })} />
                 </FadeInUp>
 
                 <FadeInUp delay={240}>

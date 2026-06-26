@@ -101,6 +101,14 @@ export default function CercleDetail() {
                         <Text style={s.desc}>{c.description ?? "Un cercle pour les passionnés d'évasion d'Abidjan. On partage nos bons plans, on organise des sorties et on crée des liens avant tout authentiques. 🌍✈️"}</Text>
                     </FadeInUp>
 
+                    <FadeInUp delay={90}>
+                        <View style={s.tags}>
+                            {[c.theme, 'Sorties', 'Abidjan'].map((tg) => (
+                                <View key={tg} style={s.tag}><Text style={s.tagTxt}>#{tg}</Text></View>
+                            ))}
+                        </View>
+                    </FadeInUp>
+
                     <FadeInUp delay={120}>
                         <LinearGradient colors={['rgba(255,106,169,0.12)', 'rgba(255,111,194,0.06)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.xpCard}>
                             <View style={s.xpTop}>
@@ -223,6 +231,9 @@ const makeStyles = (c: Palette) => StyleSheet.create({
     membersBalance: { fontFamily: fonts.body, fontSize: 11, color: c.ink(0.45) },
 
     desc: { marginTop: 16, fontFamily: fonts.body, fontSize: 13.5, lineHeight: 21, color: c.ink(0.7) },
+    tags: { marginTop: 16, flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+    tag: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 99, backgroundColor: c.field, borderWidth: 1, borderColor: c.border },
+    tagTxt: { fontFamily: fonts.bodySemi, fontSize: 12, color: c.ink(0.7) },
 
     xpCard: { marginTop: 16, padding: 15, borderRadius: 18, borderWidth: 1, borderColor: 'rgba(255,140,190,0.2)' },
     xpTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 },

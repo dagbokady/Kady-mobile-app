@@ -8,8 +8,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Pattern, Circle, Rect } from 'react-native-svg';
 import { fonts } from '../../../src/theme/typography';
 import { useColors, type Palette } from '../../../src/theme/theme';
-import { relations, NIVEAUX_RENCONTRE, NIVEAUX_AMITIE } from '../../../src/data/mock';
-import { useStore, pickImage } from '../../../src/store/app';
+import { relations, NIVEAUX_RENCONTRE, NIVEAUX_AMITIE, DISC_DATA, DISC_FIELDS } from '../../../src/data/mock';
+import { useStore, useToast, pickImage } from '../../../src/store/app';
+import QuizSheet from '../../../src/components/QuizSheet';
+import LevelUpModal from '../../../src/components/LevelUpModal';
 
 const SEND_GRAD = ['#ff6aa9', '#e02a73'] as const;
 
@@ -25,10 +27,27 @@ export default function ChatPrive() {
 
     const [draft, setDraft] = useState('');
     const [playing, setPlaying] = useState(false);
+    const [quizOpen, setQuizOpen] = useState(false);
+    const [levelOpen, setLevelOpen] = useState(false);
     const sent = useStore((st) => st.dm[r.id] ?? []);
     const sendDM = useStore((st) => st.sendDM);
+    const niveauOverride = useStore((st) => st.niveaux[r.id]);
+    const setNiveau = useStore((st) => st.setNiveau);
+    const discRevealed = useStore((st) => st.disc[r.id] ?? []);
     const scroller = useRef<ScrollView>(null);
     const hasText = draft.trim().length > 0;
+
+    // Niveau effectif (override store, sinon seed du mock). Le niveau plafonne à 5.
+    const niveau = Math.min(niveauOverride ?? r.niveau, 5);
+    const canLevel = niveau < 5;
+    const discTotal = DISC_FIELDS.length;
+    const discDone = discRevealed.length;
+
+    const confirmLevelUp = () => {
+        setNiveau(r.id, niveau + 1);
+        setLevelOpen(false);
+        useToast.getState().show(`Niveau ${niveau + 1} atteint avec ${r.prenom} 🎉`);
+    };
 
     const send = () => {
         const t = draft.trim();
@@ -80,26 +99,38 @@ export default function ChatPrive() {
                             </Text>
                         </View>
                     </Pressable>
+                    <Pressable style={s.callBtn} onPress={() => setQuizOpen(true)}><Ionicons name="star-outline" size={19} color="#ffb43a" /></Pressable>
                     <Pressable style={s.callBtn} onPress={() => lockedCall('Appel vidéo')}><Ionicons name="videocam-outline" size={20} color={c.accent} /></Pressable>
                     <Pressable style={s.callBtn} onPress={() => lockedCall('Appel audio')}><Ionicons name="call-outline" size={19} color={c.accent} /></Pressable>
                 </View>
 
-                <Pressable onPress={() => router.back()} style={s.strip}>
-                    <Ionicons name="heart" size={14} color="#ff6fa8" />
-                    <Text style={s.stripTxt} numberOfLines={1}>
-                        <Text style={s.stripStrong}>{labels[r.niveau - 1]}</Text>
-                        <Text> · Niveau {r.niveau}/5 · via </Text>
-                        <Text style={s.stripCercle}>{r.cercle}</Text>
-                    </Text>
-                    <View style={{ flex: 1 }} />
+                {/* Barre de relation : niveau, segments, actions évaluer / passer */}
+                <View style={s.relationBar}>
+                    <View style={s.relationTop}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Ionicons name={r.mode === 'rencontre' ? 'heart' : 'people'} size={12} color={c.accent} />
+                            <Text style={s.relationName}>{labels[niveau - 1]}</Text>
+                        </View>
+                        <Text style={s.relationLevel}>Niveau {niveau}/5</Text>
+                    </View>
                     <View style={s.segs}>
-                        {[0, 1, 2, 3, 4].map((i) => (
-                            i < r.niveau
-                                ? <LinearGradient key={i} colors={['#ff6fa8', '#ff9d5c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={s.seg} />
-                                : <View key={i} style={[s.seg, { backgroundColor: c.ink(0.14) }]} />
+                        {[1, 2, 3, 4, 5].map((n) => (
+                            <View key={n} style={[s.seg, { flex: 1, backgroundColor: n <= niveau ? c.accent : c.ink(0.12) }]} />
                         ))}
                     </View>
-                </Pressable>
+                    {canLevel && (
+                        <View style={s.relationActions}>
+                            <Pressable style={s.evalBtn} onPress={() => setQuizOpen(true)}>
+                                <Ionicons name="star-outline" size={14} color="#ffb43a" />
+                                <Text style={s.evalTxt}>Évaluer</Text>
+                            </Pressable>
+                            <Pressable style={s.levelBtn} onPress={() => setLevelOpen(true)}>
+                                <Ionicons name="trending-up" size={14} color={c.accentDeep} />
+                                <Text style={s.levelTxt}>Passer au niveau {niveau + 1}</Text>
+                            </Pressable>
+                        </View>
+                    )}
+                </View>
             </View>
 
             <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined} keyboardVerticalOffset={insets.top + 8}>
@@ -113,6 +144,18 @@ export default function ChatPrive() {
                             <Text style={s.sysTxt}> Vous discutez car vous partagez le cercle <Text style={s.sysCercle}>{r.cercle}</Text></Text>
                         </View>
                     </View>
+
+                    {/* Bannière « Profil à découvrir » → ouvre le profil membre (jeu de devinettes) */}
+                    <Pressable style={s.discBanner} onPress={openProfile}>
+                        <LinearGradient colors={['#ff6aa9', '#e02a73']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.discIcon}>
+                            <Ionicons name="sparkles" size={18} color="#fff" />
+                        </LinearGradient>
+                        <View style={{ flex: 1, minWidth: 0 }}>
+                            <Text style={s.discTitle}>{discDone} sur {discTotal} infos découvertes</Text>
+                            <Text style={s.discSub}>Devine ce que tu apprends sur {r.prenom} →</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={17} color={c.accent} />
+                    </Pressable>
 
                     <InBubble time="12:32">Coucou Didier ! Ravie de te croiser dans le cercle 😊</InBubble>
                     <InBubble time="12:32" gap>Tu as déjà visité Assinie ? 🌴</InBubble>
@@ -172,6 +215,32 @@ export default function ChatPrive() {
                     </Pressable>
                 </View>
             </KeyboardAvoidingView>
+
+            <QuizSheet
+                visible={quizOpen}
+                name={r.prenom}
+                grad={r.grad}
+                onClose={() => setQuizOpen(false)}
+                onSubmit={(avg) => {
+                    setQuizOpen(false);
+                    if (avg >= 4 && canLevel) {
+                        useToast.getState().show('Belle évaluation ✨ Tu peux passer au niveau supérieur');
+                        setTimeout(() => setLevelOpen(true), 350);
+                    } else {
+                        useToast.getState().show('Merci pour ton évaluation 🙏');
+                    }
+                }}
+            />
+            <LevelUpModal
+                visible={levelOpen}
+                name={r.prenom}
+                fromN={niveau}
+                toN={Math.min(niveau + 1, 5)}
+                fromNom={labels[niveau - 1]}
+                toNom={labels[Math.min(niveau, 4)]}
+                onConfirm={confirmLevelUp}
+                onClose={() => setLevelOpen(false)}
+            />
         </View>
     );
 }
@@ -255,8 +324,23 @@ const makeStyles = (c: Palette) => StyleSheet.create({
     stripTxt: { fontFamily: fonts.body, fontSize: 11.5, color: c.ink(0.6) },
     stripStrong: { fontFamily: fonts.bodyBold, color: c.text },
     stripCercle: { fontFamily: fonts.bodyBold, color: c.accentDeep },
-    segs: { flexDirection: 'row', gap: 3 },
-    seg: { width: 14, height: 4, borderRadius: 99 },
+    segs: { flexDirection: 'row', gap: 5 },
+    seg: { height: 4, borderRadius: 99 },
+
+    relationBar: { paddingHorizontal: 16, paddingBottom: 11 },
+    relationTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
+    relationName: { fontFamily: fonts.bodyBold, fontSize: 11, color: c.accent },
+    relationLevel: { fontFamily: fonts.bodySemi, fontSize: 10.5, color: c.ink(0.45) },
+    relationActions: { marginTop: 9, flexDirection: 'row', gap: 7 },
+    evalBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: 11, backgroundColor: c.field, borderWidth: 1, borderColor: c.border },
+    evalTxt: { fontFamily: fonts.bodyBold, fontSize: 11.5, color: c.text },
+    levelBtn: { flex: 1.4, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 8, borderRadius: 11, backgroundColor: 'rgba(255,106,169,0.14)', borderWidth: 1, borderColor: 'rgba(255,140,190,0.4)' },
+    levelTxt: { fontFamily: fonts.bodyBold, fontSize: 11.5, color: c.accentDeep },
+
+    discBanner: { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 11, marginBottom: 16, borderRadius: 16, backgroundColor: 'rgba(255,106,169,0.1)', borderWidth: 1, borderColor: 'rgba(255,140,190,0.28)' },
+    discIcon: { width: 36, height: 36, borderRadius: 12, alignItems: 'center', justifyContent: 'center', shadowColor: '#e02a73', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.35, shadowRadius: 12, elevation: 4 },
+    discTitle: { fontFamily: fonts.bodyBold, fontSize: 12.5, color: c.text },
+    discSub: { marginTop: 1, fontFamily: fonts.body, fontSize: 11, color: c.ink(0.55) },
 
     chat: { paddingHorizontal: 16, paddingTop: 16, paddingBottom: 18 },
     dateWrap: { alignItems: 'center', marginBottom: 16 },

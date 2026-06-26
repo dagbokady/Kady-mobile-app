@@ -41,3 +41,6 @@ app-example
 # generated native folders
 /ios
 /android
+
+# verification-only static web build (see verify-build.sh)
+web-static/

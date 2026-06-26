@@ -96,6 +96,15 @@ type State = {
     setPause: (b: boolean) => void;
     setNotifsPush: (b: boolean) => void;
 
+    // Découverte de profil : infos révélées (par membre → set de champs) + points gagnés.
+    disc: Record<string, string[]>;
+    discPoints: Record<string, number>;
+    revealDisc: (memberId: string, field: string) => void;
+
+    // Niveau de relation par membre (override sur la valeur seed du mock).
+    niveaux: Record<string, number>;
+    setNiveau: (memberId: string, n: number) => void;
+
     prefs: Prefs;
     setPrefs: (p: Partial<Prefs>) => void;
 
@@ -144,6 +153,20 @@ export const useStore = create<State>()(
             setPause: (b) => set({ pause: b }),
             setNotifsPush: (b) => set({ notifsPush: b }),
 
+            disc: { awa: ['ville', 'musique'], koffi: ['ville', 'sport', 'film'], mariam: ['musique'], fatou: [], yann: ['job'], sophie: [] },
+            discPoints: { awa: 20, koffi: 30, mariam: 10, fatou: 0, yann: 10, sophie: 0 },
+            revealDisc: (memberId, field) => set((s) => {
+                const cur = s.disc[memberId] ?? [];
+                if (cur.includes(field)) return s;
+                return {
+                    disc: { ...s.disc, [memberId]: [...cur, field] },
+                    discPoints: { ...s.discPoints, [memberId]: (s.discPoints[memberId] ?? 0) + 10 },
+                };
+            }),
+
+            niveaux: {},
+            setNiveau: (memberId, n) => set((s) => ({ niveaux: { ...s.niveaux, [memberId]: n } })),
+
             prefs: DEFAULT_PREFS,
             setPrefs: (p) => set((s) => ({ prefs: { ...s.prefs, ...p } })),
 
@@ -154,10 +177,24 @@ export const useStore = create<State>()(
             toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
             setTheme: (t) => set({ theme: t }),
 
-            reset: () => set({ dm: {}, cercle: {}, joined: [], created: [], rsvp: {}, notifsRead: [], notifsDismissed: [], request: 'pending', photos: [], notes: SEED_NOTES, pause: false, notifsPush: true, prefs: DEFAULT_PREFS, profile: DEFAULT_PROFILE }),
+            reset: () => set({ dm: {}, cercle: {}, joined: [], created: [], rsvp: {}, notifsRead: [], notifsDismissed: [], request: 'pending', photos: [], notes: SEED_NOTES, pause: false, notifsPush: true, niveaux: {}, prefs: DEFAULT_PREFS, profile: DEFAULT_PROFILE }),
         }),
         { name: 'kady-store-v1', storage: createJSONStorage(() => AsyncStorage) },
     ),
 );
 
 export const isNotifRead = (s: State, id: string) => s.notifsRead.includes('ALL') || s.notifsRead.includes(id);
+
+// Toast léger, non persisté (transitoire). Piloté par n'importe quel écran via
+// useToast.getState().show('…') ; auto-effacement après ~2,2 s.
+type ToastState = { msg: string | null; show: (m: string) => void; hide: () => void };
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
+export const useToast = create<ToastState>((set) => ({
+    msg: null,
+    show: (m) => {
+        set({ msg: m });
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => set({ msg: null }), 2200);
+    },
+    hide: () => set({ msg: null }),
+}));

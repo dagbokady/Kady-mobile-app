@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, LinearGradient as SvgGradient, Stop, Circle, Path } from 'react-native-svg';
 import Screen from '../../src/components/Screen';
-import { FadeInUp, PressableScale, AnimatedBar } from '../../src/components/motion';
+import { FadeInUp, PressableScale } from '../../src/components/motion';
 import { fonts } from '../../src/theme/typography';
 import { useColors, type Palette } from '../../src/theme/theme';
 import { useStore } from '../../src/store/app';
@@ -16,10 +16,10 @@ const BRAND = ['#ff6aa9', '#e02a73'] as const;
 
 type Slide = { grad: string[]; chip?: string; title: string; sub: string };
 const SLIDES: Slide[] = [
-    { grad: ['#ff9d5c', '#d34d7e', '#3a1c5e'], chip: 'Communauté', title: 'Les cercles, au cœur de KADY', sub: 'Rejoignez des communautés, partagez et créez des liens authentiques.' },
-    { grad: ['#7fe0d0', '#2f9aa8', '#1d3f66'], title: 'Voyagez ensemble, créez des souvenirs', sub: 'Découvrez des cercles de voyageurs près de chez vous.' },
-    { grad: ['#7be0a0', '#2f9ac2', '#2a2c66'], title: 'Partagez vos passions sportives', sub: 'Bougez, progressez et rencontrez des partenaires motivés.' },
-    { grad: ['#b07bff', '#7a4fd6', '#2a1c5e'], title: 'Une communauté bienveillante', sub: 'Des échanges respectueux, des rencontres qui comptent.' },
+    { grad: ['#ff9d5c', '#d34d7e', '#3a1c5e'], chip: 'Communauté', title: 'Les cercles, au cœur de KADY', sub: 'Des communautés où naissent de vrais liens.' },
+    { grad: ['#7fe0d0', '#2f9aa8', '#1d3f66'], title: 'Voyagez ensemble', sub: 'Des cercles de voyageurs près de chez vous.' },
+    { grad: ['#7be0a0', '#2f9ac2', '#2a2c66'], title: 'Partagez vos passions', sub: 'Rencontrez des partenaires motivés.' },
+    { grad: ['#b07bff', '#7a4fd6', '#2a1c5e'], title: 'Une communauté bienveillante', sub: 'Des rencontres qui comptent vraiment.' },
 ];
 
 type Activity = { grad: string[]; icon: keyof typeof Ionicons.glyphMap; text: string; strong: string; time: string; stack?: string[]; extra?: string; single?: string[] };
@@ -60,10 +60,10 @@ export default function Accueil() {
     const s = makeStyles(c);
     const allRead = useStore((st) => st.notifsRead.includes('ALL'));
     return (
-        <Screen padded={false}>
+        <Screen padded={false} edges={['top']}>
             <FadeInUp>
                 <View style={s.header}>
-                    <Pressable style={s.iconBtn} onPress={() => router.push('/(app)/decouvrir')}><Ionicons name="compass-outline" size={20} color={c.text} /></Pressable>
+                    <Pressable style={s.iconBtn} onPress={() => router.push('/(app)/apropos')}><Ionicons name="help-circle-outline" size={22} color={c.text} /></Pressable>
                     <View style={s.brand}>
                         <KadyMark />
                         <Text style={s.wordmark}>KADY</Text>
@@ -79,23 +79,6 @@ export default function Accueil() {
                 <FadeInUp delay={60}>
                     <Text style={s.greet}>Bonjour Didier 👋</Text>
                     <Text style={s.greetSub}>Prêt à créer de belles connexions aujourd'hui ?</Text>
-                </FadeInUp>
-
-                <FadeInUp delay={120}>
-                    <LinearGradient colors={['rgba(255,106,169,0.13)', 'rgba(255,106,169,0.06)']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.levelCard}>
-                        <LinearGradient colors={['#ffd27a', '#ff9d5c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.levelBadge}>
-                            <Ionicons name="star" size={22} color="#5a3a12" />
-                        </LinearGradient>
-                        <View style={{ flex: 1 }}>
-                            <View style={s.levelTop}>
-                                <Text style={s.levelTitle}>Niveau 4</Text>
-                                <Text style={s.levelXp}><Text style={s.levelXpStrong}>650</Text> / 1000 XP</Text>
-                            </View>
-                            <AnimatedBar progress={0.65} height={9} track={c.ink(0.12)}>
-                                <LinearGradient colors={BRAND} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={{ flex: 1 }} />
-                            </AnimatedBar>
-                        </View>
-                    </LinearGradient>
                 </FadeInUp>
 
                 <FadeInUp delay={180}>
@@ -228,7 +211,7 @@ function HeroCarousel({ onPress }: { onPress: () => void }) {
                                         <Text style={s.heroChipTxt}>{sl.chip}</Text>
                                     </View>
                                 ) : <View />}
-                                <View>
+                                <View style={{ paddingRight: 120 }}>
                                     <Text style={s.heroTitle}>{sl.title}</Text>
                                     <Text style={s.heroSub}>{sl.sub}</Text>
                                 </View>
@@ -268,13 +251,6 @@ const makeStyles = (c: Palette) => StyleSheet.create({
     greet: { fontFamily: fonts.display, fontSize: 27, lineHeight: 30, color: c.text, letterSpacing: -0.3, marginTop: 6 },
     greetSub: { marginTop: 8, fontFamily: fonts.body, fontSize: 14, lineHeight: 20, color: c.ink(0.55), maxWidth: 240 },
 
-    levelCard: { marginTop: 18, padding: 16, borderRadius: 22, borderWidth: 1, borderColor: 'rgba(255,106,169,0.22)', flexDirection: 'row', alignItems: 'center', gap: 15 },
-    levelBadge: { width: 48, height: 48, borderRadius: 15, alignItems: 'center', justifyContent: 'center', shadowColor: '#ffaa50', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 5 },
-    levelTop: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 9 },
-    levelTitle: { fontFamily: fonts.display, fontSize: 15, color: c.text },
-    levelXp: { fontFamily: fonts.body, fontSize: 12.5, color: c.ink(0.55) },
-    levelXpStrong: { fontFamily: fonts.bodyBold, color: c.text },
-
     hero: { borderRadius: 26, overflow: 'hidden', height: 218, borderWidth: 1, borderColor: c.border },
     heroContent: { flex: 1, padding: 22, justifyContent: 'space-between' },
     heroChip: { flexDirection: 'row', alignItems: 'center', gap: 7, alignSelf: 'flex-start', paddingVertical: 6, paddingHorizontal: 12, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.16)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' },
@@ -298,8 +274,8 @@ const makeStyles = (c: Palette) => StyleSheet.create({
     createCircle: { width: 70, height: 70, borderRadius: 35, borderWidth: 2, borderColor: 'rgba(255,106,169,0.5)', borderStyle: 'dashed', backgroundColor: 'rgba(255,106,169,0.08)', alignItems: 'center', justifyContent: 'center' },
     cercleRing: { width: 70, height: 70, borderRadius: 35, padding: 2.5 },
     cercleInner: { flex: 1, borderRadius: 33 },
-    cercleCount: { position: 'absolute', bottom: -2, right: -2, minWidth: 22, height: 22, paddingHorizontal: 5, borderRadius: 11, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center', shadowColor: '#281950', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.22, shadowRadius: 7, elevation: 3 },
-    cercleCountTxt: { fontFamily: fonts.bodyBold, fontSize: 11, color: c.accentDeep },
+    cercleCount: { position: 'absolute', bottom: 0, right: 0, minWidth: 20, height: 20, paddingHorizontal: 5, borderRadius: 10, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.bg[1], alignItems: 'center', justifyContent: 'center', shadowColor: '#281950', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.22, shadowRadius: 7, elevation: 3 },
+    cercleCountTxt: { fontFamily: fonts.bodyBold, fontSize: 10.5, color: c.accentDeep },
     cercleName: { fontFamily: fonts.bodySemi, fontSize: 12.5, color: c.text },
     cercleSub: { fontFamily: fonts.body, fontSize: 11, color: c.ink(0.45), marginTop: -6 },
 

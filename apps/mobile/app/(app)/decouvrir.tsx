@@ -1,140 +1,154 @@
-// app/(app)/decouvrir.tsx
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+// app/(app)/decouvrir.tsx — Découvrir : recherche, filtres avancés, chips,
+// cartes à couverture (CoverCard) + état vide. (proto L142-214)
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import Screen from '../../src/components/Screen';
-import { GradeChip, Pill, AvatarStack } from '../../src/components/ui';
-import GradientButton from '../../src/components/GradientButton';
-import { FadeInUp, PressableScale, animateLayout } from '../../src/components/motion';
+import { Pill } from '../../src/components/ui';
+import CoverCard from '../../src/components/CoverCard';
+import AdvancedFilters, { type AdvValues } from '../../src/components/AdvancedFilters';
+import { FadeInUp, animateLayout } from '../../src/components/motion';
 import { fonts } from '../../src/theme/typography';
-import { spacing, radius } from '../../src/theme/spacing';
-import { colors, themeOf } from '../../src/theme/colors';
+import { spacing } from '../../src/theme/spacing';
 import { useColors, type Palette } from '../../src/theme/theme';
 import { cerclesDecouvrir } from '../../src/data/mock';
+import { useStore, useToast } from '../../src/store/app';
 
-const FILTRES = ['Populaires', 'Proches', 'Actifs', 'Nouveaux'];
+const PAD = spacing.lg;
+const CHIPS = ['Tous', 'Populaires', 'Proches', 'Actifs', 'Nouveaux'];
+const DEFAULT_ADV: AdvValues = { places: 'all', grade: 'all', sort: 'pop' };
 
 export default function Decouvrir() {
     const router = useRouter();
-    const pal = useColors();
-    const s = makeStyles(pal);
-    const [filtre, setFiltre] = useState('Populaires');
-    const [ouvert, setOuvert] = useState<string | null>(null);
+    const c = useColors();
+    const s = makeStyles(c);
+    const joined = useStore((st) => st.joined);
+    const join = useStore((st) => st.join);
 
-    const toggle = (id: string) => {
-        animateLayout();
-        setOuvert(ouvert === id ? null : id);
-    };
+    const [search, setSearch] = useState('');
+    const [chip, setChip] = useState('Tous');
+    const [advOpen, setAdvOpen] = useState(false);
+    const [adv, setAdv] = useState<AdvValues>(DEFAULT_ADV);
 
-    const Reason = ({ icon, txt, color }: { icon: any; txt: string; color: string }) => (
-        <View style={[s.reason, { backgroundColor: color + '16' }]}>
-            <Ionicons name={icon} size={13} color={color} />
-            <Text style={[s.reasonTxt, { color }]}>{txt}</Text>
-        </View>
-    );
+    const advCount = (adv.places !== 'all' ? 1 : 0) + (adv.grade !== 'all' ? 1 : 0) + (adv.sort !== 'pop' ? 1 : 0);
+
+    const cards = useMemo(() => {
+        let list = cerclesDecouvrir.filter((cc) => {
+            const q = search.trim().toLowerCase();
+            if (q && !(cc.nom.toLowerCase().includes(q) || cc.theme.toLowerCase().includes(q))) return false;
+            const places = cc.max - cc.membres;
+            if (adv.places === 'few' && places > 3) return false;
+            if (adv.places === 'many' && places < 4) return false;
+            if (adv.grade !== 'all' && cc.grade !== adv.grade) return false;
+            return true;
+        });
+        if (chip === 'Populaires' || adv.sort === 'pop') list = [...list].sort((a, b) => b.membres - a.membres);
+        if (chip === 'Nouveaux') list = [...list].sort((a, b) => b.expireDans - a.expireDans);
+        return list;
+    }, [search, chip, adv]);
+
+    const resetAdv = () => { animateLayout(); setAdv(DEFAULT_ADV); };
 
     return (
-        <Screen>
-            <FadeInUp>
-                <Text style={s.h1}>Découvrir</Text>
-                <Text style={s.intro}>Trouve un Cercle qui te ressemble. Lis la salle d'accueil avant de rejoindre.</Text>
-            </FadeInUp>
+        <Screen edges={['top']}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: 130 }}>
+                <FadeInUp>
+                    <Text style={s.h1}>Découvrir</Text>
+                    <Text style={s.intro}>Trouve un Cercle qui te ressemble. Lis la salle d'accueil avant de rejoindre.</Text>
+                </FadeInUp>
 
-            <FadeInUp delay={60}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.filtres}>
-                    {FILTRES.map((f) => <Pill key={f} label={f} active={filtre === f} onPress={() => setFiltre(f)} />)}
+                <FadeInUp delay={60}>
+                    <View style={s.searchRow}>
+                        <View style={s.searchBox}>
+                            <Ionicons name="search" size={18} color={c.ink(0.42)} />
+                            <TextInput
+                                value={search}
+                                onChangeText={setSearch}
+                                placeholder="Rechercher un cercle, un thème…"
+                                placeholderTextColor={c.ink(0.4)}
+                                style={s.searchInput}
+                            />
+                            {search.length > 0 && (
+                                <Pressable onPress={() => setSearch('')} hitSlop={8}>
+                                    <Ionicons name="close-circle" size={18} color={c.ink(0.35)} />
+                                </Pressable>
+                            )}
+                        </View>
+                        <Pressable
+                            onPress={() => { animateLayout(); setAdvOpen((o) => !o); }}
+                            style={[s.advBtn, { borderColor: advOpen || advCount ? c.accent : c.border, backgroundColor: advOpen || advCount ? 'rgba(255,106,169,0.1)' : c.field }]}
+                        >
+                            <Ionicons name="options-outline" size={21} color={advOpen || advCount ? c.accent : c.text} />
+                            {advCount > 0 && (
+                                <View style={s.advBadge}><Text style={s.advBadgeTxt}>{advCount}</Text></View>
+                            )}
+                        </Pressable>
+                    </View>
+                </FadeInUp>
+
+                {advOpen && (
+                    <AdvancedFilters
+                        values={adv}
+                        onChange={(v) => { animateLayout(); setAdv((p) => ({ ...p, ...v })); }}
+                        count={cards.length}
+                        onApply={() => { animateLayout(); setAdvOpen(false); }}
+                        onReset={resetAdv}
+                    />
+                )}
+
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -PAD }} contentContainerStyle={s.chips}>
+                    {CHIPS.map((f) => <Pill key={f} label={f} active={chip === f} onPress={() => setChip(f)} />)}
                 </ScrollView>
-            </FadeInUp>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: spacing.xxl, gap: spacing.md }}>
-                {cerclesDecouvrir.map((c, idx) => {
-                    const open = ouvert === c.id;
-                    const t = themeOf(c.theme);
-                    return (
-                        <FadeInUp key={c.id} delay={100 + idx * 70}>
-                            <View style={[s.card, { shadowColor: t.solid }]}>
-                                <View style={[s.accent, { backgroundColor: t.solid }]} />
-                                <PressableScale onPress={() => toggle(c.id)} style={s.row} scaleTo={0.99}>
-                                    <LinearGradient colors={[t.from, t.to]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.emoji}>
-                                        <Text style={{ fontSize: 26 }}>{c.emoji}</Text>
-                                    </LinearGradient>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={s.nom} numberOfLines={1}>{c.nom}</Text>
-                                        <View style={s.meta}>
-                                            <GradeChip grade={c.grade} />
-                                            <Text style={[s.theme, { color: t.solid }]}>{c.theme}</Text>
-                                        </View>
-                                    </View>
-                                    <View style={[s.chevron, open && { backgroundColor: t.soft }]}>
-                                        <Ionicons name={open ? 'chevron-up' : 'chevron-down'} size={18} color={open ? t.solid : pal.ink(0.42)} />
-                                    </View>
-                                </PressableScale>
-
-                                <View style={s.previewRow}>
-                                    <AvatarStack names={c.apercu} extra={Math.max(0, c.membres - c.apercu.length)} size={24} />
-                                    <Text style={s.previewTxt}>{c.membres}/{c.max} membres</Text>
-                                </View>
-
-                                {open && (
-                                    <View style={s.salle}>
-                                        <Text style={s.desc}>{c.description}</Text>
-
-                                        <Text style={s.why}>Pourquoi ce Cercle ?</Text>
-                                        <View style={s.whyRow}>
-                                            <Reason icon="heart" txt="2 intérêts en commun" color={colors.pink} />
-                                            <Reason icon="location" txt="Proche de toi" color={colors.teal} />
-                                            <Reason icon="flash" txt="Très actif" color={colors.amber} />
-                                        </View>
-
-                                        <View style={[s.rules, { backgroundColor: t.soft }]}>
-                                            <Text style={[s.ruleTitle, { color: t.solid }]}>Règles du Cercle</Text>
-                                            <Text style={s.rule}>· Respect et bienveillance avant tout</Text>
-                                            <Text style={s.rule}>· Pas de coordonnées partagées en public</Text>
-                                            <Text style={s.rule}>· On reste dans le thème</Text>
-                                        </View>
-
-                                        <GradientButton label="Rejoindre ce Cercle" onPress={() => router.push(`/(app)/cercles/${c.id}`)} />
-                                    </View>
-                                )}
-                            </View>
+                <View style={{ gap: 20 }}>
+                    {cards.map((cc, i) => (
+                        <FadeInUp key={cc.id} delay={80 + i * 60}>
+                            <CoverCard
+                                nom={cc.nom}
+                                theme={cc.theme}
+                                membres={cc.membres}
+                                max={cc.max}
+                                joined={joined.includes(cc.id)}
+                                onOpen={() => router.push(`/(app)/cercles/${cc.id}`)}
+                                onJoin={() => { join(cc.id); useToast.getState().show(`Tu as rejoint ${cc.nom}`); }}
+                            />
                         </FadeInUp>
-                    );
-                })}
+                    ))}
+
+                    {cards.length === 0 && (
+                        <View style={s.empty}>
+                            <View style={s.emptyIcon}><Ionicons name="compass-outline" size={30} color={c.ink(0.3)} /></View>
+                            <Text style={s.emptyTitle}>Aucun cercle trouvé</Text>
+                            <Text style={s.emptySub}>Essaie un autre thème ou ajuste tes filtres.</Text>
+                            <Pressable onPress={() => { setSearch(''); setChip('Tous'); resetAdv(); }} style={s.emptyBtn}>
+                                <Text style={s.emptyBtnTxt}>Réinitialiser les filtres</Text>
+                            </Pressable>
+                        </View>
+                    )}
+                </View>
             </ScrollView>
         </Screen>
     );
 }
 
 const makeStyles = (c: Palette) => StyleSheet.create({
-    h1: { fontFamily: fonts.display, fontSize: 32, color: c.text, marginTop: spacing.md },
-    intro: { fontFamily: fonts.body, fontSize: 14, color: c.ink(0.6), marginTop: 4, marginBottom: spacing.md },
-    filtres: { gap: 9, paddingBottom: spacing.md },
-    card: {
-        backgroundColor: c.card, borderRadius: radius.lg, padding: spacing.md, overflow: 'hidden',
-        borderWidth: 0.5, borderColor: c.border,
-        shadowOffset: { width: 0, height: 5 }, shadowOpacity: 0.14, shadowRadius: 16, elevation: 4,
-    },
-    accent: { position: 'absolute', left: 0, top: 0, bottom: 0, width: 4 },
-    row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-    emoji: {
-        width: 54, height: 54, borderRadius: 17, alignItems: 'center', justifyContent: 'center',
-        shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 6, elevation: 4,
-    },
-    nom: { fontFamily: fonts.displayMed, fontSize: 17, color: c.text, marginBottom: 7 },
-    meta: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    theme: { fontFamily: fonts.bodySemi, fontSize: 12 },
-    chevron: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-    previewRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: spacing.md },
-    previewTxt: { fontFamily: fonts.bodyMed, fontSize: 12, color: c.ink(0.6) },
-    salle: { marginTop: spacing.md, paddingTop: spacing.md, borderTopWidth: 0.5, borderTopColor: c.border, gap: spacing.md },
-    desc: { fontFamily: fonts.body, fontSize: 14, color: c.text, lineHeight: 21 },
-    why: { fontFamily: fonts.bodySemi, fontSize: 12, color: c.ink(0.6), letterSpacing: 1, textTransform: 'uppercase' },
-    whyRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    reason: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: radius.pill, paddingVertical: 6, paddingHorizontal: 11 },
-    reasonTxt: { fontFamily: fonts.bodyMed, fontSize: 12 },
-    rules: { borderRadius: radius.md, padding: spacing.md, gap: 4 },
-    ruleTitle: { fontFamily: fonts.bodySemi, fontSize: 13, marginBottom: 4 },
-    rule: { fontFamily: fonts.body, fontSize: 13, color: c.ink(0.6), lineHeight: 20 },
+    h1: { fontFamily: fonts.display, fontSize: 30, color: c.text },
+    intro: { fontFamily: fonts.body, fontSize: 14, color: c.ink(0.6), marginTop: 4, lineHeight: 20 },
+
+    searchRow: { marginTop: 16, flexDirection: 'row', alignItems: 'center', gap: 10 },
+    searchBox: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11, paddingHorizontal: 14, borderRadius: 14, backgroundColor: c.field, borderWidth: 1, borderColor: c.border },
+    searchInput: { flex: 1, minWidth: 0, padding: 0, fontFamily: fonts.body, fontSize: 14, color: c.text },
+    advBtn: { width: 46, height: 46, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+    advBadge: { position: 'absolute', top: -5, right: -5, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 9, backgroundColor: '#ff4d97', borderWidth: 2, borderColor: c.bg[1], alignItems: 'center', justifyContent: 'center' },
+    advBadgeTxt: { fontFamily: fonts.bodyBold, fontSize: 10, color: '#fff' },
+
+    chips: { gap: 9, paddingHorizontal: PAD, marginTop: 16, marginBottom: 18 },
+
+    empty: { paddingVertical: 40, paddingHorizontal: 20, alignItems: 'center', gap: 10 },
+    emptyIcon: { width: 60, height: 60, borderRadius: 30, backgroundColor: c.field, alignItems: 'center', justifyContent: 'center' },
+    emptyTitle: { fontFamily: fonts.display, fontSize: 16, color: c.text },
+    emptySub: { fontFamily: fonts.body, fontSize: 13, lineHeight: 19, color: c.ink(0.5), textAlign: 'center', maxWidth: 220 },
+    emptyBtn: { marginTop: 4, paddingVertical: 10, paddingHorizontal: 18, borderRadius: 99, backgroundColor: c.field, borderWidth: 1, borderColor: c.border },
+    emptyBtnTxt: { fontFamily: fonts.bodySemi, fontSize: 13, color: c.accent },
 });

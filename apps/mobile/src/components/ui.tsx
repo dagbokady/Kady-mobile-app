@@ -178,13 +178,13 @@ export function ScreenHeader({ title, back, right, tint }: { title?: string; bac
     const c = useColors();
     return (
         <View style={hd.row}>
-            {back ? (
-                <Pressable onPress={() => router.back()} hitSlop={12} style={hd.icon}>
-                    <Ionicons name="chevron-back" size={26} color={tint ?? c.accent} />
+            {back && (
+                <Pressable onPress={() => router.back()} hitSlop={8} style={[hd.backBtn, { backgroundColor: c.field, borderColor: c.border }]}>
+                    <Ionicons name="chevron-back" size={20} color={tint ?? c.text} />
                 </Pressable>
-            ) : <View style={hd.icon} />}
-            <Text style={[hd.title, { color: c.text }]} numberOfLines={1}>{title}</Text>
-            <View style={hd.icon}>{right}</View>
+            )}
+            {title ? <Text style={[hd.title, { color: c.text }]} numberOfLines={1}>{title}</Text> : <View style={{ flex: 1 }} />}
+            {right}
         </View>
     );
 }
@@ -219,9 +219,9 @@ const pill = StyleSheet.create({
     txt: { fontFamily: fonts.body, fontSize: 14 },
 });
 const hd = StyleSheet.create({
-    row: { flexDirection: 'row', alignItems: 'center', height: 52 },
-    icon: { width: 40, alignItems: 'center', justifyContent: 'center' },
-    title: { flex: 1, textAlign: 'center', fontFamily: fonts.displayMed, fontSize: 17 },
+    row: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 52, marginBottom: 4 },
+    backBtn: { width: 42, height: 42, borderRadius: 13, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+    title: { flex: 1, fontFamily: fonts.display, fontSize: 23, letterSpacing: -0.3 },
 });
 const sct = StyleSheet.create({
     section: { fontFamily: fonts.bodySemi, fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: spacing.sm },

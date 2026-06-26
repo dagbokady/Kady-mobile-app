@@ -33,6 +33,7 @@ export default function Profil() {
     const s = makeStyles(c);
     const { width } = useWindowDimensions();
     const cell = (width - PAD * 2 - 20) / 3; // 3 colonnes, 2 espaces de 10
+    const cellH = Math.round((cell * 4) / 3); // hauteur explicite (aspectRatio seul s'effondre en natif sur une cellule vide)
     const pause = useStore((st) => st.pause);
     const setPause = useStore((st) => st.setPause);
     const photos = useStore((st) => st.photos);
@@ -47,7 +48,7 @@ export default function Profil() {
     const pickPhoto = async () => { const uri = await pickImage(); if (uri) addPhoto(uri); };
 
     return (
-        <Screen padded={false}>
+        <Screen padded={false} edges={['top']}>
             <FadeInUp>
                 <View style={s.header}>
                     <Text style={s.h1}>Profil</Text>
@@ -139,13 +140,13 @@ export default function Profil() {
                     </View>
                     <View style={s.photoGrid}>
                         {PHOTOS.map((g, i) => (
-                            <LinearGradient key={i} colors={g as any} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[s.photo, { width: cell }]}>
+                            <LinearGradient key={i} colors={g as any} start={{ x: 0.2, y: 0 }} end={{ x: 0.8, y: 1 }} style={[s.photo, { width: cell, height: cellH }]}>
                                 {i === 0 && <View style={s.principal}><Text style={s.principalTxt}>Principale</Text></View>}
                             </LinearGradient>
                         ))}
-                        {photos.map((uri, i) => <Image key={`p${i}`} source={{ uri }} style={[s.photo, { width: cell }]} />)}
-                        {photos.length === 0 && <><LockedPhoto label="Niveau 5" cell={cell} /><LockedPhoto label="Réciprocité" cell={cell} /></>}
-                        <Pressable style={[s.photoAdd, { width: cell }]} onPress={pickPhoto}><Ionicons name="add" size={24} color={c.accent} /></Pressable>
+                        {photos.map((uri, i) => <Image key={`p${i}`} source={{ uri }} style={[s.photo, { width: cell, height: cellH }]} />)}
+                        {photos.length === 0 && <><LockedPhoto label="Niveau 5" cell={cell} h={cellH} /><LockedPhoto label="Réciprocité" cell={cell} h={cellH} /></>}
+                        <Pressable style={[s.photoAdd, { width: cell, height: cellH }]} onPress={pickPhoto}><Ionicons name="add" size={24} color={c.accent} /></Pressable>
                     </View>
                 </FadeInUp>
 
@@ -226,11 +227,11 @@ function Section({ icon, title, noMargin }: { icon: any; title: string; noMargin
     );
 }
 
-function LockedPhoto({ label, cell }: { label: string; cell: number }) {
+function LockedPhoto({ label, cell, h }: { label: string; cell: number; h: number }) {
     const c = useColors();
     const s = makeStyles(c);
     return (
-        <View style={[s.photo, s.photoLocked, { width: cell }]}>
+        <View style={[s.photo, s.photoLocked, { width: cell, height: h }]}>
             <Ionicons name="lock-closed" size={20} color={c.ink(0.5)} />
             <Text style={s.photoLockedTxt}>{label}</Text>
         </View>
@@ -324,12 +325,12 @@ const makeStyles = (c: Palette) => StyleSheet.create({
     photoHead: { marginTop: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     photoCount: { fontFamily: fonts.body, fontSize: 12, color: c.ink(0.4) },
     photoGrid: { marginTop: 13, flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    photo: { aspectRatio: 3 / 4, borderRadius: 16, overflow: 'hidden' },
+    photo: { borderRadius: 16, overflow: 'hidden' },
     principal: { position: 'absolute', top: 8, left: 8, paddingVertical: 3, paddingHorizontal: 8, borderRadius: 99, backgroundColor: 'rgba(0,0,0,0.45)' },
     principalTxt: { fontFamily: fonts.bodyBold, fontSize: 9.5, color: '#fff' },
     photoLocked: { backgroundColor: c.field, borderWidth: 1, borderColor: c.border, alignItems: 'center', justifyContent: 'center', gap: 7 },
     photoLockedTxt: { fontFamily: fonts.bodySemi, fontSize: 9.5, color: c.ink(0.5), textAlign: 'center' },
-    photoAdd: { aspectRatio: 3 / 4, borderRadius: 16, backgroundColor: 'rgba(255,106,169,0.08)', borderWidth: 1.5, borderColor: 'rgba(255,140,190,0.4)', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
+    photoAdd: { borderRadius: 16, backgroundColor: 'rgba(255,106,169,0.08)', borderWidth: 1.5, borderColor: 'rgba(255,140,190,0.4)', borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
 
     interests: { marginTop: 13, flexDirection: 'row', flexWrap: 'wrap', gap: 9 },
     interest: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 99, borderWidth: 1 },

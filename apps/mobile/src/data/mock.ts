@@ -37,6 +37,8 @@ export const cerclesDecouvrir: Cercle[] = [
     { id: 'd2', nom: 'Ciné-club Treichville', theme: 'Cinéma', emoji: '🎬', membres: 5, max: 10, niveau: 1, grade: 'graine', expireDans: 58, actif: true, description: 'On débriefe les films, du Nollywood au cinéma d\'auteur.', apercu: ['Léa', 'Dré'] },
     { id: 'd3', nom: 'Foi & Partage', theme: 'Foi', emoji: '🙏', membres: 10, max: 10, niveau: 3, grade: 'etoile', expireDans: 22, actif: true, description: 'Un espace bienveillant pour échanger sur la foi.', apercu: ['Esther', 'Paul', 'Ruth', 'Jean'] },
     { id: 'd4', nom: 'Sport & Bien-être', theme: 'Sport', emoji: '🏃🏾', membres: 8, max: 10, niveau: 2, grade: 'flamme', expireDans: 47, actif: true, description: 'Running, fitness, motivation collective.', apercu: ['Max', 'Bintou', 'Eli'] },
+    { id: 'd5', nom: 'Les Gourmets d\'Abidjan', theme: 'Cuisine', emoji: '🍲', membres: 6, max: 10, niveau: 4, grade: 'diamant', expireDans: 35, actif: true, description: 'Adresses, recettes et sorties maquis entre passionnés.', apercu: ['Koffi', 'Mariam', 'Yao'] },
+    { id: 'd6', nom: 'Mélomanes 225', theme: 'Musique', emoji: '🎵', membres: 9, max: 10, niveau: 3, grade: 'etoile', expireDans: 12, actif: true, description: 'Coupé-décalé, afrobeats, gospel — on vibre ensemble.', apercu: ['Sékou', 'Fatou', 'Ben', 'Lou'] },
 ];
 
 export const cercleMessages = [
@@ -70,3 +72,44 @@ export const dmMessages = [
 
 export const NIVEAUX_RENCONTRE = ['L\'Inconnu', 'La Connaissance', 'L\'Ami(e)', 'La Confiance', 'L\'Intimité'];
 export const NIVEAUX_AMITIE = ['L\'Inconnu', 'La Connaissance', 'Le Camarade', 'L\'Ami Proche', 'Les Complices'];
+
+// --- Évaluation (Quiz) : critères notés + ressentis ---
+export const QUIZ_CRITERIA = [
+    { key: 'respect', label: 'Respect', desc: 'Bienveillant·e et courtois·e', icon: 'heart', tint: '#ff6fa8' },
+    { key: 'ecoute', label: 'Écoute', desc: 'Attentif·ve à ce que tu partages', icon: 'chatbubbles', tint: '#5a7fd6' },
+    { key: 'authenticite', label: 'Authenticité', desc: 'Vrai·e, sans faux-semblants', icon: 'sparkles', tint: '#a463ff' },
+    { key: 'reactivite', label: 'Réactivité', desc: 'Répond dans de bons délais', icon: 'time', tint: '#2fb8c0' },
+    { key: 'energie', label: 'Bonne énergie', desc: 'Agréable et positif·ve', icon: 'sunny', tint: '#ffb43a' },
+] as const;
+export const QUIZ_MOODS = [
+    { e: '😍', l: 'Au top' }, { e: '🙂', l: 'Sympa' }, { e: '😐', l: 'Mitigé' }, { e: '😕', l: 'Bof' },
+] as const;
+
+// --- Déblocages par niveau atteint ---
+export const UNLOCKS: Record<number, { icon: string; t: string }[]> = {
+    2: [{ icon: 'image', t: 'Une nouvelle photo se dévoile' }, { icon: 'happy', t: 'Surnoms autorisés' }],
+    3: [{ icon: 'images', t: '2ᵉ photo du profil révélée' }, { icon: 'mic', t: 'Notes vocales illimitées' }, { icon: 'location', t: 'Partage de localisation' }],
+    4: [{ icon: 'albums', t: 'Album photo partagé' }, { icon: 'call', t: 'Appels audio débloqués' }],
+    5: [{ icon: 'videocam', t: 'Appels vidéo débloqués' }, { icon: 'lock-open', t: 'Toutes les photos visibles' }, { icon: 'ribbon', t: 'Badge « Complices » obtenu' }],
+};
+
+// --- Découverte de profil : champs + bonnes réponses + leurres ---
+export const DISC_FIELDS = [
+    { key: 'ville', label: 'Ville', icon: 'location-outline' },
+    { key: 'job', label: 'Profession', icon: 'briefcase-outline' },
+    { key: 'etudes', label: 'Études', icon: 'school-outline' },
+    { key: 'musique', label: 'Musique', icon: 'musical-notes-outline' },
+    { key: 'sport', label: 'Sport', icon: 'barbell-outline' },
+    { key: 'film', label: 'Film favori', icon: 'film-outline' },
+    { key: 'langue', label: 'Langues', icon: 'language-outline' },
+] as const;
+
+type DiscEntry = Record<string, [string, string[]]>;
+export const DISC_DATA: Record<string, DiscEntry> = {
+    awa: { ville: ['Cocody', ['Cocody', 'Yopougon', 'Marcory']], job: ['Architecte', ['Architecte', 'Infirmière', 'Avocate']], etudes: ['Architecture', ['Architecture', 'Médecine', 'Commerce']], musique: ['Afrobeats', ['Afrobeats', 'Jazz', 'Gospel']], sport: ['Natation', ['Natation', 'Basket', 'Danse']], film: ['Black Panther', ['Black Panther', 'Titanic', 'Inception']], langue: ['FR · Dioula', ['FR · Dioula', 'FR · Espagnol', 'FR · Anglais']] },
+    koffi: { ville: ['Yopougon', ['Yopougon', 'Cocody', 'Treichville']], job: ['Coach sportif', ['Coach sportif', 'Comptable', 'Ingénieur']], etudes: ['STAPS', ['STAPS', 'Informatique', 'Droit']], musique: ['Coupé-décalé', ['Coupé-décalé', 'Rap US', 'Reggae']], sport: ['Basket', ['Basket', 'Football', 'Boxe']], film: ['Creed', ['Creed', 'Avatar', 'Joker']], langue: ['FR · Baoulé', ['FR · Baoulé', 'FR · Anglais', 'FR · Wolof']] },
+    mariam: { ville: ['Marcory', ['Marcory', 'Cocody', 'Plateau']], job: ['Journaliste', ['Journaliste', 'Pharmacienne', 'Enseignante']], etudes: ['Communication', ['Communication', 'Pharmacie', 'Lettres']], musique: ['Gospel', ['Gospel', 'Afrobeats', 'RnB']], sport: ['Yoga', ['Yoga', 'Tennis', 'Course']], film: ['La La Land', ['La La Land', 'Black Panther', 'Titanic']], langue: ['FR · Anglais', ['FR · Anglais', 'FR · Dioula', 'FR · Italien']] },
+    fatou: { ville: ['Plateau', ['Plateau', 'Cocody', 'Abobo']], job: ['Cheffe cuisine', ['Cheffe cuisine', 'Banquière', 'Styliste']], etudes: ['Hôtellerie', ['Hôtellerie', 'Finance', 'Mode']], musique: ['Zouglou', ['Zouglou', 'Jazz', 'Pop']], sport: ['Danse', ['Danse', 'Natation', 'Vélo']], film: ['Le Roi Lion', ['Le Roi Lion', 'Inception', 'Creed']], langue: ['FR · Bambara', ['FR · Bambara', 'FR · Anglais', 'FR · Espagnol']] },
+    yann: { ville: ['Cocody', ['Cocody', 'Marcory', 'Yopougon']], job: ['Développeur', ['Développeur', 'Médecin', 'Architecte']], etudes: ['Informatique', ['Informatique', 'Médecine', 'Gestion']], musique: ['Rap FR', ['Rap FR', 'Gospel', 'Jazz']], sport: ['Running', ['Running', 'Basket', 'Tennis']], film: ['Inception', ['Inception', 'Titanic', 'Creed']], langue: ['FR · Anglais', ['FR · Anglais', 'FR · Allemand', 'FR · Dioula']] },
+    sophie: { ville: ['Cocody', ['Cocody', 'Treichville', 'Plateau']], job: ['Designer', ['Designer', 'Avocate', 'Infirmière']], etudes: ['Beaux-Arts', ['Beaux-Arts', 'Droit', 'Médecine']], musique: ['Jazz', ['Jazz', 'Afrobeats', 'Rap']], sport: ['Yoga', ['Yoga', 'Course', 'Danse']], film: ['Amélie', ['Amélie', 'Avatar', 'Joker']], langue: ['FR · Anglais', ['FR · Anglais', 'FR · Espagnol', 'FR · Arabe']] },
+};
