@@ -1,0 +1,103 @@
+<!-- @dsCard group="Foundations" -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kady — Espacement</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(160deg, #ffffff 0%, #faf7fe 60%, #f6f2fb 100%);
+    min-height: 100vh;
+    padding: 40px 32px;
+    color: #211633;
+  }
+  h1 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #6E6A7D; margin-bottom: 36px; }
+  .section-title { font-weight: 600; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #6E6A7D; margin-bottom: 16px; margin-top: 32px; }
+  .section-title:first-of-type { margin-top: 0; }
+
+  /* Spacing */
+  .sp-row { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+  .sp-bar { background: linear-gradient(90deg, #ff6aa9, #e02a73); border-radius: 4px; height: 20px; }
+  .sp-label { font-size: 12px; font-weight: 600; color: #d6286e; width: 48px; }
+  .sp-value { font-size: 12px; color: #6E6A7D; }
+
+  /* Radius */
+  .radius-row { display: flex; flex-wrap: wrap; gap: 16px; }
+  .radius-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .radius-box { width: 56px; height: 56px; background: linear-gradient(135deg,#ff6aa9,#e02a73); }
+  .radius-label { font-size: 11px; font-weight: 700; color: #d6286e; }
+  .radius-value { font-size: 10px; color: #6E6A7D; }
+
+  /* Shadow */
+  .shadow-row { display: flex; flex-wrap: wrap; gap: 20px; }
+  .shadow-item { width: 120px; }
+  .shadow-box { height: 56px; border-radius: 16px; background: #fff; margin-bottom: 10px; }
+  .shadow-name { font-size: 12px; font-weight: 700; color: #211633; }
+  .shadow-desc { font-size: 11px; color: #6E6A7D; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <h1>Espacement &amp; Formes</h1>
+  <p class="subtitle">Spacing · Radius · Shadows</p>
+
+  <div class="section-title">Spacing</div>
+  <div>
+    <div class="sp-row"><div class="sp-label">xs</div><div class="sp-bar" style="width:4px"></div><div class="sp-value">4px</div></div>
+    <div class="sp-row"><div class="sp-label">sm</div><div class="sp-bar" style="width:8px"></div><div class="sp-value">8px</div></div>
+    <div class="sp-row"><div class="sp-label">md</div><div class="sp-bar" style="width:16px"></div><div class="sp-value">16px</div></div>
+    <div class="sp-row"><div class="sp-label">lg</div><div class="sp-bar" style="width:24px"></div><div class="sp-value">24px</div></div>
+    <div class="sp-row"><div class="sp-label">xl</div><div class="sp-bar" style="width:32px"></div><div class="sp-value">32px</div></div>
+    <div class="sp-row"><div class="sp-label">xxl</div><div class="sp-bar" style="width:48px"></div><div class="sp-value">48px</div></div>
+    <div class="sp-row"><div class="sp-label">xxxl</div><div class="sp-bar" style="width:64px"></div><div class="sp-value">64px</div></div>
+  </div>
+
+  <div class="section-title">Radius</div>
+  <div class="radius-row">
+    <div class="radius-item">
+      <div class="radius-box" style="border-radius:10px"></div>
+      <div class="radius-label">sm</div><div class="radius-value">10px</div>
+    </div>
+    <div class="radius-item">
+      <div class="radius-box" style="border-radius:16px"></div>
+      <div class="radius-label">md</div><div class="radius-value">16px</div>
+    </div>
+    <div class="radius-item">
+      <div class="radius-box" style="border-radius:22px"></div>
+      <div class="radius-label">lg</div><div class="radius-value">22px</div>
+    </div>
+    <div class="radius-item">
+      <div class="radius-box" style="border-radius:100px"></div>
+      <div class="radius-label">pill</div><div class="radius-value">100px</div>
+    </div>
+    <div class="radius-item">
+      <div class="radius-box" style="border-radius:999px; width:56px; height:56px"></div>
+      <div class="radius-label">round</div><div class="radius-value">999px</div>
+    </div>
+  </div>
+
+  <div class="section-title">Shadows</div>
+  <div class="shadow-row">
+    <div class="shadow-item">
+      <div class="shadow-box" style="box-shadow:0 6px 20px rgba(184,48,74,0.28)"></div>
+      <div class="shadow-name">glow</div>
+      <div class="shadow-desc">Halo rose · CTA</div>
+    </div>
+    <div class="shadow-item">
+      <div class="shadow-box" style="box-shadow:0 2px 14px rgba(0,0,0,0.07)"></div>
+      <div class="shadow-name">card</div>
+      <div class="shadow-desc">Ombre douce · cartes</div>
+    </div>
+    <div class="shadow-item">
+      <div class="shadow-box" style="box-shadow:0 8px 24px rgba(0,0,0,0.10)"></div>
+      <div class="shadow-name">elevated</div>
+      <div class="shadow-desc">Éléments flottants</div>
+    </div>
+  </div>
+</body>
+</html>

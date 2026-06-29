@@ -10,6 +10,7 @@ import { fonts } from '../../../src/theme/typography';
 import { spacing, radius } from '../../../src/theme/spacing';
 import { useColors, useTheme, type Palette } from '../../../src/theme/theme';
 import { useStore } from '../../../src/store/app';
+import { useAuth } from '../../../src/store/auth';
 
 export default function Parametres() {
     const router = useRouter();
@@ -26,7 +27,7 @@ export default function Parametres() {
     const deleteAccount = () => {
         Alert.alert('Supprimer mon compte', 'Cette action est définitive : tes Cercles, messages et données seront effacés.', [
             { text: 'Annuler', style: 'cancel' },
-            { text: 'Supprimer', style: 'destructive', onPress: () => { reset(); router.replace('/'); } },
+            { text: 'Supprimer', style: 'destructive', onPress: async () => { reset(); await useAuth.getState().logout(); router.replace('/'); } },
         ]);
     };
     const web = (path: string) => Linking.openURL(`https://kady.ci/${path}`).catch(() => {});
@@ -98,7 +99,7 @@ export default function Parametres() {
                 </FadeInUp>
 
                 <FadeInUp delay={350}>
-                    <Pressable style={s.logout} onPress={() => router.replace('/')}>
+                    <Pressable style={s.logout} onPress={async () => { await useAuth.getState().logout(); router.replace('/'); }}>
                         <Ionicons name="log-out-outline" size={18} color="#ef5350" />
                         <Text style={s.logoutTxt}>Se déconnecter</Text>
                     </Pressable>

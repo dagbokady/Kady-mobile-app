@@ -1,6 +1,7 @@
 // app/_layout.tsx
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Stack } from 'expo-router';
+import { useAuth } from '../src/store/auth';
 import * as SplashScreen from 'expo-splash-screen';
 import { View } from 'react-native';
 import { useFonts, Sora_600SemiBold, Sora_700Bold, Sora_800ExtraBold } from '@expo-google-fonts/sora';
@@ -24,6 +25,10 @@ export default function RootLayout() {
     // Ne jamais bloquer l'app si le chargement d'une police échoue : on affiche
     // avec des polices de repli plutôt que de rester sur un écran vide.
     const ready = loaded || !!error;
+
+    // Restaure la session (jetons → /auth/me) au lancement.
+    const bootstrap = useAuth((s) => s.bootstrap);
+    useEffect(() => { bootstrap(); }, [bootstrap]);
 
     const c = useColors();
 

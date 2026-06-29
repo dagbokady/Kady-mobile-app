@@ -1,0 +1,107 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kady — Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(160deg, #ffffff 0%, #faf7fe 60%, #f6f2fb 100%);
+    min-height: 100vh; padding: 40px 32px; color: #211633;
+  }
+  h1 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #6E6A7D; margin-bottom: 36px; }
+  .section-title { font-weight: 600; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #6E6A7D; margin-bottom: 16px; margin-top: 28px; }
+  .section-title:first-of-type { margin-top: 0; }
+  .grid { display: flex; flex-wrap: wrap; gap: 16px; }
+
+  .card {
+    background: #fff;
+    border-radius: 22px;
+    border: 1px solid rgba(33,22,51,0.08);
+    padding: 16px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.07);
+  }
+  .card-title { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: #211633; margin-bottom: 6px; }
+  .card-sub { font-size: 12px; color: #6E6A7D; }
+  .card-row { display: flex; align-items: center; gap: 10px; }
+  .avatar-sm { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Sora', sans-serif; font-weight: 600; font-size: 14px; flex-shrink: 0; }
+  .divider { height: 1px; background: rgba(33,22,51,0.07); margin: 12px 0; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; border-radius: 100px; padding: 3px 10px; }
+  .stat { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: #211633; }
+  .stat-label { font-size: 11px; color: #6E6A7D; margin-top: 2px; }
+  .grad-header { height: 56px; border-radius: 14px; margin-bottom: 12px; display: flex; align-items: flex-end; padding: 10px 12px; }
+</style>
+</head>
+<body>
+  <h1>Card</h1>
+  <p class="subtitle">Surface blanche arrondie (radius lg=22), bordure subtile, ombre douce.</p>
+
+  <div class="section-title">Exemples</div>
+  <div class="grid">
+
+    <!-- Cercle card -->
+    <div class="card" style="width:200px">
+      <div class="grad-header" style="background:linear-gradient(135deg,#ff9d5c,#d34d7e)">
+        <span style="font-family:'Sora';font-size:14px;font-weight:700;color:#fff;">Cuisine</span>
+      </div>
+      <div class="card-title">Les Gourmets</div>
+      <div class="card-sub">42 membres · actif</div>
+      <div class="divider"></div>
+      <div class="card-row">
+        <div class="avatar-sm" style="background:#d34d7e22;color:#d34d7e">A</div>
+        <div class="avatar-sm" style="background:#7a4fd622;color:#7a4fd6;margin-left:-10px">M</div>
+        <div class="avatar-sm" style="background:#2f9aa822;color:#2f9aa8;margin-left:-10px">S</div>
+        <span style="font-size:11px;color:#6E6A7D;margin-left:4px">+39</span>
+      </div>
+    </div>
+
+    <!-- Stats card -->
+    <div class="card" style="width:160px">
+      <div class="stat">127</div>
+      <div class="stat-label">Connexions</div>
+      <div class="divider"></div>
+      <div class="stat" style="background:linear-gradient(90deg,#ff6aa9,#e02a73);-webkit-background-clip:text;-webkit-text-fill-color:transparent">48</div>
+      <div class="stat-label">Cercles actifs</div>
+    </div>
+
+    <!-- Profile snippet card -->
+    <div class="card" style="width:220px">
+      <div class="card-row" style="margin-bottom:10px">
+        <div class="avatar-sm" style="width:44px;height:44px;background:#a463ff22;color:#a463ff;font-size:18px">K</div>
+        <div>
+          <div class="card-title" style="margin-bottom:2px">Kady D.</div>
+          <div class="card-sub">Paris · 26 ans</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <span class="tag" style="background:#F1EBFD;color:#7a4fd6">Musique</span>
+        <span class="tag" style="background:#FDE9F1;color:#d6286e">Voyage</span>
+        <span class="tag" style="background:#E4F6F4;color:#2f9aa8">Cuisine</span>
+      </div>
+    </div>
+
+    <!-- Dark mode hint -->
+    <div class="card" style="width:180px;background:#1a0f2e;border-color:rgba(255,255,255,0.08)">
+      <div class="card-title" style="color:#fff">Mode sombre</div>
+      <div class="card-sub" style="color:rgba(255,255,255,0.5)">Fond encre #1a0f2e</div>
+      <div class="divider" style="background:rgba(255,255,255,0.08)"></div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.4)">Même radius, bordure adaptée</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:28px">Spécifications</div>
+  <div style="font-size:13px;color:#6E6A7D;display:flex;flex-direction:column;gap:5px">
+    <div><strong style="color:#211633">Border radius</strong> 22px (radius.lg)</div>
+    <div><strong style="color:#211633">Background</strong> #FFFFFF (light) / ~#1a0f2e (dark)</div>
+    <div><strong style="color:#211633">Border</strong> 1px rgba(33,22,51,0.08)</div>
+    <div><strong style="color:#211633">Padding</strong> 16px (spacing.md)</div>
+    <div><strong style="color:#211633">Shadow</strong> card — 0 2px 14px rgba(0,0,0,0.07)</div>
+  </div>
+</body>
+</html>

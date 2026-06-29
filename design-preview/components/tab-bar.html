@@ -1,0 +1,181 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kady — TabBar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(160deg, #ffffff 0%, #faf7fe 60%, #f6f2fb 100%);
+    min-height: 100vh; padding: 40px 32px 80px; color: #211633;
+  }
+  h1 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #6E6A7D; margin-bottom: 36px; }
+  .section-title { font-weight: 600; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #6E6A7D; margin-bottom: 16px; margin-top: 28px; }
+  .section-title:first-of-type { margin-top: 0; }
+  .phone-shell {
+    width: 320px;
+    background: linear-gradient(160deg,#ffffff,#faf7fe);
+    border-radius: 36px;
+    border: 1px solid rgba(33,22,51,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    overflow: hidden;
+    position: relative;
+  }
+  .phone-content { height: 200px; display: flex; align-items: center; justify-content: center; }
+  .phone-content-text { font-size: 13px; color: #A8A2B4; }
+
+  /* TabBar */
+  .tabbar {
+    background: #fff;
+    border-top-left-radius: 28px;
+    border-top-right-radius: 28px;
+    border: 1px solid rgba(33,22,51,0.08);
+    border-bottom: none;
+    padding: 12px 12px 20px;
+    box-shadow: 0 -6px 18px rgba(40,25,80,0.10);
+  }
+  .tab-row { display: flex; align-items: flex-start; justify-content: space-between; }
+  .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; padding-top: 2px; cursor: pointer; }
+  .icon-wrap { min-width: 46px; height: 30px; border-radius: 15px; display: flex; align-items: center; justify-content: center; padding: 0 6px; }
+  .icon-wrap-active { background: rgba(255,106,169,0.14); }
+  .tab-label { font-size: 10.5px; letter-spacing: 0.2px; }
+  .tab-label-active { color: #d6286e; font-weight: 700; }
+  .tab-label-inactive { color: rgba(33,22,51,0.5); font-weight: 600; }
+
+  /* FAB */
+  .fab-slot { flex: 1; display: flex; align-items: flex-start; justify-content: center; }
+  .fab {
+    margin-top: -22px;
+    width: 60px; height: 60px; border-radius: 22px;
+    background: linear-gradient(135deg,#ff6aa9,#e02a73);
+    display: flex; align-items: center; justify-content: center;
+    border: 4px solid #fff;
+    box-shadow: 0 10px 16px rgba(224,42,115,0.5);
+    cursor: pointer;
+  }
+  /* Badge */
+  .badge-dot {
+    position: relative;
+    display: inline-flex;
+  }
+  .badge-dot::after {
+    content: '4';
+    position: absolute;
+    top: -5px; right: -4px;
+    min-width: 16px; height: 16px;
+    border-radius: 8px;
+    background: #ff4d97;
+    border: 2px solid #fff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700; font-size: 9px;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 3px;
+    line-height: 14px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+  <h1>TabBar</h1>
+  <p class="subtitle">Accueil · Cercles · FAB (Créer) · Messages · Profil. Surface arrondie, onglet actif en rose, badge notification.</p>
+
+  <div class="section-title">Accueil actif</div>
+  <div class="phone-shell">
+    <div class="phone-content"><span class="phone-content-text">Contenu de l'écran</span></div>
+    <div class="tabbar">
+      <div class="tab-row">
+        <!-- Accueil (actif) -->
+        <div class="tab-item">
+          <div class="icon-wrap icon-wrap-active">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#d6286e"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          </div>
+          <span class="tab-label tab-label-active">Accueil</span>
+        </div>
+        <!-- Cercles -->
+        <div class="tab-item">
+          <div class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(33,22,51,0.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <span class="tab-label tab-label-inactive">Cercles</span>
+        </div>
+        <!-- FAB -->
+        <div class="fab-slot">
+          <div class="fab">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
+        <!-- Messages -->
+        <div class="tab-item">
+          <div class="icon-wrap">
+            <div class="badge-dot">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(33,22,51,0.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+          </div>
+          <span class="tab-label tab-label-inactive">Messages</span>
+        </div>
+        <!-- Profil -->
+        <div class="tab-item">
+          <div class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(33,22,51,0.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span class="tab-label tab-label-inactive">Profil</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:28px">Messages actif (badge)</div>
+  <div class="phone-shell">
+    <div class="phone-content"><span class="phone-content-text">Liste de messages</span></div>
+    <div class="tabbar">
+      <div class="tab-row">
+        <div class="tab-item">
+          <div class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(33,22,51,0.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          </div>
+          <span class="tab-label tab-label-inactive">Accueil</span>
+        </div>
+        <div class="tab-item">
+          <div class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(33,22,51,0.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <span class="tab-label tab-label-inactive">Cercles</span>
+        </div>
+        <div class="fab-slot">
+          <div class="fab">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </div>
+        </div>
+        <div class="tab-item">
+          <div class="icon-wrap icon-wrap-active">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#d6286e"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          </div>
+          <span class="tab-label tab-label-active">Messages</span>
+        </div>
+        <div class="tab-item">
+          <div class="icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(33,22,51,0.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <span class="tab-label tab-label-inactive">Profil</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Spécifications</div>
+  <div style="font-size:13px;color:#6E6A7D;display:flex;flex-direction:column;gap:5px">
+    <div><strong style="color:#211633">Border radius (haut)</strong> 28px</div>
+    <div><strong style="color:#211633">FAB</strong> 60×60px · radius 22px · offset -22px vers le haut · border 4px card</div>
+    <div><strong style="color:#211633">Onglet actif</strong> icône pleine + pastille rgba(255,106,169,0.14)</div>
+    <div><strong style="color:#211633">Badge</strong> 16×16px · #ff4d97 · border 2px card</div>
+    <div><strong style="color:#211633">Shadow</strong> 0 -6px 18px rgba(40,25,80,0.10)</div>
+  </div>
+</body>
+</html>

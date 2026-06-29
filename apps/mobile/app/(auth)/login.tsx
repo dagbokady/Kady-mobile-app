@@ -11,6 +11,9 @@ import { fonts } from '../../src/theme/typography';
 import { spacing, radius } from '../../src/theme/spacing';
 import { useColors, type Palette } from '../../src/theme/theme';
 import { useScale } from '../../src/theme/responsive';
+import { useAuth } from '../../src/store/auth';
+import { apiError } from '../../src/api/client';
+import { useToast } from '../../src/store/app';
 
 export default function Login() {
     const router = useRouter();
@@ -19,6 +22,21 @@ export default function Login() {
     const s = makeStyles(c, sc);
     const [email, setEmail] = useState('');
     const [mdp, setMdp] = useState('');
+    const [busy, setBusy] = useState(false);
+    const login = useAuth((st) => st.login);
+
+    const submit = async () => {
+        if (!email.trim() || !mdp) { useToast.getState().show('Renseigne ton email et ton mot de passe.'); return; }
+        setBusy(true);
+        try {
+            await login(email.trim().toLowerCase(), mdp);
+            router.replace('/(app)/accueil');
+        } catch (e) {
+            useToast.getState().show(apiError(e));
+        } finally {
+            setBusy(false);
+        }
+    };
 
     return (
         <Screen padded={false}>
@@ -58,7 +76,7 @@ export default function Login() {
                 </FadeInUp>
 
                 <FadeInUp delay={260} style={{ marginTop: spacing.lg }}>
-                    <GradientButton label="Se connecter" onPress={() => router.replace('/(app)/accueil')} />
+                    <GradientButton label={busy ? 'Connexion…' : 'Se connecter'} onPress={submit} />
                 </FadeInUp>
 
                 <FadeInUp delay={300} style={s.dividerRow}>

@@ -1,0 +1,116 @@
+<!-- @dsCard group="Foundations" -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kady — Typographie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(160deg, #ffffff 0%, #faf7fe 60%, #f6f2fb 100%);
+    min-height: 100vh;
+    padding: 40px 32px;
+    color: #211633;
+  }
+  h1 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #6E6A7D; margin-bottom: 36px; }
+  .row {
+    display: flex; align-items: baseline; gap: 24px;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(33,22,51,0.07);
+  }
+  .row:last-child { border-bottom: none; }
+  .meta { width: 130px; flex-shrink: 0; }
+  .token { font-size: 11px; font-weight: 700; color: #d6286e; font-family: 'Plus Jakarta Sans', sans-serif; letter-spacing: 0.3px; }
+  .spec { font-size: 10.5px; color: #A8A2B4; margin-top: 3px; }
+  .sample { flex: 1; }
+
+  .type-hero     { font-family: 'Sora', sans-serif; font-size: 27px; font-weight: 700; letter-spacing: -0.3px; line-height: 30px; color: #211633; }
+  .type-wordmark { font-family: 'Sora', sans-serif; font-size: 21px; font-weight: 700; letter-spacing: 5px; color: #211633; }
+  .type-h1       { font-family: 'Sora', sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -0.3px; line-height: 30px; color: #211633; }
+  .type-h2       { font-family: 'Sora', sans-serif; font-size: 17px; line-height: 22px; color: #211633; }
+  .type-body     { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; line-height: 20px; color: #211633; }
+  .type-bodyLg   { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; line-height: 24px; color: #211633; }
+  .type-label    { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 0.3px; color: #211633; }
+  .type-caption  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 17px; color: #211633; }
+
+  .divider { margin: 28px 0 20px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: #6E6A7D; }
+</style>
+</head>
+<body>
+  <h1>Typographie</h1>
+  <p class="subtitle">Sora (titres) · Plus Jakarta Sans (corps)</p>
+
+  <div class="divider">Sora — Titres &amp; Wordmark</div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">hero</div>
+      <div class="spec">Sora 700 · 27px · -0.3ls</div>
+    </div>
+    <div class="sample"><span class="type-hero">Trouve ta tribu</span></div>
+  </div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">wordmark</div>
+      <div class="spec">Sora 700 · 21px · 5ls</div>
+    </div>
+    <div class="sample"><span class="type-wordmark">KADY</span></div>
+  </div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">h1</div>
+      <div class="spec">Sora 700 · 25px · -0.3ls</div>
+    </div>
+    <div class="sample"><span class="type-h1">Bienvenue sur Kady</span></div>
+  </div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">h2</div>
+      <div class="spec">Sora 600 · 17px</div>
+    </div>
+    <div class="sample"><span class="type-h2">Mes cercles récents</span></div>
+  </div>
+
+  <div class="divider">Plus Jakarta Sans — Corps</div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">bodyLg</div>
+      <div class="spec">PJS 400 · 16px · lh 24</div>
+    </div>
+    <div class="sample"><span class="type-bodyLg">Rejoins des cercles qui te ressemblent.</span></div>
+  </div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">body</div>
+      <div class="spec">PJS 400 · 14px · lh 20</div>
+    </div>
+    <div class="sample"><span class="type-body">Partageons des passions, des idées, des moments de vie ensemble.</span></div>
+  </div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">label</div>
+      <div class="spec">PJS 700 · 12px · 0.3ls</div>
+    </div>
+    <div class="sample"><span class="type-label">MEMBRES ACTIFS</span></div>
+  </div>
+
+  <div class="row">
+    <div class="meta">
+      <div class="token">caption</div>
+      <div class="spec">PJS 400 · 12px · lh 17</div>
+    </div>
+    <div class="sample"><span class="type-caption">Dernière activité il y a 3 min · 42 membres</span></div>
+  </div>
+</body>
+</html>

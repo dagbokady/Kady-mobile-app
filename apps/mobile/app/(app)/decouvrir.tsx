@@ -1,7 +1,8 @@
 // app/(app)/decouvrir.tsx — Découvrir : recherche, filtres avancés, chips,
 // cartes à couverture (CoverCard) + état vide. (proto L142-214)
-import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import { useFocusEffect } from 'expo-router';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Screen from '../../src/components/Screen';
@@ -12,8 +13,24 @@ import { FadeInUp, animateLayout } from '../../src/components/motion';
 import { fonts } from '../../src/theme/typography';
 import { spacing } from '../../src/theme/spacing';
 import { useColors, type Palette } from '../../src/theme/theme';
-import { cerclesDecouvrir } from '../../src/data/mock';
-import { useStore, useToast } from '../../src/store/app';
+import { useToast } from '../../src/store/app';
+import { cercles as cerclesApi, type CercleApi } from '../../src/api';
+import { apiError } from '../../src/api/client';
+
+const GRADE_PAR_NIVEAU = ['graine', 'graine', 'flamme', 'etoile', 'diamant', 'legendaire'] as const;
+function joursAvant(iso: string | null): number {
+    if (!iso) return 60;
+    return Math.max(0, Math.round((new Date(iso).getTime() - Date.now()) / 86_400_000));
+}
+// Transforme un cercle d'API vers la forme attendue par l'écran/CoverCard.
+function versCarte(c: CercleApi) {
+    return {
+        id: c.id, nom: c.nom, theme: c.theme ?? 'Communauté', description: c.description ?? '',
+        membres: c.membres, max: c.capacite_max,
+        grade: GRADE_PAR_NIVEAU[Math.min(c.niveau, 5)] as 'graine' | 'flamme' | 'etoile' | 'diamant' | 'legendaire',
+        expireDans: joursAvant(c.expire_le), apercu: [] as string[], rejoint: c.rejoint,
+    };
+}
 
 const PAD = spacing.lg;
 const CHIPS = ['Tous', 'Populaires', 'Proches', 'Actifs', 'Nouveaux'];
@@ -23,8 +40,40 @@ export default function Decouvrir() {
     const router = useRouter();
     const c = useColors();
     const s = makeStyles(c);
-    const joined = useStore((st) => st.joined);
-    const join = useStore((st) => st.join);
+
+    const [data, setData] = useState<ReturnType<typeof versCarte>[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+    const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set());
+
+    const charger = useCallback(async () => {
+        try {
+            const liste = await cerclesApi.list();
+            const cartes = liste.map(versCarte);
+            setData(cartes);
+            setJoinedIds(new Set(cartes.filter((x) => x.rejoint).map((x) => x.id)));
+        } catch (e) {
+            useToast.getState().show(apiError(e));
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+
+    // Recharge à chaque fois que l'écran reprend le focus (cercle rejoint ailleurs, etc.).
+    useFocusEffect(useCallback(() => { charger(); }, [charger]));
+
+    const join = async (id: string, nom: string) => {
+        setJoinedIds((prev) => new Set(prev).add(id)); // optimiste
+        try {
+            await cerclesApi.join(id);
+            useToast.getState().show(`Tu as rejoint ${nom}`);
+            charger();
+        } catch (e) {
+            setJoinedIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
+            useToast.getState().show(apiError(e));
+        }
+    };
 
     const [search, setSearch] = useState('');
     const [chip, setChip] = useState('Tous');
@@ -34,7 +83,7 @@ export default function Decouvrir() {
     const advCount = (adv.places !== 'all' ? 1 : 0) + (adv.grade !== 'all' ? 1 : 0) + (adv.sort !== 'pop' ? 1 : 0);
 
     const cards = useMemo(() => {
-        let list = cerclesDecouvrir.filter((cc) => {
+        let list = data.filter((cc) => {
             const q = search.trim().toLowerCase();
             if (q && !(cc.nom.toLowerCase().includes(q) || cc.theme.toLowerCase().includes(q))) return false;
             const places = cc.max - cc.membres;
@@ -46,13 +95,14 @@ export default function Decouvrir() {
         if (chip === 'Populaires' || adv.sort === 'pop') list = [...list].sort((a, b) => b.membres - a.membres);
         if (chip === 'Nouveaux') list = [...list].sort((a, b) => b.expireDans - a.expireDans);
         return list;
-    }, [search, chip, adv]);
+    }, [data, search, chip, adv]);
 
     const resetAdv = () => { animateLayout(); setAdv(DEFAULT_ADV); };
 
     return (
         <Screen edges={['top']}>
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: 130 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingTop: spacing.sm, paddingBottom: 130 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); charger(); }} tintColor={c.accent} />}>
                 <FadeInUp>
                     <Text style={s.h1}>Découvrir</Text>
                     <Text style={s.intro}>Trouve un Cercle qui te ressemble. Lis la salle d'accueil avant de rejoindre.</Text>
@@ -112,14 +162,18 @@ export default function Decouvrir() {
                                 grade={cc.grade}
                                 expireDans={cc.expireDans}
                                 apercu={cc.apercu}
-                                joined={joined.includes(cc.id)}
+                                joined={joinedIds.has(cc.id)}
                                 onOpen={() => router.push(`/(app)/cercles/${cc.id}`)}
-                                onJoin={() => { join(cc.id); useToast.getState().show(`Tu as rejoint ${cc.nom}`); }}
+                                onJoin={() => join(cc.id, cc.nom)}
                             />
                         </FadeInUp>
                     ))}
 
-                    {cards.length === 0 && (
+                    {loading && (
+                        <View style={s.empty}><ActivityIndicator color={c.accent} /></View>
+                    )}
+
+                    {!loading && cards.length === 0 && (
                         <View style={s.empty}>
                             <View style={s.emptyIcon}><Ionicons name="compass-outline" size={30} color={c.ink(0.3)} /></View>
                             <Text style={s.emptyTitle}>Aucun cercle trouvé</Text>

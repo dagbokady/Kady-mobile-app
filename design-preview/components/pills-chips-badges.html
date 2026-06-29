@@ -1,0 +1,123 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kady — Pills, Chips &amp; Badges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(160deg, #ffffff 0%, #faf7fe 60%, #f6f2fb 100%);
+    min-height: 100vh; padding: 40px 32px; color: #211633;
+  }
+  h1 { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #6E6A7D; margin-bottom: 36px; }
+  .section-title { font-weight: 600; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: #6E6A7D; margin-bottom: 16px; margin-top: 28px; }
+  .section-title:first-of-type { margin-top: 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+  /* Pill */
+  .pill {
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 100px; padding: 9px 15px;
+    font-size: 14px; cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .pill-inactive { border: 1px solid rgba(33,22,51,0.08); color: rgba(33,22,51,0.6); background: transparent; }
+  .pill-active { background: linear-gradient(135deg,#ff6aa9,#e02a73); color: #fff; font-weight: 600; border: 1px solid transparent; }
+
+  /* Grade Chips */
+  .grade-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    border: 1px solid; border-radius: 100px; padding: 3px 9px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; font-size: 11px;
+  }
+  .grade-solid { color: #fff; border-color: transparent; }
+
+  /* Badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    border-radius: 100px; padding: 5px 11px;
+    font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500; font-size: 12px;
+  }
+</style>
+</head>
+<body>
+  <h1>Pills · Chips · Badges</h1>
+  <p class="subtitle">Filtres sélectionnables, grades de cercle, badges de profil.</p>
+
+  <div class="section-title">Pill — filtre sélectionnable</div>
+  <div class="row">
+    <span class="pill pill-inactive">Tous</span>
+    <span class="pill pill-active">Cuisine</span>
+    <span class="pill pill-inactive">Musique</span>
+    <span class="pill pill-inactive">Voyage</span>
+    <span class="pill pill-active">Sport</span>
+    <span class="pill pill-inactive">Foi</span>
+  </div>
+
+  <div class="section-title">GradeChip — outline</div>
+  <div class="row">
+    <span class="grade-chip" style="border-color:#22B36B55;background:#22B36B26;color:#22B36B;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#22B36B"><path d="M17 8C8 10 5.9 16.17 3.82 19.92c.21-.23.44-.43.68-.58C7 17.5 10 14 10 12c0 2.5 3.5 4 5 8 5-7 3-14-2-12z"/></svg>
+      Graine
+    </span>
+    <span class="grade-chip" style="border-color:#FF6B4A55;background:#FF6B4A26;color:#FF6B4A;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#FF6B4A"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z"/></svg>
+      Flamme
+    </span>
+    <span class="grade-chip" style="border-color:#F5A62355;background:#F5A62326;color:#F5A623;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#F5A623"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+      Étoile
+    </span>
+    <span class="grade-chip" style="border-color:#2BB7CF55;background:#2BB7CF26;color:#2BB7CF;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#2BB7CF"><path d="M12 2L2 12l10 10 10-10L12 2zm0 3.5L18.5 12 12 18.5 5.5 12 12 5.5z"/></svg>
+      Diamant
+    </span>
+    <span class="grade-chip" style="border-color:#8B5CF655;background:#8B5CF626;color:#8B5CF6;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#8B5CF6"><path d="M12 1L9 9H1l6 5-2 8 7-5 7 5-2-8 6-5h-8z"/></svg>
+      Légendaire
+    </span>
+  </div>
+
+  <div class="section-title">GradeChip — solid</div>
+  <div class="row">
+    <span class="grade-chip grade-solid" style="background:#22B36B;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M17 8C8 10 5.9 16.17 3.82 19.92c.21-.23.44-.43.68-.58C7 17.5 10 14 10 12c0 2.5 3.5 4 5 8 5-7 3-14-2-12z"/></svg>
+      Graine
+    </span>
+    <span class="grade-chip grade-solid" style="background:#FF6B4A;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67z"/></svg>
+      Flamme
+    </span>
+    <span class="grade-chip grade-solid" style="background:#8B5CF6;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M12 1L9 9H1l6 5-2 8 7-5 7 5-2-8 6-5h-8z"/></svg>
+      Légendaire
+    </span>
+  </div>
+
+  <div class="section-title">Badge — profil</div>
+  <div class="row">
+    <span class="badge" style="background:#a78bfa24;color:#a78bfa;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#a78bfa"><path d="M12 2L8.5 8H2l5 4.5L5.5 20 12 16l6.5 4L17 12.5 22 8h-6.5z"/></svg>
+      Pionnier
+    </span>
+    <span class="badge" style="background:#2fb8c024;color:#2fb8c0;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#2fb8c0"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      Vérifié
+    </span>
+    <span class="badge" style="background:#5a7fd624;color:#5a7fd6;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#5a7fd6"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+      Vérifié+
+    </span>
+    <span class="badge" style="background:#ff6fa824;color:#ff6fa8;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="#ff6fa8"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Respectueux
+    </span>
+  </div>
+</body>
+</html>

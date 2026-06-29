@@ -10,6 +10,7 @@ import { FadeInUp, PopIn } from '../src/components/motion';
 import { spacing } from '../src/theme/spacing';
 import { fonts } from '../src/theme/typography';
 import { useColors, type Palette } from '../src/theme/theme';
+import { useAuth } from '../src/store/auth';
 
 export default function Welcome() {
     const router = useRouter();
@@ -17,6 +18,12 @@ export default function Welcome() {
     const { width } = useWindowDimensions();
     const styles = makeStyles(c, width);
     const spin = useRef(new Animated.Value(0)).current;
+
+    // Session déjà active (jeton valide restauré) → on saute l'accueil marketing.
+    const status = useAuth((s) => s.status);
+    useEffect(() => {
+        if (status === 'authed') router.replace('/(app)/accueil');
+    }, [status]);
 
     useEffect(() => {
         const loop = Animated.loop(

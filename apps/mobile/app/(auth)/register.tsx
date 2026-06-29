@@ -1,6 +1,6 @@
 // app/(auth)/register.tsx — 6 étapes : identité, détails, préférences, selfie, photos, CGU
-import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Modal, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Screen from '../../src/components/Screen';
@@ -13,6 +13,9 @@ import { colors } from '../../src/theme/colors';
 import { useColors, type Palette } from '../../src/theme/theme';
 import { useScale } from '../../src/theme/responsive';
 import { useStore, DEFAULT_PREFS } from '../../src/store/app';
+import { useAuth } from '../../src/store/auth';
+import { meta } from '../../src/api';
+import { apiError } from '../../src/api/client';
 
 const INTERETS = ['Musique', 'Sport', 'Cuisine', 'Cinéma', 'Voyage', 'Lecture', 'Mode', 'Tech', 'Foi', 'Entrepreneuriat', 'Danse', 'Jeux vidéo'];
 const TOTAL_STEPS = 6;
@@ -23,6 +26,8 @@ export default function Register() {
     const sc = useScale();
     const s = makeStyles(c, sc);
     const setPrefs = useStore((st) => st.setPrefs);
+    const register = useAuth((st) => st.register);
+    const [busy, setBusy] = useState(false);
 
     const [step, setStep] = useState(0);
 
@@ -36,6 +41,11 @@ export default function Register() {
     // Step 1 — détails
     const [genre, setGenre] = useState('');
     const [ville, setVille] = useState('');
+    const [villes, setVilles] = useState<string[]>([]);
+    const [villeOpen, setVilleOpen] = useState(false);
+    const [villeQ, setVilleQ] = useState('');
+    useEffect(() => { meta.villes().then(setVilles); }, []);
+    const villesFiltrees = villes.filter((v) => v.toLowerCase().includes(villeQ.trim().toLowerCase()));
     const [interets, setInterets] = useState<string[]>([]);
 
     // Step 2 — préférences
@@ -63,12 +73,20 @@ export default function Register() {
 
     const prev = () => { setErr(''); if (step > 0) setStep(step - 1); else router.back(); };
 
-    const next = () => {
+    // JJ/MM/AAAA → AAAA-MM-JJ (format attendu par l'API).
+    const isoNaissance = () => {
+        const m = naissance.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+    };
+    const genreApi = () => (genre.toLowerCase().startsWith('f') ? 'femme' : genre ? 'homme' : null);
+
+    const next = async () => {
         setErr('');
+        if (busy) return;
         if (step === 0) {
             if (!prenom.trim()) return setErr('Indique ton prénom.');
             if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setErr('Email invalide.');
-            if (!mdp || mdp.length < 6) return setErr('Mot de passe : au moins 6 caractères.');
+            if (!mdp || mdp.length < 8) return setErr('Mot de passe : au moins 8 caractères.');
             if (mdp !== mdp2) return setErr('Les mots de passe ne correspondent pas.');
             if (monAge === null) return setErr('Date au format JJ/MM/AAAA.');
             if (monAge < 18) return setErr('KADY est réservé aux 18 ans et plus.');
@@ -77,8 +95,22 @@ export default function Register() {
         if (step === 3 && !selfie) return setErr('Prends un selfie pour continuer.');
         if (step === 5 && !cgu) return setErr('Tu dois accepter les conditions.');
         if (step < TOTAL_STEPS - 1) return setStep(step + 1);
+
+        // Dernière étape : création du compte côté serveur.
         setPrefs({ lookingFor: 'tout', ageMin: (monAge ?? 25) - gap, ageMax: (monAge ?? 25) + gap, mode });
-        router.replace('/onboarding' as any);
+        setBusy(true);
+        try {
+            await register({
+                email: email.trim().toLowerCase(), password: mdp, prenom: prenom.trim(),
+                date_naissance: isoNaissance(), genre: genreApi(), ville: ville.trim() || null,
+                centres_interet: interets,
+            });
+            router.replace('/onboarding' as any);
+        } catch (e) {
+            setErr(apiError(e));
+        } finally {
+            setBusy(false);
+        }
     };
 
     const togglePhoto = (i: number) => setPhotos((p) => { const n = [...p]; n[i] = !n[i]; return n; });
@@ -150,8 +182,37 @@ export default function Register() {
                             </View>
                         </Field>
                         <Field label="Ville">
-                            <TextInput style={s.input} value={ville} onChangeText={setVille} placeholder="Abidjan, Bouaké…" placeholderTextColor={c.ink(0.42)} />
+                            <Pressable style={[s.input, { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]} onPress={() => setVilleOpen(true)}>
+                                <Text style={{ fontFamily: fonts.body, fontSize: sc.ms(16), color: ville ? c.text : c.ink(0.42) }}>{ville || 'Choisis ta ville…'}</Text>
+                                <Ionicons name="chevron-down" size={sc.ms(18)} color={c.ink(0.45)} />
+                            </Pressable>
                         </Field>
+
+                        <Modal visible={villeOpen} transparent animationType="slide" onRequestClose={() => setVilleOpen(false)}>
+                            <Pressable style={{ flex: 1, backgroundColor: 'rgba(10,6,20,0.5)', justifyContent: 'flex-end' }} onPress={() => setVilleOpen(false)}>
+                                <Pressable style={{ maxHeight: '78%', backgroundColor: c.bg[0], borderTopLeftRadius: 26, borderTopRightRadius: 26, paddingTop: 12 }} onPress={() => {}}>
+                                    <View style={{ alignSelf: 'center', width: 38, height: 5, borderRadius: 99, backgroundColor: c.ink(0.18), marginBottom: 10 }} />
+                                    <Text style={{ fontFamily: fonts.display, fontSize: sc.ms(18), color: c.text, paddingHorizontal: 20, marginBottom: 10 }}>Ta ville</Text>
+                                    <View style={{ marginHorizontal: 20, marginBottom: 8, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 13, borderRadius: 13, backgroundColor: c.field, borderWidth: 1, borderColor: c.border }}>
+                                        <Ionicons name="search" size={16} color={c.ink(0.42)} />
+                                        <TextInput value={villeQ} onChangeText={setVilleQ} placeholder="Rechercher…" placeholderTextColor={c.ink(0.4)} style={{ flex: 1, paddingVertical: 11, fontFamily: fonts.body, fontSize: sc.ms(15), color: c.text }} />
+                                    </View>
+                                    <FlatList
+                                        data={villesFiltrees}
+                                        keyExtractor={(v) => v}
+                                        keyboardShouldPersistTaps="handled"
+                                        renderItem={({ item }) => (
+                                            <Pressable onPress={() => { setVille(item); setVilleOpen(false); setVilleQ(''); }}
+                                                style={{ paddingVertical: 14, paddingHorizontal: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                                                <Text style={{ fontFamily: fonts.bodySemi, fontSize: sc.ms(15), color: c.text }}>{item}</Text>
+                                                {ville === item && <Ionicons name="checkmark" size={18} color={c.accent} />}
+                                            </Pressable>
+                                        )}
+                                        ListEmptyComponent={<Text style={{ textAlign: 'center', padding: 24, color: c.ink(0.45), fontFamily: fonts.body }}>Aucune ville</Text>}
+                                    />
+                                </Pressable>
+                            </Pressable>
+                        </Modal>
                         <Field label="Centres d'intérêt">
                             <View style={s.rowWrap}>{INTERETS.map((i) => <Pill key={i} label={i} active={interets.includes(i)} onPress={() => setInterets((p) => p.includes(i) ? p.filter((x) => x !== i) : [...p, i])} />)}</View>
                         </Field>

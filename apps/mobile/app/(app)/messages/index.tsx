@@ -1,47 +1,53 @@
 // app/(app)/messages/index.tsx — Messages : recherche, filtres, liste de
 // conversations (réservées aux cercles partagés). (proto L216-261)
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable, TextInput } from 'react-native';
-import { useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, TextInput, ActivityIndicator, RefreshControl } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import Screen from '../../../src/components/Screen';
 import { FadeInUp } from '../../../src/components/motion';
 import { fonts } from '../../../src/theme/typography';
+import { colorForName } from '../../../src/theme/colors';
 import { useColors, type Palette } from '../../../src/theme/theme';
+import { dm as dmApi, type ConversationApi } from '../../../src/api';
+import { apiError } from '../../../src/api/client';
+import { useToast } from '../../../src/store/app';
 
 const PAD = 22;
-const CHIPS = ['Tous', 'Rencontre', 'Amitié'];
-const REN = { dot: '#ff6fa8', label: 'Rencontre' };
-const AMI = { dot: '#8f9dff', label: 'Amitié' };
+const NIVEAUX = ['L\'Inconnu', 'La Connaissance', 'L\'Ami(e)', 'La Confiance', 'L\'Intimité'];
 
-type Conv = {
-    id: string; initial: string; grad: readonly [string, string]; name: string;
-    mode: { dot: string; label: string }; time: string; last: string;
-    unread?: number; online?: boolean; mine?: boolean; photo?: boolean;
-};
-const CONVS: Conv[] = [
-    { id: 'awa', initial: 'A', grad: ['#ff9d5c', '#d34d7e'], name: 'Awa, 26', mode: REN, last: 'Tu as déjà visité Assinie ? 🌴', time: '12:45', unread: 2, online: true },
-    { id: 'koffi', initial: 'K', grad: ['#7be0a0', '#2f9ac2'], name: 'Koffi, 29', mode: AMI, last: 'On se capte ce week-end ? 🏀', time: '11:20', online: true, mine: true },
-    { id: 'mariam', initial: 'M', grad: ['#b07bff', '#7a4fd6'], name: 'Mariam, 24', mode: REN, last: "J'ai adoré ta sélection de films 🎬", time: 'Hier', unread: 1 },
-    { id: 'fatou', initial: 'F', grad: ['#ffb45c', '#d3744d'], name: 'Fatou, 31', mode: AMI, last: 'Photo envoyée', time: 'Hier', photo: true },
-    { id: 'yann', initial: 'Y', grad: ['#8fd0ff', '#5a7fd6'], name: 'Yann, 27', mode: REN, last: 'Salut ! On partage le cercle business 👋', time: 'Lun', unread: 1 },
-    { id: 'sophie', initial: 'S', grad: ['#9aa7d6', '#5b6aa8'], name: 'Sophie, 28', mode: AMI, last: 'Merci pour la recommandation 🙏', time: 'Dim', mine: true },
-];
+type Conv = { id: string; initial: string; grad: readonly [string, string]; name: string; niveau: number; relationId: string; autreId: string };
+
+function versConv(cv: ConversationApi): Conv {
+    const nom = cv.prenom ?? 'Inconnu';
+    const tint = colorForName(nom);
+    return { id: cv.id, initial: nom.charAt(0).toUpperCase(), grad: [tint, tint], name: nom, niveau: cv.niveau, relationId: cv.relation_id, autreId: cv.autre_id };
+}
 
 export default function Messages() {
     const router = useRouter();
     const c = useColors();
     const s = makeStyles(c);
-    const [filter, setFilter] = useState(0);
     const [search, setSearch] = useState('');
+    const [data, setData] = useState<Conv[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    const charger = useCallback(async () => {
+        try {
+            setData((await dmApi.conversations()).map(versConv));
+        } catch (e) {
+            useToast.getState().show(apiError(e));
+        } finally {
+            setLoading(false);
+            setRefreshing(false);
+        }
+    }, []);
+    useFocusEffect(useCallback(() => { charger(); }, [charger]));
 
     const q = search.trim().toLowerCase();
-    const shown = CONVS.filter((cv) => {
-        if (filter !== 0 && cv.mode.label !== CHIPS[filter]) return false;
-        if (q && !cv.name.toLowerCase().includes(q)) return false;
-        return true;
-    });
+    const shown = data.filter((cv) => !q || cv.name.toLowerCase().includes(q));
 
     return (
         <Screen padded={false} edges={['top']}>
@@ -52,7 +58,8 @@ export default function Messages() {
                 </View>
             </FadeInUp>
 
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: PAD, paddingBottom: 140 }}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: PAD, paddingBottom: 140 }}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); charger(); }} tintColor={c.accent} />}>
                 <FadeInUp delay={40}>
                     <View style={s.searchBox}>
                         <Ionicons name="search" size={18} color={c.ink(0.42)} />
@@ -63,44 +70,24 @@ export default function Messages() {
                     </View>
                 </FadeInUp>
 
-                <FadeInUp delay={70}>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -PAD }} contentContainerStyle={s.chipsRow}>
-                        {CHIPS.map((label, i) => {
-                            const on = i === filter;
-                            return (
-                                <Pressable key={label} onPress={() => setFilter(i)} style={[s.chip, on ? s.chipOn : s.chipOff]}>
-                                    <Text style={[s.chipTxt, { color: on ? c.accentDeep : c.ink(0.6) }]}>{label}</Text>
-                                </Pressable>
-                            );
-                        })}
-                    </ScrollView>
-                </FadeInUp>
-
-                <View style={{ marginTop: 8 }}>
+                <View style={{ marginTop: 14 }}>
                     {shown.map((cv, i) => (
                         <FadeInUp key={cv.id} delay={90 + i * 45}>
-                            <Pressable style={s.conv} onPress={() => router.push(`/(app)/messages/${cv.id}`)}>
-                                <View>
-                                    <LinearGradient colors={cv.grad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.convAvatar}>
-                                        <Text style={s.convLetter}>{cv.initial}</Text>
-                                    </LinearGradient>
-                                    {cv.online && <View style={s.convOnline} />}
-                                </View>
+                            <Pressable style={s.conv} onPress={() => router.push({ pathname: '/(app)/messages/[id]', params: { id: cv.id, name: cv.name, niveau: String(cv.niveau), relationId: cv.relationId, autreId: cv.autreId } })}>
+                                <LinearGradient colors={cv.grad} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.convAvatar}>
+                                    <Text style={s.convLetter}>{cv.initial}</Text>
+                                </LinearGradient>
                                 <View style={s.convBody}>
                                     <View style={s.convTop}>
-                                        <Text style={[s.convName, cv.unread ? { fontFamily: fonts.bodyBold } : null]} numberOfLines={1}>{cv.name}</Text>
-                                        <Text style={[s.convTime, cv.unread ? { color: c.accent, fontFamily: fonts.bodySemi } : null]}>{cv.time}</Text>
+                                        <Text style={s.convName} numberOfLines={1}>{cv.name}</Text>
                                     </View>
                                     <View style={s.convBottom}>
                                         <View style={s.convLastWrap}>
-                                            {cv.mine && <Ionicons name="checkmark-done" size={15} color={c.accent} />}
-                                            {cv.photo && <Ionicons name="image-outline" size={15} color={c.ink(0.5)} />}
-                                            <Text style={[s.convLast, cv.unread ? { color: c.text, fontFamily: fonts.bodyMed } : null]} numberOfLines={1}>{cv.last}</Text>
+                                            <Ionicons name="heart" size={13} color={c.accent} />
+                                            <Text style={s.convLast} numberOfLines={1}>{NIVEAUX[Math.min(cv.niveau, 5) - 1]}</Text>
                                         </View>
                                         <View style={s.convMeta}>
-                                            <View style={[s.modeDot, { backgroundColor: cv.mode.dot }]} />
-                                            <Text style={[s.modeTxt, { color: cv.mode.dot }]}>{cv.mode.label}</Text>
-                                            {!!cv.unread && <View style={s.unread}><Text style={s.unreadTxt}>{cv.unread}</Text></View>}
+                                            <Text style={[s.modeTxt, { color: c.accent }]}>Niveau {cv.niveau}</Text>
                                         </View>
                                     </View>
                                 </View>
@@ -108,10 +95,12 @@ export default function Messages() {
                         </FadeInUp>
                     ))}
 
-                    {shown.length === 0 && (
+                    {loading && <View style={s.empty}><ActivityIndicator color={c.accent} /></View>}
+
+                    {!loading && shown.length === 0 && (
                         <View style={s.empty}>
-                            <Ionicons name="search-outline" size={34} color={c.ink(0.25)} />
-                            <Text style={s.emptyTxt}>Aucune conversation pour « {search} »</Text>
+                            <Ionicons name="chatbubbles-outline" size={34} color={c.ink(0.25)} />
+                            <Text style={s.emptyTxt}>{q ? `Aucune conversation pour « ${search} »` : 'Pas encore de conversation. Fais grandir un lien dans un Cercle pour débloquer le privé.'}</Text>
                         </View>
                     )}
                 </View>

@@ -10,6 +10,7 @@ import { fonts } from '../../../src/theme/typography';
 import { gradients } from '../../../src/theme/colors';
 import { useColors, useTheme, type Palette } from '../../../src/theme/theme';
 import { useStore, pickImage } from '../../../src/store/app';
+import { useAuth } from '../../../src/store/auth';
 import { interestMeta } from '../../../src/data/interests';
 
 const PAD = 22;
@@ -197,7 +198,7 @@ export default function Profil() {
                 </FadeInUp>
 
                 <FadeInUp delay={410}>
-                    <Pressable style={s.logout} onPress={() => router.replace('/')}>
+                    <Pressable style={s.logout} onPress={async () => { await useAuth.getState().logout(); router.replace('/'); }}>
                         <Text style={s.logoutTxt}>Se déconnecter</Text>
                     </Pressable>
                 </FadeInUp>

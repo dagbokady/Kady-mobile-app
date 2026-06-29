@@ -1,71 +1,109 @@
 // app/(app)/messages/[id].tsx — Chat privé (handoff "KADY Chat Prive.dc.html")
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Animated, Easing, StatusBar, useWindowDimensions, Image, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Animated, Easing, StatusBar, useWindowDimensions, Image, Alert, ActivityIndicator } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Defs, Pattern, Circle, Rect } from 'react-native-svg';
 import { fonts } from '../../../src/theme/typography';
+import { colorForName } from '../../../src/theme/colors';
 import { useColors, type Palette } from '../../../src/theme/theme';
-import { relations, NIVEAUX_RENCONTRE, NIVEAUX_AMITIE, DISC_DATA, DISC_FIELDS } from '../../../src/data/mock';
-import { useStore, useToast, pickImage } from '../../../src/store/app';
+import { NIVEAUX_RENCONTRE, DISC_FIELDS } from '../../../src/data/mock';
+import { useStore, useToast } from '../../../src/store/app';
+import { useAuth } from '../../../src/store/auth';
+import { dm as dmApi, relations as relApi, type DmApi } from '../../../src/api';
+import { apiError } from '../../../src/api/client';
 import QuizSheet from '../../../src/components/QuizSheet';
 import LevelUpModal from '../../../src/components/LevelUpModal';
 
 const SEND_GRAD = ['#ff6aa9', '#e02a73'] as const;
 
+// ISO → HH:MM local.
+function fmtHeure(iso: string): string {
+    const d = new Date(iso);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
 export default function ChatPrive() {
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const params = useLocalSearchParams<{ id: string; name?: string; niveau?: string; relationId?: string; autreId?: string }>();
+    const convId = params.id;
+    const prenom = params.name ?? 'Conversation';
+    const relationId = params.relationId;
+    const autreId = params.autreId ?? '';
     const router = useRouter();
     const insets = useSafeAreaInsets();
     const { width, height } = useWindowDimensions();
     const c = useColors();
     const s = makeStyles(c);
-    const r = relations.find((x) => x.id === id) ?? relations[0];
-    const labels = r.mode === 'rencontre' ? NIVEAUX_RENCONTRE : NIVEAUX_AMITIE;
+    const labels = NIVEAUX_RENCONTRE;
+    const grad = [colorForName(prenom), colorForName(prenom)] as const;
 
     const [draft, setDraft] = useState('');
-    const [playing, setPlaying] = useState(false);
     const [quizOpen, setQuizOpen] = useState(false);
     const [levelOpen, setLevelOpen] = useState(false);
-    const sent = useStore((st) => st.dm[r.id] ?? []);
-    const sendDM = useStore((st) => st.sendDM);
-    const niveauOverride = useStore((st) => st.niveaux[r.id]);
-    const setNiveau = useStore((st) => st.setNiveau);
-    const discRevealed = useStore((st) => st.disc[r.id] ?? []);
+    const [niveau, setNiveauLocal] = useState(Math.min(Number(params.niveau ?? '1') || 1, 5));
+    const [messages, setMessages] = useState<DmApi[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const meId = useAuth((st) => st.me?.id);
+    const discRevealed = useStore((st) => st.disc[autreId] ?? []);
     const scroller = useRef<ScrollView>(null);
     const hasText = draft.trim().length > 0;
 
-    // Niveau effectif (override store, sinon seed du mock). Le niveau plafonne à 5.
-    const niveau = Math.min(niveauOverride ?? r.niveau, 5);
     const canLevel = niveau < 5;
     const discTotal = DISC_FIELDS.length;
     const discDone = discRevealed.length;
 
-    const confirmLevelUp = () => {
-        setNiveau(r.id, niveau + 1);
-        setLevelOpen(false);
-        useToast.getState().show(`Niveau ${niveau + 1} atteint avec ${r.prenom} 🎉`);
+    // Charge l'historique réel de la conversation à l'ouverture / au focus.
+    const charger = useCallback(async () => {
+        if (!convId) return;
+        try {
+            setMessages(await dmApi.messages(convId));
+        } catch (e) {
+            useToast.getState().show(apiError(e));
+        } finally {
+            setLoading(false);
+            setTimeout(() => scroller.current?.scrollToEnd({ animated: false }), 60);
+        }
+    }, [convId]);
+    useFocusEffect(useCallback(() => { charger(); }, [charger]));
+
+    const send = async () => {
+        const t = draft.trim();
+        if (!t || !convId) return;
+        setDraft('');
+        try {
+            const msg = await dmApi.envoyer(convId, t);
+            setMessages((prev) => [...prev, msg]);
+            setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 50);
+        } catch (e) {
+            useToast.getState().show(apiError(e));
+        }
     };
 
-    const send = () => {
-        const t = draft.trim();
-        if (!t) return;
-        sendDM(r.id, t);
-        setDraft('');
-        setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 50);
+    const evaluer = async (moyenne: number): Promise<boolean> => {
+        if (!relationId) return false;
+        try {
+            const r = await relApi.evaluer(relationId, moyenne);
+            setNiveauLocal(r.niveau);
+            return r.a_evolue;
+        } catch (e) {
+            useToast.getState().show(apiError(e));
+            return false;
+        }
     };
-    const sendImg = async () => {
-        const uri = await pickImage();
-        if (!uri) return;
-        sendDM(r.id, '', uri);
-        setTimeout(() => scroller.current?.scrollToEnd({ animated: true }), 80);
+
+    const confirmLevelUp = async () => {
+        setLevelOpen(false);
+        const evolue = await evaluer(5);
+        if (evolue) useToast.getState().show(`Votre lien grandit avec ${prenom} 🎉`);
     };
+
     const lockedCall = (kind: string) =>
-        Alert.alert(`${kind} verrouillé`, `Les appels ${kind.toLowerCase()} se débloquent au niveau « La Confiance ». Continuez à échanger pour y arriver 💫`);
+        Alert.alert(`${kind} verrouillé`, `Les appels ${kind.toLowerCase()} se débloquent à un niveau plus élevé. Continuez à échanger pour y arriver 💫`);
     const addEmoji = () => setDraft((d) => d + '😊');
-    const openProfile = () => router.push(`/(app)/membre/${r.id}`);
+    const openProfile = () => autreId && router.push({ pathname: '/(app)/membre/[id]', params: { id: autreId, name: prenom } });
 
     return (
         <View style={s.root}>
@@ -86,17 +124,12 @@ export default function ChatPrive() {
                         <Ionicons name="chevron-back" size={24} color={c.text} />
                     </Pressable>
                     <Pressable onPress={openProfile} style={s.headerId}>
-                        <View>
-                            <LinearGradient colors={r.grad as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.avatar}>
-                                <Text style={s.avatarLetter}>{r.prenom.charAt(0).toUpperCase()}</Text>
-                            </LinearGradient>
-                            {r.enLigne && <View style={s.onlineDot} />}
-                        </View>
+                        <LinearGradient colors={grad as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.avatar}>
+                            <Text style={s.avatarLetter}>{prenom.charAt(0).toUpperCase()}</Text>
+                        </LinearGradient>
                         <View style={{ flex: 1 }}>
-                            <Text style={s.name} numberOfLines={1}>{r.prenom}, {r.age}</Text>
-                            <Text style={[s.status, !r.enLigne && { color: c.ink(0.45) }]}>
-                                {r.enLigne ? 'En ligne' : labels[r.niveau - 1]}
-                            </Text>
+                            <Text style={s.name} numberOfLines={1}>{prenom}</Text>
+                            <Text style={[s.status, { color: c.ink(0.45) }]}>{labels[niveau - 1]}</Text>
                         </View>
                     </Pressable>
                     <Pressable style={s.callBtn} onPress={() => setQuizOpen(true)}><Ionicons name="star-outline" size={19} color="#ffb43a" /></Pressable>
@@ -108,7 +141,7 @@ export default function ChatPrive() {
                 <View style={s.relationBar}>
                     <View style={s.relationTop}>
                         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                            <Ionicons name={r.mode === 'rencontre' ? 'heart' : 'people'} size={12} color={c.accent} />
+                            <Ionicons name="heart" size={12} color={c.accent} />
                             <Text style={s.relationName}>{labels[niveau - 1]}</Text>
                         </View>
                         <Text style={s.relationLevel}>Niveau {niveau}/5</Text>
@@ -141,61 +174,35 @@ export default function ChatPrive() {
                     <View style={s.sysWrap}>
                         <View style={s.sysNote}>
                             <Ionicons name="lock-closed" size={12} color={c.accent} />
-                            <Text style={s.sysTxt}> Vous discutez car vous partagez le cercle <Text style={s.sysCercle}>{r.cercle}</Text></Text>
+                            <Text style={s.sysTxt}> Vous discutez en privé car vous partagez un <Text style={s.sysCercle}>Cercle</Text>. Les coordonnées sont masquées.</Text>
                         </View>
                     </View>
 
                     {/* Bannière « Profil à découvrir » → ouvre le profil membre (jeu de devinettes) */}
-                    <Pressable style={s.discBanner} onPress={openProfile}>
-                        <LinearGradient colors={['#ff6aa9', '#e02a73']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.discIcon}>
-                            <Ionicons name="sparkles" size={18} color="#fff" />
-                        </LinearGradient>
-                        <View style={{ flex: 1, minWidth: 0 }}>
-                            <Text style={s.discTitle}>{discDone} sur {discTotal} infos découvertes</Text>
-                            <Text style={s.discSub}>Devine ce que tu apprends sur {r.prenom} →</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={17} color={c.accent} />
-                    </Pressable>
-
-                    <InBubble time="12:32">Coucou Didier ! Ravie de te croiser dans le cercle 😊</InBubble>
-                    <InBubble time="12:32" gap>Tu as déjà visité Assinie ? 🌴</InBubble>
-
-                    <OutBubble time="12:38">Salut {r.prenom} ! Oui plusieurs fois, c'est un de mes coins préférés 🙌</OutBubble>
-                    <OutBubble time="12:38" gap>On pourrait y organiser une sortie avec le cercle 👀</OutBubble>
-
-                    <View style={[s.rowIn, { marginBottom: 14 }]}>
-                        <View style={s.imageBubble}>
-                            <View style={s.imageInner}>
-                                <LinearGradient colors={['#7fe0d0', '#2f9aa8', '#1d3f66']} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={StyleSheet.absoluteFill} />
-                                <LinearGradient colors={['rgba(255,235,170,0.4)', 'transparent']} start={{ x: 0.8, y: 0 }} end={{ x: 0.2, y: 0.7 }} style={StyleSheet.absoluteFill} />
-                                <View style={[s.imageTag, { left: 8 }]}><Text style={s.imageTagTxt}>photo · plage</Text></View>
-                                <View style={[s.imageTag, { right: 8 }]}><Text style={s.imageTagTxt}>12:41</Text></View>
+                    {!!autreId && (
+                        <Pressable style={s.discBanner} onPress={openProfile}>
+                            <LinearGradient colors={['#ff6aa9', '#e02a73']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.discIcon}>
+                                <Ionicons name="sparkles" size={18} color="#fff" />
+                            </LinearGradient>
+                            <View style={{ flex: 1, minWidth: 0 }}>
+                                <Text style={s.discTitle}>{discDone} sur {discTotal} infos découvertes</Text>
+                                <Text style={s.discSub}>Devine ce que tu apprends sur {prenom} →</Text>
                             </View>
-                            <Text style={s.imageCaption}>Regarde ce coucher de soleil 🌅</Text>
-                        </View>
-                    </View>
+                            <Ionicons name="chevron-forward" size={17} color={c.accent} />
+                        </Pressable>
+                    )}
 
-                    <View style={[s.rowOut, { marginBottom: 14 }]}>
-                        <LinearGradient colors={c.outBubble} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.voice}>
-                            <Pressable onPress={() => setPlaying((p) => !p)} style={s.voicePlay}><Ionicons name={playing ? 'pause' : 'play'} size={14} color="#fff" /></Pressable>
-                            <View style={s.wave}>
-                                {[8, 16, 22, 14, 19, 9, 15, 11, 18, 7].map((h, i) => (
-                                    <View key={i} style={[s.waveBar, { height: h, backgroundColor: i < 3 ? '#ff6aa9' : i < 5 ? '#ff9dc4' : c.ink(0.25) }]} />
-                                ))}
-                            </View>
-                            <Text style={s.voiceDur}>0:14</Text>
-                            <View style={s.voiceMeta}>
-                                <Text style={s.outTime}>12:43</Text>
-                                <Ionicons name="checkmark-done" size={14} color={c.accent} />
-                            </View>
-                        </LinearGradient>
-                    </View>
+                    {loading && <ActivityIndicator color={c.accent} style={{ marginTop: 24 }} />}
 
-                    <InBubble time="12:45" gap>J'adore l'idée ! On en parle au prochain événement du cercle ?</InBubble>
+                    {!loading && messages.length === 0 && (
+                        <Text style={s.emptyChat}>Démarre la conversation avec {prenom} 👋</Text>
+                    )}
 
-                    {sent.map((m) => <OutBubble key={m.id} time={m.time} image={m.image}>{m.text}</OutBubble>)}
-
-                    <TypingDots />
+                    {messages.map((m) =>
+                        m.auteur_id === meId
+                            ? <OutBubble key={m.id} time={fmtHeure(m.created_at)}>{m.contenu}</OutBubble>
+                            : <InBubble key={m.id} time={fmtHeure(m.created_at)}>{m.contenu}</InBubble>,
+                    )}
                 </ScrollView>
 
                 <View style={[s.inputWrap, { paddingBottom: insets.bottom + 9 }]}>
@@ -205,12 +212,10 @@ export default function ChatPrive() {
                             value={draft} onChangeText={setDraft} onSubmitEditing={send} returnKeyType="send"
                             placeholder="Message" placeholderTextColor={c.ink(0.4)} style={s.input}
                         />
-                        <Pressable hitSlop={6} onPress={sendImg}><Ionicons name="image-outline" size={21} color={c.ink(0.45)} /></Pressable>
-                        <Pressable hitSlop={6} onPress={sendImg}><Ionicons name="attach" size={22} color={c.ink(0.45)} /></Pressable>
                     </View>
-                    <Pressable onPress={send}>
-                        <LinearGradient colors={SEND_GRAD} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.send}>
-                            <Ionicons name={hasText ? 'send' : 'mic'} size={hasText ? 19 : 21} color="#fff" />
+                    <Pressable onPress={send} disabled={!hasText}>
+                        <LinearGradient colors={SEND_GRAD} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.send, !hasText && { opacity: 0.55 }]}>
+                            <Ionicons name="send" size={19} color="#fff" />
                         </LinearGradient>
                     </Pressable>
                 </View>
@@ -218,22 +223,23 @@ export default function ChatPrive() {
 
             <QuizSheet
                 visible={quizOpen}
-                name={r.prenom}
-                grad={r.grad}
+                name={prenom}
+                grad={grad}
                 onClose={() => setQuizOpen(false)}
-                onSubmit={(avg) => {
+                onSubmit={async (avg) => {
                     setQuizOpen(false);
                     if (avg >= 4 && canLevel) {
-                        useToast.getState().show('Belle évaluation ✨ Tu peux passer au niveau supérieur');
+                        useToast.getState().show('Belle évaluation ✨');
                         setTimeout(() => setLevelOpen(true), 350);
                     } else {
+                        await evaluer(avg);
                         useToast.getState().show('Merci pour ton évaluation 🙏');
                     }
                 }}
             />
             <LevelUpModal
                 visible={levelOpen}
-                name={r.prenom}
+                name={prenom}
                 fromN={niveau}
                 toN={Math.min(niveau + 1, 5)}
                 fromNom={labels[niveau - 1]}
@@ -349,6 +355,7 @@ const makeStyles = (c: Palette) => StyleSheet.create({
     sysNote: { maxWidth: 290, flexDirection: 'row', alignItems: 'center', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 14, backgroundColor: 'rgba(214,40,110,0.10)', borderWidth: 1, borderColor: 'rgba(214,40,110,0.18)' },
     sysTxt: { flexShrink: 1, fontFamily: fonts.body, fontSize: 11, lineHeight: 16, color: c.ink(0.6), textAlign: 'center' },
     sysCercle: { fontFamily: fonts.bodyBold, color: c.accentDeep },
+    emptyChat: { textAlign: 'center', marginTop: 30, fontFamily: fonts.body, fontSize: 14, color: c.ink(0.45) },
 
     rowIn: { flexDirection: 'row', justifyContent: 'flex-start' },
     rowOut: { flexDirection: 'row', justifyContent: 'flex-end' },

@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Plus Jakarta Sans',sans-serif;}
+  button{font-family:inherit;color:inherit;background:none;border:none;}
+  ion-icon{pointer-events:none;}
+  .kscroll{scrollbar-width:none;-ms-overflow-style:none;}
+  .kscroll::-webkit-scrollbar{display:none;width:0;height:0;}
+  .kinput::placeholder{color:rgba(var(--ink),0.4);}
+  :root,[data-theme=light]{--bg1:#ffffff;--bg2:#faf7fe;--bg3:#f6f2fb;--card:#ffffff;--card2:#F4F1FA;--field:rgba(33,22,51,0.04);--text:#211633;--ink:33,22,51;--border:rgba(33,22,51,0.08);--chatBg:#f4eefb;--dot:rgba(214,40,110,0.06);--inBubble:#ffffff;--outB:linear-gradient(135deg,#efe3ff,#f7e6f3);--outText:#2a1840;--glass:rgba(255,255,255,0.94);--accent:#d6286e;--accentDeep:#b01b5c;--tabOn:rgba(255,106,169,0.14);--brand:linear-gradient(135deg,#ff6aa9,#e02a73);--cardShadow:0 6px 20px rgba(40,25,80,0.08);--aura1:rgba(255,120,175,0.16);--aura2:rgba(164,99,255,0.12);--page:#e9e4f1;}
+  [data-theme=dark]{--bg1:#140f1e;--bg2:#171122;--bg3:#1b1428;--card:#221a31;--card2:#2b2140;--field:rgba(255,255,255,0.06);--text:#f4eef8;--ink:244,238,248;--border:rgba(255,255,255,0.10);--chatBg:#15101f;--dot:rgba(255,255,255,0.05);--inBubble:#251b34;--outB:linear-gradient(135deg,#52306a,#5e3350);--outText:#fbe9f4;--glass:rgba(30,22,44,0.92);--accent:#ff7ab0;--accentDeep:#ff9dc4;--tabOn:rgba(255,122,176,0.18);--brand:linear-gradient(135deg,#ff6aa9,#e02a73);--cardShadow:0 8px 22px rgba(0,0,0,0.45);--aura1:rgba(224,42,115,0.22);--aura2:rgba(164,99,255,0.16);--page:#0b0712;}
+  @keyframes ktyp{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+  @keyframes ktoast{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+  @keyframes kspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div data-theme="{{ theme }}" style="min-height:100vh;background:var(--page);display:flex;flex-direction:column;align-items:center;gap:16px;padding:18px 12px 36px;font-family:'Plus Jakarta Sans',sans-serif;">
+
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <svg width="30" height="20" viewBox="0 0 132 82" fill="none"><defs><linearGradient id="kgradTop" x1="14" y1="6" x2="120" y2="78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffc2d6"/><stop offset=".38" stop-color="#ff5f9e"/><stop offset=".78" stop-color="#e22a72"/><stop offset="1" stop-color="#bb1659"/></linearGradient></defs><circle cx="86" cy="41" r="27" stroke="url(#kgradTop)" stroke-width="13.5"/><circle cx="46" cy="41" r="27" stroke="url(#kgradTop)" stroke-width="13.5"/><path d="M66 58.9 A27 27 0 0 0 80 66.4" stroke="url(#kgradTop)" stroke-width="13.5" stroke-linecap="round"/></svg>
+      <span style="font-size:12.5px;font-weight:600;color:rgba(var(--ink),.55);letter-spacing:.3px;">maquette interactive</span>
+    </div>
+    <div style="display:flex;padding:4px;border-radius:99px;background:var(--card);border:1px solid var(--border);gap:4px;">
+      <button onClick="{{ setLight }}" style="{{ lightBtn }}"><ion-icon name="sunny" style="font-size:14px;"></ion-icon>Clair</button>
+      <button onClick="{{ setDark }}" style="{{ darkBtn }}"><ion-icon name="moon" style="font-size:13px;"></ion-icon>Sombre</button>
+    </div>
+  </div>
+
+  <div ref="{{ phoneRef }}" style="position:relative;flex-shrink:0;">
+    <div style="width:375px;height:812px;border:13px solid #0b0712;border-radius:54px;background:var(--bg2);position:relative;box-shadow:0 40px 90px -20px rgba(20,12,40,.55),0 0 0 1px rgba(0,0,0,.45);overflow:hidden;">
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,var(--bg1),var(--bg2) 42%,var(--bg3));"></div>
+      <div style="position:absolute;top:-40px;right:-50px;width:220px;height:220px;border-radius:50%;background:var(--aura1);filter:blur(12px);pointer-events:none;"></div>
+      <div style="position:absolute;bottom:120px;left:-60px;width:200px;height:200px;border-radius:50%;background:var(--aura2);filter:blur(12px);pointer-events:none;"></div>
+
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+        <div style="height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:relative;flex-shrink:0;z-index:6;">
+          <div style="font-family:'Sora';font-weight:600;font-size:14px;color:var(--text);letter-spacing:.3px;">9:41</div>
+          <div style="position:absolute;left:50%;top:9px;transform:translateX(-50%);width:104px;height:26px;border-radius:16px;background:#000;"></div>
+          <div style="display:flex;align-items:center;gap:6px;color:var(--text);">
+            <ion-icon name="cellular" style="font-size:15px;"></ion-icon>
+            <ion-icon name="wifi" style="font-size:15px;"></ion-icon>
+            <ion-icon name="battery-full" style="font-size:20px;"></ion-icon>
+          </div>
+        </div>
+
+        <div style="flex:1;position:relative;overflow:hidden;">
+
+          <sc-if value="{{ isAccueil }}" hint-placeholder-val="{{ true }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="height:50px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;">
+                <button onClick="{{ goApropos }}" style="width:42px;height:42px;border-radius:14px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="help-circle-outline" style="font-size:22px;color:var(--text);"></ion-icon></button>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <svg width="34" height="22" viewBox="0 0 132 82" fill="none"><defs><linearGradient id="kgradH" x1="14" y1="6" x2="120" y2="78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffc2d6"/><stop offset=".38" stop-color="#ff5f9e"/><stop offset=".78" stop-color="#e22a72"/><stop offset="1" stop-color="#bb1659"/></linearGradient></defs><circle cx="86" cy="41" r="27" stroke="url(#kgradH)" stroke-width="13.5"/><circle cx="46" cy="41" r="27" stroke="url(#kgradH)" stroke-width="13.5"/><path d="M66 58.9 A27 27 0 0 0 80 66.4" stroke="url(#kgradH)" stroke-width="13.5" stroke-linecap="round"/></svg>
+                  <span style="font-family:'Sora';font-weight:700;font-size:20px;letter-spacing:5px;color:var(--text);padding-left:3px;">KADY</span>
+                </div>
+                <button onClick="{{ onBell }}" style="width:42px;height:42px;border-radius:14px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;"><ion-icon name="notifications-outline" style="font-size:20px;color:var(--text);"></ion-icon><sc-if value="{{ showBellDot }}"><div style="position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:4px;background:#ff4d97;border:2px solid var(--card);"></div></sc-if></button>
+              </div>
+
+              <div style="padding:6px 22px 120px;">
+                <div style="font-family:'Sora';font-weight:700;font-size:26px;line-height:30px;letter-spacing:-.3px;color:var(--text);">Bonjour Didier 👋</div>
+                <div style="margin-top:8px;font-size:14px;line-height:20px;color:rgba(var(--ink),.55);max-width:240px;">Prêt à créer de belles connexions aujourd'hui ?</div>
+
+                <div style="margin-top:22px;">
+                  <div style="border-radius:26px;overflow:hidden;height:206px;border:1px solid var(--border);position:relative;">
+                    <div style="display:flex;width:400%;height:100%;transition:transform .6s cubic-bezier(.65,0,.2,1);transform:translateX(-{{ heroOffset }}%);">
+                      <sc-for list="{{ heroSlides }}" as="sl" hint-placeholder-count="4">
+                        <div style="width:25%;height:100%;position:relative;">
+                          <div style="position:absolute;inset:0;background:{{ sl.gradCss }};"></div>
+                          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,20,.05),rgba(10,6,20,.78));"></div>
+                          <div style="position:absolute;inset:0;padding:20px;display:flex;flex-direction:column;justify-content:space-between;">
+                            <div style="min-height:1px;"><sc-if value="{{ sl.hasChip }}"><div style="align-self:flex-start;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.2);"><ion-icon name="people-outline" style="font-size:14px;color:#fff;"></ion-icon><span style="font-size:11.5px;font-weight:600;color:#fff;">{{ sl.chip }}</span></div></sc-if></div>
+                            <div><div style="font-family:'Sora';font-weight:700;font-size:22px;line-height:27px;color:#fff;max-width:250px;">{{ sl.title }}</div><div style="margin-top:8px;font-size:13px;line-height:19px;color:rgba(255,255,255,.85);max-width:220px;">{{ sl.sub }}</div></div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <button onClick="{{ goDecouvrir }}" style="position:absolute;right:16px;bottom:16px;display:flex;align-items:center;gap:8px;padding:11px 17px;border-radius:99px;background:var(--brand);box-shadow:0 8px 14px rgba(255,106,169,.55);cursor:pointer;"><span style="font-size:13.5px;font-weight:600;color:#fff;">Découvrir</span><ion-icon name="chevron-forward" style="font-size:16px;color:#fff;"></ion-icon></button>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;"><sc-for list="{{ heroDots }}" as="d" hint-placeholder-count="4"><button onClick="{{ d.onClick }}" style="{{ d.style }}"></button></sc-for></div>
+                </div>
+
+                <div style="margin-top:24px;display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;align-items:center;gap:9px;"><ion-icon name="people" style="font-size:19px;color:var(--accent);"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:17px;color:var(--text);">Mes cercles</span></div>
+                  <button onClick="{{ goDecouvrir }}" style="display:flex;align-items:center;gap:3px;cursor:pointer;"><span style="font-size:13px;font-weight:600;color:var(--accent);">Voir tous</span><ion-icon name="chevron-forward" style="font-size:15px;color:var(--accent);"></ion-icon></button>
+                </div>
+                <div class="kscroll" style="display:flex;gap:16px;overflow-x:auto;padding:16px 22px 6px;margin:0 -22px;">
+                  <button onClick="{{ goDecouvrir }}" style="flex:0 0 auto;width:74px;display:flex;flex-direction:column;align-items:center;gap:9px;cursor:pointer;">
+                    <div style="width:70px;height:70px;border-radius:35px;border:2px dashed rgba(255,106,169,.5);background:rgba(255,106,169,.08);display:flex;align-items:center;justify-content:center;"><ion-icon name="add" style="font-size:26px;color:var(--accent);"></ion-icon></div>
+                    <div style="text-align:center;line-height:1.15;"><div style="font-size:12.5px;font-weight:600;color:var(--text);">Créer</div><div style="font-size:11px;color:rgba(var(--ink),.45);">un cercle</div></div>
+                  </button>
+                  <sc-for list="{{ rail }}" as="r" hint-placeholder-count="4">
+                    <div style="flex:0 0 auto;width:74px;display:flex;flex-direction:column;align-items:center;gap:9px;">
+                      <div style="width:70px;height:70px;border-radius:35px;padding:2.5px;background:{{ r.ringCss }};position:relative;"><div style="width:100%;height:100%;border-radius:33px;background:{{ r.gradCss }};"></div><div style="position:absolute;bottom:-2px;right:-2px;min-width:22px;height:22px;padding:0 5px;border-radius:11px;background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 7px rgba(40,25,80,.22);"><span style="font-size:11px;font-weight:700;color:var(--accentDeep);">{{ r.membres }}</span></div></div>
+                      <div style="text-align:center;line-height:1.15;"><div style="font-size:12.5px;font-weight:600;color:var(--text);">{{ r.nom }}</div><div style="font-size:11px;color:rgba(var(--ink),.45);">{{ r.sub }}</div></div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:26px;display:flex;align-items:center;gap:9px;"><ion-icon name="flash" style="font-size:18px;color:var(--accent);"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:17px;color:var(--text);">Activité dans vos cercles</span></div>
+                <div style="margin-top:14px;display:flex;flex-direction:column;gap:11px;">
+                  <sc-for list="{{ acts }}" as="a" hint-placeholder-count="3">
+                    <button onClick="{{ a.onTap }}" style="display:flex;align-items:center;gap:13px;padding:13px;border-radius:20px;background:var(--card);border:1px solid var(--border);box-shadow:var(--cardShadow);cursor:pointer;text-align:left;width:100%;">
+                      <div style="position:relative;flex-shrink:0;"><div style="width:46px;height:46px;border-radius:14px;background:{{ a.grad }};"></div><div style="position:absolute;bottom:-5px;right:-5px;width:24px;height:24px;border-radius:12px;background:var(--card2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;"><ion-icon name="{{ a.icon }}" style="font-size:12px;color:var(--accent);"></ion-icon></div></div>
+                      <div style="flex:1;"><div style="font-size:13.5px;line-height:19px;color:rgba(var(--ink),.72);">{{ a.text }}<b style="color:var(--text);">{{ a.strong }}</b></div><div style="margin-top:3px;font-size:11.5px;color:rgba(var(--ink),.42);">{{ a.time }}</div></div>
+                      <div style="display:flex;align-items:center;gap:6px;">
+                        <div style="display:flex;">
+                          <div style="width:24px;height:24px;border-radius:12px;border:2px solid var(--card);background:{{ a.av1 }};"></div>
+                          <sc-if value="{{ a.hasAv2 }}"><div style="width:24px;height:24px;border-radius:12px;border:2px solid var(--card);background:{{ a.av2 }};margin-left:-9px;"></div></sc-if>
+                          <sc-if value="{{ a.hasExtra }}"><div style="width:24px;height:24px;border-radius:12px;border:2px solid var(--card);background:var(--card2);display:flex;align-items:center;justify-content:center;margin-left:-9px;"><span style="font-size:9.5px;font-weight:700;color:var(--accent);">{{ a.extra }}</span></div></sc-if>
+                        </div>
+                        <ion-icon name="chevron-forward" style="font-size:17px;color:rgba(var(--ink),.3);"></ion-icon>
+                      </div>
+                    </button>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:22px;position:relative;overflow:hidden;padding:18px;border-radius:22px;border:1px solid rgba(255,106,169,.28);background:linear-gradient(135deg,rgba(255,106,169,.15),rgba(255,106,169,.07));">
+                  <div style="position:absolute;top:-30px;right:-20px;width:130px;height:130px;border-radius:65px;background:rgba(255,106,169,.28);"></div>
+                  <div style="position:relative;display:flex;align-items:center;gap:14px;"><div style="width:50px;height:50px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 14px rgba(255,106,169,.5);"><ion-icon name="diamond" style="font-size:22px;color:#fff;"></ion-icon></div><div style="flex:1;"><div style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Passez Premium</div><div style="margin-top:3px;font-size:12.5px;line-height:18px;color:rgba(var(--ink),.58);">Plus de cercles, plus de contenu, sans limites.</div></div></div>
+                  <button onClick="{{ onPremium }}" style="position:relative;margin-top:14px;width:100%;padding:13px;border-radius:14px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;box-shadow:0 10px 16px rgba(255,106,169,.45);"><span style="font-size:14px;font-weight:700;color:#fff;">Découvrir Premium</span><ion-icon name="chevron-forward" style="font-size:16px;color:#fff;"></ion-icon></button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isDecouvrir }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:14px 22px 120px;">
+                <div style="font-family:'Sora';font-weight:700;font-size:30px;color:var(--text);">Découvrir</div>
+                <div style="margin-top:4px;font-size:14px;color:rgba(var(--ink),.6);">Trouve un Cercle qui te ressemble. Lis la salle d'accueil avant de rejoindre.</div>
+
+                <div style="margin-top:16px;display:flex;align-items:center;gap:10px;">
+                  <div style="flex:1;display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:14px;background:var(--field);border:1px solid var(--border);">
+                    <ion-icon name="search" style="font-size:18px;color:rgba(var(--ink),.42);flex-shrink:0;"></ion-icon>
+                    <input class="kinput" value="{{ dSearch }}" onInput="{{ onDSearch }}" placeholder="Rechercher un cercle, un thème…" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'Plus Jakarta Sans';font-size:14px;color:var(--text);padding:1px 0;"/>
+                    <sc-if value="{{ hasDSearch }}"><button onClick="{{ clearDSearch }}" style="display:flex;cursor:pointer;"><ion-icon name="close-circle" style="font-size:18px;color:rgba(var(--ink),.35);"></ion-icon></button></sc-if>
+                  </div>
+                  <button onClick="{{ toggleAdv }}" style="{{ advBtnStyle }}"><ion-icon name="options-outline" style="font-size:21px;color:{{ advIconColor }};"></ion-icon><sc-if value="{{ advCountShow }}"><div style="position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#ff4d97;border:2px solid var(--bg2);display:flex;align-items:center;justify-content:center;"><span style="font-size:10px;font-weight:700;color:#fff;">{{ advCount }}</span></div></sc-if></button>
+                </div>
+
+                <sc-if value="{{ advOpen }}">
+                  <div style="margin-top:12px;padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--border);box-shadow:var(--cardShadow);display:flex;flex-direction:column;gap:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">Filtres avancés</span><button onClick="{{ resetAdv }}" style="font-size:12.5px;font-weight:600;color:var(--accent);cursor:pointer;">Réinitialiser</button></div>
+                    <div>
+                      <div style="font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(var(--ink),.5);margin-bottom:9px;">Places disponibles</div>
+                      <div style="display:flex;gap:8px;"><sc-for list="{{ advPlaces }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div>
+                    </div>
+                    <div>
+                      <div style="font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(var(--ink),.5);margin-bottom:9px;">Grade du cercle</div>
+                      <div style="display:flex;flex-wrap:wrap;gap:8px;"><sc-for list="{{ advGrades }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><ion-icon name="{{ o.icon }}" style="font-size:13px;color:{{ o.color }};"></ion-icon><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div>
+                    </div>
+                    <div>
+                      <div style="font-size:11.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(var(--ink),.5);margin-bottom:9px;">Trier par</div>
+                      <div style="display:flex;gap:8px;"><sc-for list="{{ advSorts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div>
+                    </div>
+                    <button onClick="{{ toggleAdv }}" style="padding:13px;border-radius:13px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;box-shadow:0 8px 14px rgba(224,42,115,.4);"><span style="font-size:14px;font-weight:700;color:#fff;">Voir {{ cardCount }} {{ resultWord }}</span></button>
+                  </div>
+                </sc-if>
+
+                <div class="kscroll" style="display:flex;gap:9px;overflow-x:auto;margin:16px -22px 0;padding:0 22px 4px;">
+                  <sc-for list="{{ dFilters }}" as="f" hint-placeholder-count="5"><button onClick="{{ f.onClick }}" style="{{ f.boxStyle }}"><span style="font-size:12.5px;font-weight:{{ f.weight }};color:{{ f.txtColor }};">{{ f.label }}</span></button></sc-for>
+                </div>
+                <div style="margin-top:18px;display:flex;flex-direction:column;gap:20px;">
+                  <sc-for list="{{ cards }}" as="c" hint-placeholder-count="4">
+                    <div style="background:var(--card);border-radius:26px;overflow:hidden;border:1px solid var(--border);box-shadow:var(--cardShadow);">
+                      <button onClick="{{ c.onToggle }}" style="display:block;width:100%;text-align:left;cursor:pointer;padding:0;">
+                        <div style="position:relative;height:172px;background:{{ c.coverCss }};overflow:hidden;">
+                          <ion-icon name="{{ c.coverIcon }}" style="position:absolute;right:-18px;bottom:-26px;font-size:158px;color:rgba(255,255,255,.14);transform:rotate(-10deg);"></ion-icon>
+                          <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,6,24,.04) 38%,rgba(12,6,24,.72));"></div>
+                          <div style="position:absolute;left:18px;right:18px;bottom:15px;">
+                            <span style="display:inline-block;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.82);">{{ c.theme }}</span>
+                            <div style="margin-top:3px;font-family:'Sora';font-weight:700;font-size:21px;line-height:25px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.3);">{{ c.nom }}</div>
+                          </div>
+                        </div>
+                      </button>
+                      <div style="padding:14px 16px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+                          <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+                            <ion-icon name="people" style="font-size:16px;color:rgba(var(--ink),.5);"></ion-icon>
+                            <span style="font-size:13.5px;font-weight:700;color:rgba(var(--ink),.68);white-space:nowrap;">{{ c.membresLine }}</span>
+                          </div>
+                          <button onClick="{{ c.onJoin }}" style="{{ c.ctaStyle }}"><ion-icon name="{{ c.ctaIcon }}" style="font-size:14px;color:{{ c.ctaColor }};"></ion-icon><span style="font-size:12.5px;font-weight:700;color:{{ c.ctaColor }};">{{ c.ctaLabel }}</span></button>
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ dNoResults }}">
+                    <div style="padding:40px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;">
+                      <div style="width:60px;height:60px;border-radius:30px;background:var(--field);display:flex;align-items:center;justify-content:center;"><ion-icon name="compass-outline" style="font-size:30px;color:rgba(var(--ink),.3);"></ion-icon></div>
+                      <div style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Aucun cercle trouvé</div>
+                      <div style="font-size:13px;line-height:19px;color:rgba(var(--ink),.5);max-width:220px;">Essaie un autre thème ou ajuste tes filtres.</div>
+                      <button onClick="{{ resetAdv }}" style="margin-top:4px;padding:10px 18px;border-radius:99px;background:var(--field);border:1px solid var(--border);cursor:pointer;"><span style="font-size:13px;font-weight:600;color:var(--accent);">Réinitialiser les filtres</span></button>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isMessages }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:4px 20px 10px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-family:'Sora';font-weight:800;font-size:27px;letter-spacing:-.5px;color:var(--text);">Messages</div>
+                <button onClick="{{ onCreate }}" style="width:42px;height:42px;border-radius:21px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="create-outline" style="font-size:20px;color:var(--text);"></ion-icon></button>
+              </div>
+              <div style="padding:0 20px 120px;">
+                <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:13px;background:var(--field);border:1px solid var(--border);">
+                  <ion-icon name="search" style="font-size:18px;color:rgba(var(--ink),.42);flex-shrink:0;"></ion-icon>
+                  <input class="kinput" value="{{ search }}" onInput="{{ onSearch }}" placeholder="Rechercher" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'Plus Jakarta Sans';font-size:14.5px;color:var(--text);padding:1px 0;"/>
+                  <sc-if value="{{ hasSearch }}"><button onClick="{{ clearSearch }}" style="display:flex;cursor:pointer;"><ion-icon name="close-circle" style="font-size:18px;color:rgba(var(--ink),.35);"></ion-icon></button></sc-if>
+                </div>
+
+                <div class="kscroll" style="display:flex;gap:8px;overflow-x:auto;margin:14px -20px 0;padding:0 20px 2px;"><sc-for list="{{ chipsM }}" as="ch" hint-placeholder-count="3"><button onClick="{{ ch.onClick }}" style="{{ ch.boxStyle }}"><span style="font-size:13px;font-weight:600;color:{{ ch.txtColor }};">{{ ch.label }}</span></button></sc-for></div>
+
+                <div style="margin-top:8px;">
+                  <sc-for list="{{ convs }}" as="cv" hint-placeholder-count="5">
+                    <button onClick="{{ cv.onOpen }}" style="width:100%;text-align:left;display:flex;align-items:center;gap:13px;padding:11px 2px;cursor:pointer;" style-hover="background:var(--field)">
+                      <div style="position:relative;flex-shrink:0;"><div style="width:54px;height:54px;border-radius:27px;background:{{ cv.gradCss }};display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:19px;color:#fff;">{{ cv.initial }}</span></div><sc-if value="{{ cv.online }}"><div style="position:absolute;bottom:1px;right:1px;width:13px;height:13px;border-radius:7px;background:#43e08a;border:2.5px solid var(--bg2);"></div></sc-if></div>
+                      <div style="flex:1;min-width:0;padding:13px 0;border-bottom:1px solid var(--border);">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <span style="font-size:15.5px;font-weight:{{ cv.nameWeight }};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ cv.nameAge }}</span>
+                          <span style="font-size:11.5px;font-weight:{{ cv.timeWeight }};color:{{ cv.timeColor }};flex-shrink:0;">{{ cv.time }}</span>
+                        </div>
+                        <div style="margin-top:3px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                          <div style="flex:1;min-width:0;display:flex;align-items:center;gap:5px;">
+                            <sc-if value="{{ cv.mine }}"><ion-icon name="checkmark-done" style="font-size:15px;color:var(--accent);flex-shrink:0;"></ion-icon></sc-if>
+                            <sc-if value="{{ cv.photo }}"><ion-icon name="image-outline" style="font-size:15px;color:{{ cv.lastColor }};flex-shrink:0;"></ion-icon></sc-if>
+                            <span style="font-size:13.5px;font-weight:{{ cv.lastWeight }};color:{{ cv.lastColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ cv.last }}</span>
+                          </div>
+                          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                            <ion-icon name="ellipse" style="font-size:4px;color:{{ cv.modeColor }};"></ion-icon>
+                            <span style="font-size:11px;font-weight:600;color:{{ cv.modeColor }};">{{ cv.modeLabel }}</span>
+                            <sc-if value="{{ cv.showUnread }}"><div style="min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:#ff4d97;display:flex;align-items:center;justify-content:center;"><span style="font-size:10.5px;font-weight:700;color:#fff;">{{ cv.unread }}</span></div></sc-if>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </sc-for>
+                  <sc-if value="{{ noResults }}"><div style="padding:48px 20px;text-align:center;"><ion-icon name="search-outline" style="font-size:34px;color:rgba(var(--ink),.25);"></ion-icon><div style="margin-top:10px;font-size:14px;color:rgba(var(--ink),.45);">Aucune conversation pour « {{ search }} »</div></div></sc-if>
+                </div>
+
+                <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;gap:7px;padding:12px;border-radius:14px;background:var(--field);"><ion-icon name="lock-closed" style="font-size:13px;color:rgba(var(--ink),.4);"></ion-icon><span style="font-size:11.5px;color:rgba(var(--ink),.42);">Messages privés réservés à vos cercles partagés</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isChat }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--chatBg);">
+              <div style="background:var(--glass);border-bottom:1px solid var(--border);box-shadow:0 4px 12px rgba(40,25,80,.06);z-index:5;">
+                <div style="display:flex;align-items:center;gap:10px;padding:6px 14px 11px;">
+                  <button onClick="{{ back }}" style="width:30px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:24px;color:var(--text);"></ion-icon></button>
+                  <button onClick="{{ openProfile }}" style="flex:1;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left;">
+                    <div style="position:relative;flex-shrink:0;"><div style="width:42px;height:42px;border-radius:21px;background:{{ chat.gradCss }};display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:17px;color:#fff;">{{ chat.initial }}</span></div><sc-if value="{{ chat.online }}"><div style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:6px;background:#43e08a;border:2.5px solid var(--glass);"></div></sc-if></div>
+                    <div style="flex:1;min-width:0;"><div style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">{{ chat.nameAge }}</div><div style="margin-top:1px;font-size:11.5px;font-weight:600;color:{{ chat.statusColor }};">{{ chat.status }}</div></div>
+                  </button>
+                  <button onClick="{{ onVideo }}" style="width:40px;height:40px;border-radius:13px;background:var(--field);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="videocam-outline" style="font-size:20px;color:var(--accent);"></ion-icon></button>
+                  <button onClick="{{ onCall }}" style="width:40px;height:40px;border-radius:13px;background:var(--field);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="call-outline" style="font-size:19px;color:var(--accent);"></ion-icon></button>
+                </div>
+              </div>
+
+              <div class="kscroll" ref="{{ chatRef }}" style="flex:1;overflow-y:auto;padding:16px;background-image:radial-gradient(var(--dot) 1.4px,transparent 1.4px);background-size:22px 22px;">
+                <div style="display:flex;justify-content:center;margin-bottom:16px;"><span style="padding:5px 13px;border-radius:99px;background:var(--card);border:1px solid var(--border);font-size:11px;font-weight:600;color:rgba(var(--ink),.5);">Aujourd'hui</span></div>
+                <div style="display:flex;justify-content:center;margin-bottom:16px;"><div style="max-width:290px;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:14px;background:rgba(214,40,110,.10);border:1px solid rgba(214,40,110,.18);"><ion-icon name="lock-closed" style="font-size:12px;color:var(--accent);flex-shrink:0;"></ion-icon><span style="font-size:11px;line-height:16px;color:rgba(var(--ink),.6);text-align:center;">Vous discutez car vous partagez le cercle <b style="color:var(--accentDeep);">{{ chat.cercle }}</b></span></div></div>
+
+                <sc-for list="{{ thread }}" as="m" hint-placeholder-count="6">
+                  <sc-if value="{{ m.in }}">
+                    <div style="display:flex;justify-content:flex-start;margin-bottom:{{ m.mb }};">
+                      <sc-if value="{{ m.isText }}"><div style="max-width:80%;padding:9px 13px;border-radius:18px;border-bottom-left-radius:5px;background:var(--inBubble);box-shadow:0 2px 6px rgba(40,25,80,.1);"><div style="font-size:14px;line-height:20px;color:var(--text);">{{ m.text }}</div><div style="margin-top:3px;text-align:right;font-size:10px;color:rgba(var(--ink),.4);">{{ m.time }}</div></div></sc-if>
+                      <sc-if value="{{ m.isImage }}"><div style="max-width:72%;padding:4px;border-radius:18px;border-bottom-left-radius:5px;background:var(--inBubble);box-shadow:0 2px 6px rgba(40,25,80,.1);"><div style="height:170px;border-radius:15px;border-bottom-left-radius:4px;overflow:hidden;position:relative;background:linear-gradient(150deg,#7fe0d0,#2f9aa8,#1d3f66);"><div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,235,170,.4),transparent 60%);"></div><div style="position:absolute;left:8px;bottom:8px;padding:3px 7px;border-radius:7px;background:rgba(0,0,0,.32);font-family:monospace;font-size:9.5px;color:rgba(255,255,255,.9);">photo · event</div><div style="position:absolute;right:8px;bottom:8px;padding:3px 7px;border-radius:7px;background:rgba(0,0,0,.32);font-size:9.5px;color:rgba(255,255,255,.9);">{{ m.time }}</div></div><div style="padding:6px 8px 3px;font-size:13.5px;color:var(--text);">{{ m.caption }}</div></div></sc-if>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ m.out }}">
+                    <div style="display:flex;justify-content:flex-end;margin-bottom:{{ m.mb }};">
+                      <sc-if value="{{ m.isText }}"><div style="max-width:80%;padding:9px 13px;border-radius:18px;border-bottom-right-radius:5px;background:var(--outB);box-shadow:0 2px 8px rgba(214,40,110,.16);"><div style="font-size:14px;line-height:20px;color:var(--outText);">{{ m.text }}</div><div style="margin-top:3px;display:flex;align-items:center;justify-content:flex-end;gap:4px;"><span style="font-size:10px;color:rgba(var(--ink),.42);">{{ m.time }}</span><ion-icon name="checkmark-done" style="font-size:14px;color:var(--accent);"></ion-icon></div></div></sc-if>
+                      <sc-if value="{{ m.isVoice }}"><div style="max-width:80%;display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:18px;border-bottom-right-radius:5px;background:var(--outB);box-shadow:0 2px 8px rgba(214,40,110,.16);"><div style="width:34px;height:34px;border-radius:17px;display:flex;align-items:center;justify-content:center;background:#ff6aa9;box-shadow:0 4px 8px rgba(255,106,169,.5);flex-shrink:0;"><ion-icon name="play" style="font-size:14px;color:#fff;"></ion-icon></div><div style="display:flex;align-items:center;gap:2.5px;height:24px;"><div style="width:3px;height:8px;border-radius:9px;background:#ff6aa9;"></div><div style="width:3px;height:16px;border-radius:9px;background:#ff6aa9;"></div><div style="width:3px;height:22px;border-radius:9px;background:#ff6aa9;"></div><div style="width:3px;height:14px;border-radius:9px;background:#ff9dc4;"></div><div style="width:3px;height:19px;border-radius:9px;background:#ff9dc4;"></div><div style="width:3px;height:9px;border-radius:9px;background:rgba(var(--ink),.25);"></div><div style="width:3px;height:15px;border-radius:9px;background:rgba(var(--ink),.25);"></div><div style="width:3px;height:11px;border-radius:9px;background:rgba(var(--ink),.25);"></div><div style="width:3px;height:18px;border-radius:9px;background:rgba(var(--ink),.25);"></div><div style="width:3px;height:7px;border-radius:9px;background:rgba(var(--ink),.25);"></div></div><span style="font-size:11px;color:rgba(var(--ink),.5);">0:14</span><div style="display:flex;align-items:center;gap:4px;align-self:flex-end;"><span style="font-size:10px;color:rgba(var(--ink),.42);">{{ m.time }}</span><ion-icon name="checkmark-done" style="font-size:14px;color:var(--accent);"></ion-icon></div></div></sc-if>
+                    </div>
+                  </sc-if>
+                </sc-for>
+
+                <div style="display:flex;justify-content:flex-start;"><div style="display:flex;align-items:center;gap:5px;padding:11px 15px;border-radius:18px;border-bottom-left-radius:5px;background:var(--inBubble);box-shadow:0 2px 6px rgba(40,25,80,.1);"><span style="width:7px;height:7px;border-radius:4px;background:#ff6aa9;animation:ktyp 1.2s infinite;"></span><span style="width:7px;height:7px;border-radius:4px;background:#ff6aa9;animation:ktyp 1.2s infinite .15s;"></span><span style="width:7px;height:7px;border-radius:4px;background:#ff6aa9;animation:ktyp 1.2s infinite .3s;"></span></div></div>
+              </div>
+
+              <div style="display:flex;align-items:flex-end;gap:8px;padding:9px 12px 16px;background:var(--chatBg);">
+                <div style="flex:1;display:flex;align-items:center;gap:8px;padding:7px 8px 7px 14px;border-radius:24px;background:var(--card);border:1px solid var(--border);box-shadow:0 4px 12px rgba(40,25,80,.12);">
+                  <ion-icon name="happy-outline" style="font-size:22px;color:rgba(var(--ink),.45);flex-shrink:0;"></ion-icon>
+                  <input class="kinput" value="{{ draft }}" onInput="{{ onDraft }}" onKeyDown="{{ onKey }}" placeholder="Message" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'Plus Jakarta Sans';font-size:14.5px;color:var(--text);padding:4px 0;"/>
+                  <ion-icon name="image-outline" style="font-size:21px;color:rgba(var(--ink),.45);flex-shrink:0;"></ion-icon>
+                  <ion-icon name="attach" style="font-size:22px;color:rgba(var(--ink),.45);flex-shrink:0;"></ion-icon>
+                </div>
+                <button onClick="{{ send }}" style="width:46px;height:46px;border-radius:23px;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 14px rgba(224,42,115,.55);flex-shrink:0;"><ion-icon name="{{ sendIcon }}" style="font-size:20px;color:#fff;"></ion-icon></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isCercle }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;background:var(--bg1);">
+              <div style="position:relative;height:248px;background:{{ cercle.coverCss }};overflow:hidden;">
+                <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,20,.28),transparent 38%,rgba(10,6,20,.62));"></div>
+                <div style="position:relative;padding:10px 18px 0;display:flex;align-items:center;justify-content:space-between;">
+                  <button onClick="{{ back }}" style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:#fff;"></ion-icon></button>
+                  <div style="display:flex;gap:9px;">
+                    <button onClick="{{ onInviteCercle }}" style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="share-social-outline" style="font-size:18px;color:#fff;"></ion-icon></button>
+                    <button onClick="{{ onGroupChat }}" style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="ellipsis-vertical" style="font-size:18px;color:#fff;"></ion-icon></button>
+                  </div>
+                </div>
+                <div style="position:absolute;left:20px;right:20px;bottom:18px;">
+                  <div style="display:flex;gap:8px;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;background:rgba(255,210,122,.22);border:1px solid rgba(255,210,122,.4);"><ion-icon name="{{ cercle.gradeIcon }}" style="font-size:11px;color:#ffd27a;"></ion-icon><span style="font-size:10.5px;font-weight:700;color:#ffe7b0;">{{ cercle.gradeChip }}</span></div>
+                    <div style="display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:99px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.22);"><div style="width:6px;height:6px;border-radius:3px;background:#43e08a;"></div><span style="font-size:10.5px;font-weight:700;color:#fff;">Très actif</span></div>
+                  </div>
+                  <div style="font-family:'Sora';font-weight:800;font-size:26px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.45);">{{ cercle.nom }}</div>
+                  <div style="margin-top:5px;display:flex;align-items:center;gap:8px;"><span style="font-size:12.5px;color:rgba(255,255,255,.85);">{{ cercle.theme }} · Aventure</span><span style="color:rgba(255,255,255,.5);">·</span><ion-icon name="location" style="font-size:12px;color:rgba(255,255,255,.85);"></ion-icon><span style="font-size:12.5px;color:rgba(255,255,255,.85);">2 km</span></div>
+                </div>
+              </div>
+
+              <div style="padding:18px 22px 40px;">
+                <div style="display:flex;align-items:center;gap:11px;">
+                  <div style="display:flex;align-items:center;">
+                    <div style="width:34px;height:34px;border-radius:17px;border:2.5px solid var(--bg1);background:#ff9d5c;"></div>
+                    <div style="width:34px;height:34px;border-radius:17px;border:2.5px solid var(--bg1);background:#7fe0d0;margin-left:-12px;"></div>
+                    <div style="width:34px;height:34px;border-radius:17px;border:2.5px solid var(--bg1);background:#b07bff;margin-left:-12px;"></div>
+                    <div style="width:34px;height:34px;border-radius:17px;border:2.5px solid var(--bg1);background:var(--card2);display:flex;align-items:center;justify-content:center;margin-left:-12px;"><span style="font-size:11px;font-weight:700;color:var(--accent);">+4</span></div>
+                  </div>
+                  <div><div style="font-size:14px;font-weight:700;color:var(--text);">{{ cercle.membresLine }}</div><div style="font-size:11px;color:rgba(var(--ink),.45);">4 femmes · 4 hommes</div></div>
+                </div>
+
+                <div style="margin-top:16px;font-size:13.5px;line-height:21px;color:rgba(var(--ink),.7);">{{ cercle.desc }}</div>
+
+                <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:7px;"><sc-for list="{{ cercle.tags }}" as="t" hint-placeholder-count="3"><div style="padding:6px 12px;border-radius:99px;background:var(--field);border:1px solid var(--border);"><span style="font-size:12px;font-weight:600;color:rgba(var(--ink),.7);">#{{ t }}</span></div></sc-for></div>
+
+                <div style="margin-top:16px;padding:15px;border-radius:18px;border:1px solid rgba(255,140,190,.2);background:linear-gradient(135deg,rgba(255,106,169,.12),rgba(255,111,194,.06));">
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><div style="display:flex;align-items:center;gap:7px;"><ion-icon name="flash" style="font-size:15px;color:var(--accent);"></ion-icon><span style="font-size:13px;font-weight:700;color:var(--text);">Niveau du cercle 3</span></div><span style="font-size:12px;color:rgba(var(--ink),.6);"><b style="color:var(--text);">320</b> / 500 XP</span></div>
+                  <div style="height:8px;border-radius:99px;background:rgba(var(--ink),.12);overflow:hidden;"><div style="width:64%;height:100%;background:var(--brand);border-radius:99px;"></div></div>
+                  <div style="margin-top:9px;font-size:11px;color:rgba(var(--ink),.5);">Encore 180 XP pour débloquer les <b style="color:var(--accentDeep);">albums photo partagés</b></div>
+                </div>
+
+                <div style="margin-top:16px;display:flex;gap:10px;">
+                  <button onClick="{{ onGroupChat }}" style="flex:2;padding:14px;border-radius:15px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 12px 18px rgba(224,42,115,.45);"><ion-icon name="chatbubble-ellipses-outline" style="font-size:18px;color:#fff;"></ion-icon><span style="font-size:14px;font-weight:700;color:#fff;">Ouvrir le chat</span></button>
+                  <button onClick="{{ onInviteCercle }}" style="flex:1;padding:14px;border-radius:15px;background:rgba(255,140,190,.14);border:1px solid rgba(255,140,190,.35);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;"><ion-icon name="person-add-outline" style="font-size:17px;color:var(--accentDeep);"></ion-icon><span style="font-size:13px;font-weight:700;color:var(--accentDeep);">Inviter</span></button>
+                </div>
+
+                <div style="margin-top:22px;display:flex;align-items:center;gap:9px;margin-bottom:13px;"><ion-icon name="calendar-outline" style="font-size:18px;color:var(--accent);"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Prochaine sortie</span></div>
+                <div style="display:flex;align-items:center;gap:14px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--border);box-shadow:var(--cardShadow);">
+                  <div style="width:52px;padding:9px 0;border-radius:13px;background:linear-gradient(135deg,#7fe0d0,#2f9aa8);display:flex;flex-direction:column;align-items:center;flex-shrink:0;"><span style="font-family:'Sora';font-weight:800;font-size:20px;color:#fff;line-height:1;">28</span><span style="font-size:10px;font-weight:600;color:#fff;margin-top:2px;">JUIN</span></div>
+                  <div style="flex:1;min-width:0;"><div style="font-size:14.5px;font-weight:700;color:var(--text);">Sortie plage à Assinie</div><div style="margin-top:3px;font-size:11.5px;color:rgba(var(--ink),.5);">09:00 · Plage de Marlin · 5 participants</div></div>
+                  <button onClick="{{ toggleRsvp }}" style="{{ cercle.rsvpStyle }}"><sc-if value="{{ cercle.rsvp }}"><ion-icon name="checkmark" style="font-size:13px;color:#fff;"></ion-icon></sc-if><span style="font-size:12.5px;font-weight:700;color:{{ cercle.rsvpColor }};">{{ cercle.rsvpLabel }}</span></button>
+                </div>
+
+                <div style="margin-top:22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;"><div style="display:flex;align-items:center;gap:9px;"><ion-icon name="people-outline" style="font-size:18px;color:var(--accent);"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Membres</span></div><button onClick="{{ onGroupChat }}" style="cursor:pointer;"><span style="font-size:13px;font-weight:600;color:var(--accent);">Voir tous</span></button></div>
+                <div style="display:flex;flex-direction:column;gap:4px;">
+                  <sc-for list="{{ cercle.members }}" as="m" hint-placeholder-count="4">
+                    <button onClick="{{ m.onTap }}" style="display:flex;align-items:center;gap:12px;padding:9px 4px;cursor:pointer;text-align:left;width:100%;">
+                      <div style="position:relative;flex-shrink:0;"><div style="width:44px;height:44px;border-radius:22px;background:{{ m.gradCss }};display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:16px;color:#fff;">{{ m.initial }}</span></div><sc-if value="{{ m.online }}"><div style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:6px;background:#43e08a;border:2px solid var(--bg1);"></div></sc-if></div>
+                      <div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:var(--text);">{{ m.name }}<sc-if value="{{ m.you }}"><span style="font-weight:600;font-size:11px;color:var(--accent);"> · Vous</span></sc-if></div><div style="margin-top:1px;font-size:11px;color:{{ m.subColorCss }};">{{ m.sub }}</div></div>
+                      <sc-if value="{{ m.lien }}"><div style="display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;background:rgba(255,111,168,.14);border:1px solid rgba(255,111,168,.3);"><ion-icon name="heart" style="font-size:10px;color:#ff6fa8;"></ion-icon><span style="font-size:10.5px;font-weight:700;color:#ff6fa8;">Lien</span></div></sc-if>
+                      <sc-if value="{{ m.hasTag }}"><div style="display:flex;align-items:center;padding:4px 10px;border-radius:99px;background:{{ m.tagBg }};border:1px solid {{ m.tagBd }};"><span style="font-size:10.5px;font-weight:700;color:{{ m.tagColor }};">{{ m.tag }}</span></div></sc-if>
+                      <sc-if value="{{ m.clickable }}"><ion-icon name="chevron-forward" style="font-size:16px;color:rgba(var(--ink),.3);"></ion-icon></sc-if>
+                    </button>
+                  </sc-for>
+                </div>
+
+                <button onClick="{{ onLeaveCercle }}" style="margin-top:18px;width:100%;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;"><span style="font-size:13.5px;font-weight:600;color:#ef5350;">Quitter le cercle</span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isProfil }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:6px 22px 12px;display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-family:'Sora';font-weight:800;font-size:27px;letter-spacing:-.5px;color:var(--text);">Profil</div>
+                <div style="display:flex;gap:9px;">
+                  <button onClick="{{ toggleTheme }}" style="width:42px;height:42px;border-radius:14px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="{{ themeToggleIcon }}" style="font-size:19px;color:var(--text);"></ion-icon></button>
+                  <button onClick="{{ onSettings }}" style="width:42px;height:42px;border-radius:14px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="settings-outline" style="font-size:19px;color:var(--text);"></ion-icon></button>
+                </div>
+              </div>
+              <div style="padding:0 22px 130px;">
+                <div style="display:flex;flex-direction:column;align-items:center;padding-top:8px;">
+                  <div style="position:relative;">
+                    <div style="width:96px;height:96px;border-radius:48px;padding:3px;background:linear-gradient(135deg,#8fd0ff,#ff6aa9,#e02a73,#8fd0ff);"><div style="width:100%;height:100%;border-radius:45px;background:linear-gradient(160deg,#5a7fd6,#7a4fd6,#2a1c5e);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:34px;color:#fff;">D</span></div></div>
+                    <div style="position:absolute;bottom:2px;right:2px;width:28px;height:28px;border-radius:14px;border:3px solid var(--bg2);background:linear-gradient(135deg,#3aa0ff,#5a7fd6);display:flex;align-items:center;justify-content:center;"><ion-icon name="checkmark" style="font-size:14px;color:#fff;"></ion-icon></div>
+                  </div>
+                  <div style="margin-top:13px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;"><span style="font-family:'Sora';font-weight:700;font-size:22px;color:var(--text);white-space:nowrap;">Didier, 28</span><div style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;background:rgba(143,208,255,.16);border:1px solid rgba(143,208,255,.4);"><ion-icon name="shield-checkmark" style="font-size:11px;color:#3aa0ff;"></ion-icon><span style="font-size:11px;font-weight:700;color:#3aa0ff;">Vérifié+</span></div></div>
+                  <div style="margin-top:6px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;"><ion-icon name="location-outline" style="font-size:14px;color:rgba(var(--ink),.55);"></ion-icon><span style="font-size:13px;color:rgba(var(--ink),.55);white-space:nowrap;">Abidjan · Cocody</span><span style="color:rgba(var(--ink),.4);">·</span><ion-icon name="diamond" style="font-size:12px;color:#8fd0ff;"></ion-icon><span style="font-size:13px;font-weight:600;color:#8fd0ff;white-space:nowrap;">Diamant</span></div>
+                  <div style="margin-top:11px;font-size:13px;line-height:20px;color:rgba(var(--ink),.62);text-align:center;max-width:290px;">Passionné de basket et de cinéma. J'aime les vraies conversations et découvrir Abidjan autrement. 🌍</div>
+                  <button onClick="{{ onEditProfile }}" style="margin-top:15px;display:flex;align-items:center;gap:8px;padding:11px 22px;border-radius:13px;background:rgba(255,140,190,.12);border:1px solid rgba(255,140,190,.4);cursor:pointer;"><ion-icon name="create-outline" style="font-size:15px;color:var(--accentDeep);"></ion-icon><span style="font-size:13.5px;font-weight:700;color:var(--accentDeep);">Modifier le profil</span></button>
+                </div>
+
+                <div style="margin-top:20px;display:flex;padding:4px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:11px 0;"><span style="font-family:'Sora';font-weight:700;font-size:19px;color:var(--text);">2</span><span style="margin-top:2px;font-size:11px;color:rgba(var(--ink),.5);">Cercles</span></div>
+                  <div style="width:1px;background:var(--border);margin:8px 0;"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:11px 0;"><span style="font-family:'Sora';font-weight:700;font-size:19px;color:var(--text);">650</span><span style="margin-top:2px;font-size:11px;color:rgba(var(--ink),.5);">XP · Niv. 4</span></div>
+                  <div style="width:1px;background:var(--border);margin:8px 0;"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:11px 0;"><span style="font-family:'Sora';font-weight:700;font-size:19px;color:var(--text);">14</span><span style="margin-top:2px;font-size:11px;color:rgba(var(--ink),.5);">Relations</span></div>
+                </div>
+
+                <div style="margin-top:13px;display:flex;align-items:center;gap:13px;padding:14px;border-radius:18px;border:1px solid rgba(67,224,138,.25);background:linear-gradient(135deg,rgba(67,224,138,.12),rgba(143,208,255,.06));">
+                  <div style="width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#43e08a,#2fa8c2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="shield-checkmark" style="font-size:22px;color:#06281a;"></ion-icon></div>
+                  <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--text);">Identité vérifiée</div><div style="margin-top:2px;font-size:12px;color:rgba(var(--ink),.55);">Selfie vivant confirmé · Photo validée</div></div>
+                </div>
+
+                <div style="margin-top:22px;display:flex;align-items:center;gap:9px;"><ion-icon name="ribbon" style="font-size:18px;color:var(--accent);"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Badges</span></div>
+                <div class="kscroll" style="display:flex;gap:11px;overflow-x:auto;margin:0 -22px;padding:13px 22px 4px;">
+                  <sc-for list="{{ badges }}" as="b" hint-placeholder-count="4">
+                    <div style="flex:0 0 auto;width:84px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+                      <sc-if value="{{ b.locked }}"><div style="width:58px;height:58px;border-radius:18px;background:var(--field);border:1px dashed rgba(var(--ink),.2);display:flex;align-items:center;justify-content:center;opacity:.6;"><ion-icon name="lock-closed" style="font-size:22px;color:rgba(var(--ink),.5);"></ion-icon></div></sc-if>
+                      <sc-if value="{{ b.notLocked }}"><div style="width:58px;height:58px;border-radius:18px;background:{{ b.gradCss }};display:flex;align-items:center;justify-content:center;box-shadow:0 8px 14px rgba(255,170,80,.35);"><ion-icon name="{{ b.icon }}" style="font-size:25px;color:{{ b.tint }};"></ion-icon></div></sc-if>
+                      <span style="font-size:11px;font-weight:600;color:rgba(var(--ink),.7);text-align:center;">{{ b.label }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:22px;display:flex;align-items:center;justify-content:space-between;"><div style="display:flex;align-items:center;gap:9px;"><ion-icon name="image" style="font-size:18px;color:var(--accent);"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Mes photos</span></div><span style="font-size:12px;color:rgba(var(--ink),.4);">3 / 6</span></div>
+                <div style="margin-top:13px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                  <sc-for list="{{ photos }}" as="p" hint-placeholder-count="6">
+                    <sc-if value="{{ p.isPhoto }}"><div style="aspect-ratio:3/4;border-radius:16px;background:{{ p.css }};position:relative;overflow:hidden;"><sc-if value="{{ p.principal }}"><div style="position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:99px;background:rgba(0,0,0,.45);"><span style="font-size:9.5px;font-weight:700;color:#fff;">Principale</span></div></sc-if></div></sc-if>
+                    <sc-if value="{{ p.locked }}"><div style="aspect-ratio:3/4;border-radius:16px;background:var(--field);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><ion-icon name="lock-closed" style="font-size:19px;color:rgba(var(--ink),.5);"></ion-icon><span style="font-size:9.5px;font-weight:600;color:rgba(var(--ink),.5);text-align:center;">{{ p.label }}</span></div></sc-if>
+                    <sc-if value="{{ p.add }}"><button onClick="{{ onAddPhoto }}" style="aspect-ratio:3/4;border-radius:16px;background:rgba(255,106,169,.08);border:1.5px dashed rgba(255,140,190,.4);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="add" style="font-size:24px;color:var(--accent);"></ion-icon></button></sc-if>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:22px;display:flex;align-items:center;gap:9px;"><ion-icon name="heart" style="font-size:18px;color:var(--accent);"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Centres d'intérêt</span></div>
+                <div style="margin-top:13px;display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ interests }}" as="it" hint-placeholder-count="6"><div style="padding:8px 14px;border-radius:99px;background:{{ it.bg }};border:1px solid {{ it.border }};"><span style="font-size:12.5px;font-weight:600;color:{{ it.color }};">{{ it.label }}</span></div></sc-for></div>
+
+                <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px;">
+                  <sc-for list="{{ menu }}" as="m" hint-placeholder-count="4">
+                    <button onClick="{{ m.onTap }}" style="display:flex;align-items:center;gap:14px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);cursor:pointer;text-align:left;width:100%;">
+                      <div style="width:40px;height:40px;border-radius:12px;background:{{ m.tintBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="{{ m.icon }}" style="font-size:20px;color:{{ m.tint }};"></ion-icon></div>
+                      <div style="flex:1;min-width:0;"><div style="font-size:14.5px;font-weight:700;color:var(--text);">{{ m.title }}</div><div style="margin-top:2px;font-size:11.5px;color:rgba(var(--ink),.45);">{{ m.sub }}</div></div>
+                      <sc-if value="{{ m.hasTag }}"><div style="padding:4px 9px;border-radius:99px;background:rgba(255,140,190,.14);"><span style="font-size:10px;font-weight:700;color:var(--accentDeep);">{{ m.tag }}</span></div></sc-if>
+                      <sc-if value="{{ m.noTag }}"><ion-icon name="chevron-forward" style="font-size:18px;color:rgba(var(--ink),.35);"></ion-icon></sc-if>
+                    </button>
+                  </sc-for>
+                  <div style="display:flex;align-items:center;gap:14px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                    <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,111,168,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="pause-circle-outline" style="font-size:20px;color:#ff6fa8;"></ion-icon></div>
+                    <div style="flex:1;min-width:0;"><div style="font-size:14.5px;font-weight:700;color:var(--text);">Pause relationnelle</div><div style="margin-top:2px;font-size:11.5px;color:{{ pauseSubColor }};">{{ pauseSub }}</div></div>
+                    <button onClick="{{ togglePause }}" style="{{ pauseTrack }}"><div style="width:21px;height:21px;border-radius:11px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);"></div></button>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:14px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                    <div style="width:40px;height:40px;border-radius:12px;background:rgba(167,139,250,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="moon-outline" style="font-size:20px;color:#a78bfa;"></ion-icon></div>
+                    <div style="flex:1;min-width:0;"><div style="font-size:14.5px;font-weight:700;color:var(--text);">Mode sombre</div><div style="margin-top:2px;font-size:11.5px;color:rgba(var(--ink),.45);">{{ themeSub }}</div></div>
+                    <button onClick="{{ toggleTheme }}" style="{{ themeTrack }}"><div style="width:21px;height:21px;border-radius:11px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);"></div></button>
+                  </div>
+                </div>
+
+                <div style="margin-top:18px;position:relative;overflow:hidden;padding:18px;border-radius:22px;border:1px solid rgba(255,140,190,.28);background:linear-gradient(135deg,rgba(255,106,169,.22),rgba(255,111,194,.12));">
+                  <div style="position:absolute;top:-30px;right:-20px;width:130px;height:130px;border-radius:65px;background:rgba(255,111,194,.3);"></div>
+                  <div style="position:relative;display:flex;align-items:center;gap:14px;"><div style="width:50px;height:50px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 14px rgba(224,42,115,.5);"><ion-icon name="diamond" style="font-size:22px;color:#fff;"></ion-icon></div><div style="flex:1;"><div style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Passez Premium</div><div style="margin-top:3px;font-size:12.5px;line-height:18px;color:rgba(var(--ink),.62);">Cercles & DM illimités, statistiques, rythme personnel.</div></div></div>
+                  <button onClick="{{ onPremium }}" style="position:relative;margin-top:14px;width:100%;padding:13px;border-radius:14px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;box-shadow:0 10px 16px rgba(224,42,115,.45);"><span style="font-size:14px;font-weight:700;color:#fff;">Découvrir Premium</span><ion-icon name="chevron-forward" style="font-size:16px;color:#fff;"></ion-icon></button>
+                </div>
+                <button onClick="{{ onLogout }}" style="margin-top:14px;width:100%;padding:13px;border-radius:14px;background:var(--card);border:1px solid var(--border);cursor:pointer;"><span style="font-size:13.5px;font-weight:600;color:#ef5350;">Se déconnecter</span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isCreer }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+              <div style="padding:6px 22px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+                <div><div style="font-family:'Sora';font-weight:800;font-size:25px;letter-spacing:-.3px;color:var(--text);">Créer</div><div style="margin-top:2px;font-size:13px;color:rgba(var(--ink),.5);">Lancez quelque chose de nouveau</div></div>
+                <button onClick="{{ goAccueil }}" style="width:44px;height:44px;border-radius:14px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="close" style="font-size:20px;color:var(--text);"></ion-icon></button>
+              </div>
+              <div class="kscroll" style="flex:1;overflow-y:auto;padding:0 22px 110px;">
+                <div style="position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;padding:18px;border-radius:22px;background:var(--brand);box-shadow:0 16px 28px rgba(224,42,115,.4);">
+                  <div style="position:absolute;top:-30px;right:-20px;width:130px;height:130px;border-radius:65px;background:rgba(255,255,255,.22);"></div>
+                  <div style="position:relative;width:50px;height:50px;border-radius:16px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="people-outline" style="font-size:26px;color:#fff;"></ion-icon></div>
+                  <div style="position:relative;flex:1;"><div style="font-family:'Sora';font-weight:700;font-size:17px;color:#fff;">Créer un cercle</div><div style="margin-top:3px;font-size:12.5px;line-height:17px;color:rgba(255,255,255,.88);">Rassemblez une communauté autour d'une passion</div></div>
+                  <ion-icon name="chevron-forward" style="position:relative;font-size:20px;color:#fff;"></ion-icon>
+                </div>
+
+                <button onClick="{{ onActivity }}" style="margin-top:11px;width:100%;display:flex;align-items:center;gap:14px;padding:15px;border-radius:20px;background:var(--card);border:1px solid var(--border);cursor:pointer;text-align:left;box-shadow:var(--cardShadow);">
+                  <div style="width:46px;height:46px;border-radius:14px;background:rgba(255,157,92,.13);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="calendar-outline" style="font-size:22px;color:#ff9d5c;"></ion-icon></div>
+                  <div style="flex:1;"><div style="font-size:15px;font-weight:700;color:var(--text);">Proposer une activité</div><div style="margin-top:2px;font-size:12px;color:rgba(var(--ink),.5);">Sortie, soirée, événement d'un cercle</div></div>
+                  <ion-icon name="chevron-forward" style="font-size:18px;color:rgba(var(--ink),.35);"></ion-icon>
+                </button>
+                <button onClick="{{ onInvite }}" style="margin-top:11px;width:100%;display:flex;align-items:center;gap:14px;padding:15px;border-radius:20px;background:var(--card);border:1px solid var(--border);cursor:pointer;text-align:left;box-shadow:var(--cardShadow);">
+                  <div style="width:46px;height:46px;border-radius:14px;background:rgba(143,157,255,.13);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="person-add-outline" style="font-size:22px;color:#8f9dff;"></ion-icon></div>
+                  <div style="flex:1;"><div style="font-size:15px;font-weight:700;color:var(--text);">Inviter des amis</div><div style="margin-top:2px;font-size:12px;color:rgba(var(--ink),.5);">Partagez KADY et gagnez de l'XP</div></div>
+                  <ion-icon name="chevron-forward" style="font-size:18px;color:rgba(var(--ink),.35);"></ion-icon>
+                </button>
+
+                <div style="margin:22px 0;display:flex;align-items:center;gap:12px;"><div style="flex:1;height:1px;background:var(--border);"></div><span style="font-size:11.5px;font-weight:600;color:rgba(var(--ink),.4);letter-spacing:.5px;">NOUVEAU CERCLE</span><div style="flex:1;height:1px;background:var(--border);"></div></div>
+
+                <div style="position:relative;height:120px;border-radius:20px;overflow:hidden;background:{{ cCoverCss }};display:flex;align-items:flex-end;padding:14px;box-shadow:0 12px 22px rgba(40,25,80,.3);">
+                  <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent,rgba(10,6,20,.45));"></div>
+                  <button onClick="{{ onAddPhoto }}" style="position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:5px;padding:7px 11px;border-radius:99px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);cursor:pointer;"><ion-icon name="image-outline" style="font-size:13px;color:#fff;"></ion-icon><span style="font-size:11.5px;font-weight:600;color:#fff;">Couverture</span></button>
+                  <span style="position:relative;font-family:'Sora';font-weight:700;font-size:18px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.4);">{{ cNamePreview }}</span>
+                </div>
+
+                <div style="margin-top:18px;font-size:12.5px;font-weight:700;color:var(--text);">Nom du cercle</div>
+                <div style="margin-top:8px;display:flex;align-items:center;gap:10px;padding:13px 15px;border-radius:15px;background:var(--field);border:1px solid var(--border);">
+                  <ion-icon name="people-outline" style="font-size:18px;color:rgba(var(--ink),.4);flex-shrink:0;"></ion-icon>
+                  <input class="kinput" value="{{ cName }}" onInput="{{ setCName }}" placeholder="Ex. Randonneurs d'Abidjan" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'Plus Jakarta Sans';font-size:14.5px;color:var(--text);padding:0;"/>
+                </div>
+
+                <div style="margin-top:18px;font-size:12.5px;font-weight:700;color:var(--text);">Catégorie</div>
+                <div class="kscroll" style="display:flex;gap:9px;overflow-x:auto;margin:10px -22px 0;padding:0 22px 4px;"><sc-for list="{{ cCats }}" as="ct" hint-placeholder-count="5"><button onClick="{{ ct.onClick }}" style="{{ ct.style }}"><span style="font-size:15px;">{{ ct.emoji }}</span><span style="font-size:13px;font-weight:600;color:{{ ct.color }};">{{ ct.label }}</span></button></sc-for></div>
+
+                <div style="margin-top:18px;font-size:12.5px;font-weight:700;color:var(--text);">Type de connexion</div>
+                <div style="margin-top:10px;display:flex;gap:10px;">
+                  <button onClick="{{ setRenc }}" style="{{ typeRencStyle }}"><ion-icon name="heart" style="font-size:22px;color:{{ rencColor }};"></ion-icon><span style="font-size:13px;font-weight:700;color:{{ rencColor }};">Rencontre</span></button>
+                  <button onClick="{{ setAmitie }}" style="{{ typeAmitieStyle }}"><ion-icon name="people" style="font-size:22px;color:{{ amitieColor }};"></ion-icon><span style="font-size:13px;font-weight:700;color:{{ amitieColor }};">Amitié</span></button>
+                </div>
+
+                <div style="margin-top:18px;padding:15px;border-radius:16px;background:var(--card);border:1px solid var(--border);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;font-weight:700;color:var(--text);">Membres maximum</span><span style="font-family:'Sora';font-weight:700;font-size:15px;color:var(--accentDeep);">{{ cMax }}</span></div>
+                  <div style="margin-top:12px;position:relative;height:7px;border-radius:99px;background:rgba(var(--ink),.12);"><div style="position:absolute;left:0;top:0;height:7px;border-radius:99px;background:var(--brand);width:{{ cMaxPct }}%;"></div><div style="position:absolute;top:50%;left:{{ cMaxPct }}%;width:20px;height:20px;border-radius:10px;background:#fff;border:2px solid #ff6aa9;transform:translate(-50%,-50%);box-shadow:0 3px 8px rgba(214,40,110,.35);"></div></div>
+                  <div style="margin-top:9px;display:flex;gap:8px;"><sc-for list="{{ cSizes }}" as="sz" hint-placeholder-count="4"><button onClick="{{ sz.onClick }}" style="{{ sz.style }}"><span style="font-size:12.5px;font-weight:700;color:{{ sz.color }};">{{ sz.n }}</span></button></sc-for></div>
+                </div>
+
+                <div style="margin-top:13px;display:flex;align-items:center;gap:13px;padding:15px;border-radius:16px;background:var(--card);border:1px solid var(--border);">
+                  <div style="width:40px;height:40px;border-radius:12px;background:rgba(123,224,160,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="lock-closed" style="font-size:20px;color:#1f9d57;"></ion-icon></div>
+                  <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--text);">Cercle privé</div><div style="margin-top:2px;font-size:11.5px;color:{{ cPrivSubColor }};">{{ cPrivSub }}</div></div>
+                  <button onClick="{{ toggleCPriv }}" style="{{ cPrivTrack }}"><div style="width:21px;height:21px;border-radius:11px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);"></div></button>
+                </div>
+              </div>
+              <div style="padding:14px 22px 16px;background:var(--bg2);flex-shrink:0;">
+                <button onClick="{{ doCreate }}" style="width:100%;padding:16px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;box-shadow:0 14px 24px rgba(224,42,115,.45);"><ion-icon name="add" style="font-size:19px;color:#fff;"></ion-icon><span style="font-family:'Sora';font-weight:700;font-size:15px;color:#fff;">Créer mon cercle</span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isMembre }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg1);">
+              <div class="kscroll" ref="{{ viewRef }}" style="flex:1;overflow-y:auto;">
+                <div style="position:relative;height:172px;background:{{ member.coverCss }};">
+                  <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,20,.25),transparent 45%,rgba(10,6,20,.4));"></div>
+                  <div style="position:relative;padding:10px 18px 0;display:flex;align-items:center;justify-content:space-between;">
+                    <button onClick="{{ back }}" style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:#fff;"></ion-icon></button>
+                    <button onClick="{{ openProfile }}" style="width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="ellipsis-vertical" style="font-size:18px;color:#fff;"></ion-icon></button>
+                  </div>
+                </div>
+                <div style="padding:0 22px 130px;margin-top:-44px;">
+                  <div style="display:flex;flex-direction:column;align-items:center;">
+                    <div style="position:relative;"><div style="width:96px;height:96px;border-radius:48px;padding:3px;background:{{ member.gradCss }};"><div style="width:100%;height:100%;border-radius:45px;background:var(--card);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:36px;color:{{ member.tint }};">{{ member.initial }}</span></div></div><sc-if value="{{ member.online }}"><div style="position:absolute;bottom:4px;right:6px;width:18px;height:18px;border-radius:9px;background:#43e08a;border:3px solid var(--bg1);"></div></sc-if></div>
+                    <div style="margin-top:13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:22px;color:var(--text);">{{ member.nameAge }}</span><div style="display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;background:{{ member.tintBg }};border:1px solid {{ member.tintBd }};"><div style="width:6px;height:6px;border-radius:3px;background:{{ member.tint }};"></div><span style="font-size:11px;font-weight:700;color:{{ member.tint }};">{{ member.modeLabel }}</span></div></div>
+                    <div style="margin-top:6px;display:flex;align-items:center;gap:6px;"><ion-icon name="location-outline" style="font-size:13px;color:rgba(var(--ink),.5);"></ion-icon><span style="font-size:13px;color:rgba(var(--ink),.55);">Abidjan</span><span style="color:rgba(var(--ink),.4);">·</span><span style="font-size:13px;font-weight:600;color:{{ member.statusColor }};">{{ member.status }}</span></div>
+                  </div>
+                  <div style="margin-top:18px;padding:15px;border-radius:16px;background:var(--card);border:1px solid var(--border);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><span style="font-size:14px;font-weight:700;color:{{ member.tint }};">{{ member.levelLabel }}</span><span style="font-size:12px;color:rgba(var(--ink),.45);">Niveau {{ member.niveau }}/5</span></div>
+                    <div style="display:flex;gap:5px;"><sc-for list="{{ member.segs }}" as="sg" hint-placeholder-count="5"><div style="{{ sg.style }}"></div></sc-for></div>
+                  </div>
+                  <div style="margin-top:13px;display:flex;align-items:center;gap:13px;padding:14px;border-radius:16px;background:rgba(255,106,169,.08);border:1px solid rgba(255,140,190,.25);">
+                    <div style="width:40px;height:40px;border-radius:12px;background:rgba(255,140,190,.16);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="people" style="font-size:18px;color:var(--accent);"></ion-icon></div>
+                    <div style="flex:1;"><div style="font-size:13.5px;font-weight:700;color:var(--text);">Cercle partagé</div><div style="margin-top:2px;font-size:12px;color:rgba(var(--ink),.6);">Vous vous êtes rencontrés dans <b style="color:var(--accentDeep);">{{ member.cercle }}</b></div></div>
+                  </div>
+                  <div style="margin-top:16px;font-size:14px;line-height:21px;color:rgba(var(--ink),.72);text-align:center;">{{ member.bio }}</div>
+                  <div style="margin-top:22px;font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Centres d'intérêt</div>
+                  <div style="margin-top:11px;display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ member.interets }}" as="it" hint-placeholder-count="3"><div style="padding:8px 14px;border-radius:99px;background:var(--field);border:1px solid var(--border);"><span style="font-size:12.5px;font-weight:600;color:rgba(var(--ink),.75);">{{ it }}</span></div></sc-for></div>
+                  <div style="margin-top:22px;font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Photos</div>
+                  <div style="margin-top:11px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;"><sc-for list="{{ member.photos }}" as="p" hint-placeholder-count="3"><div style="aspect-ratio:3/4;border-radius:16px;background:{{ p.css }};position:relative;overflow:hidden;"><sc-if value="{{ p.locked }}"><div style="position:absolute;inset:0;background:rgba(10,6,20,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;"><ion-icon name="lock-closed" style="font-size:16px;color:#fff;"></ion-icon><span style="font-size:10.5px;font-weight:700;color:#fff;">{{ p.lockLabel }}</span></div></sc-if></div></sc-for></div>
+                  <div style="margin-top:10px;font-size:12px;color:rgba(var(--ink),.45);text-align:center;">Les photos se débloquent au fil des niveaux de votre lien.</div>
+                </div>
+              </div>
+              <div style="padding:12px 22px 18px;background:var(--glass);border-top:1px solid var(--border);">
+                <button onClick="{{ member.onMessage }}" style="width:100%;padding:15px;border-radius:15px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;box-shadow:0 10px 16px rgba(224,42,115,.5);"><ion-icon name="chatbubble-ellipses-outline" style="font-size:18px;color:#fff;"></ion-icon><span style="font-size:15px;font-weight:700;color:#fff;">Envoyer un message</span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isNotifs }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:6px 22px 14px;display:flex;align-items:center;gap:12px;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">Notifications</div>
+                <button onClick="{{ markNotifsRead }}" style="cursor:pointer;"><span style="font-size:12.5px;font-weight:700;color:var(--accent);">Tout lire</span></button>
+              </div>
+              <div style="padding:0 22px 40px;">
+                <div style="margin-top:6px;font-size:12px;font-weight:700;letter-spacing:.5px;color:rgba(var(--ink),.4);">NOUVEAU</div>
+                <sc-if value="{{ notif.reqPending }}">
+                  <div style="margin-top:11px;position:relative;display:flex;align-items:flex-start;gap:13px;padding:14px;border-radius:18px;background:rgba(255,111,168,.10);border:1px solid rgba(255,111,168,.22);">
+                    <div style="position:relative;flex-shrink:0;"><div style="width:46px;height:46px;border-radius:23px;background:linear-gradient(135deg,#ff9d5c,#d34d7e);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:17px;color:#fff;">A</span></div><div style="position:absolute;bottom:-3px;right:-3px;width:22px;height:22px;border-radius:11px;background:#ff6fa8;border:2px solid var(--bg1);display:flex;align-items:center;justify-content:center;"><ion-icon name="heart" style="font-size:11px;color:#fff;"></ion-icon></div></div>
+                    <div style="flex:1;"><div style="font-size:13.5px;line-height:19px;color:rgba(var(--ink),.78);"><b style="color:var(--text);">Awa</b> souhaite passer au niveau <b style="color:#ff6fa8;">L'Ami(e)</b> avec vous</div>
+                      <div style="margin-top:9px;display:flex;gap:8px;"><button onClick="{{ acceptRequest }}" style="padding:8px 16px;border-radius:10px;background:var(--brand);cursor:pointer;box-shadow:0 6px 10px rgba(224,42,115,.45);"><span style="font-size:12px;font-weight:700;color:#fff;">Accepter</span></button><button onClick="{{ dismissRequest }}" style="padding:8px 14px;border-radius:10px;background:var(--field);border:1px solid var(--border);cursor:pointer;"><span style="font-size:12px;font-weight:700;color:rgba(var(--ink),.6);">Plus tard</span></button></div>
+                      <div style="margin-top:8px;font-size:11px;color:rgba(var(--ink),.42);">Il y a 5 min</div>
+                    </div>
+                    <sc-if value="{{ notif.unread }}"><div style="position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:5px;background:#ff4d97;"></div></sc-if>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ notif.reqHandled }}">
+                  <div style="margin-top:11px;display:flex;align-items:center;gap:10px;padding:14px;border-radius:18px;background:var(--card2);border:1px solid var(--border);"><ion-icon name="{{ notif.reqIcon }}" style="font-size:18px;color:{{ notif.reqIconColor }};"></ion-icon><span style="flex:1;font-size:12.5px;color:rgba(var(--ink),.6);">{{ notif.reqHandledTxt }}</span></div>
+                </sc-if>
+                <div style="margin-top:9px;display:flex;align-items:center;gap:13px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--border);box-shadow:var(--cardShadow);">
+                  <div style="position:relative;flex-shrink:0;"><div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#ff9d5c,#c2477e,#3b1f63);"></div><div style="position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;border-radius:11px;background:var(--card2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;"><ion-icon name="chatbubble-outline" style="font-size:12px;color:var(--accent);"></ion-icon></div></div>
+                  <div style="flex:1;"><div style="font-size:13.5px;line-height:19px;color:rgba(var(--ink),.78);">3 nouveaux messages dans <b style="color:var(--text);">Voyageurs</b></div><div style="margin-top:6px;font-size:11px;color:rgba(var(--ink),.42);">Il y a 18 min</div></div>
+                  <sc-if value="{{ notif.unread }}"><div style="width:9px;height:9px;border-radius:5px;background:#ff4d97;flex-shrink:0;"></div></sc-if>
+                </div>
+                <div style="margin-top:9px;display:flex;align-items:center;gap:13px;padding:14px;border-radius:18px;background:var(--card);border:1px solid var(--border);box-shadow:var(--cardShadow);">
+                  <div style="width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#ffd27a,#ff9d5c);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="star" style="font-size:22px;color:#5a3a12;"></ion-icon></div>
+                  <div style="flex:1;"><div style="font-size:13.5px;line-height:19px;color:rgba(var(--ink),.78);">Vous avez gagné <b style="color:#e8893a;">+50 XP</b> · plus que 350 pour le niveau 5 !</div><div style="margin-top:6px;font-size:11px;color:rgba(var(--ink),.42);">Il y a 1 h</div></div>
+                  <sc-if value="{{ notif.unread }}"><div style="width:9px;height:9px;border-radius:5px;background:#ff4d97;flex-shrink:0;"></div></sc-if>
+                </div>
+                <div style="margin-top:22px;font-size:12px;font-weight:700;letter-spacing:.5px;color:rgba(var(--ink),.4);">PLUS TÔT</div>
+                <div style="margin-top:9px;display:flex;align-items:center;gap:13px;padding:14px;border-radius:18px;background:var(--card2);border:1px solid var(--border);">
+                  <div style="position:relative;flex-shrink:0;"><div style="width:46px;height:46px;border-radius:23px;background:linear-gradient(135deg,#b07bff,#7a4fd6);display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:17px;color:#fff;">S</span></div><div style="position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;border-radius:11px;background:var(--card2);border:2px solid var(--card);display:flex;align-items:center;justify-content:center;"><ion-icon name="person-add" style="font-size:12px;color:var(--accent);"></ion-icon></div></div>
+                  <div style="flex:1;"><div style="font-size:13.5px;line-height:19px;color:rgba(var(--ink),.7);"><b style="color:var(--text);">Sophie</b> a rejoint le cercle <b style="color:var(--accentDeep);">Entrepreneurs 225</b></div><div style="margin-top:6px;font-size:11px;color:rgba(var(--ink),.42);">Hier</div></div>
+                </div>
+                <button onClick="{{ onPremium }}" style="margin-top:9px;width:100%;text-align:left;display:flex;align-items:center;gap:13px;padding:14px;border-radius:18px;background:var(--card2);border:1px solid var(--border);cursor:pointer;">
+                  <div style="width:46px;height:46px;border-radius:14px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="diamond" style="font-size:20px;color:#fff;"></ion-icon></div>
+                  <div style="flex:1;"><div style="font-size:13.5px;line-height:19px;color:rgba(var(--ink),.7);">Découvrez <b style="color:var(--accentDeep);">KADY Premium</b> · 7 jours offerts</div><div style="margin-top:6px;font-size:11px;color:rgba(var(--ink),.42);">Il y a 2 j</div></div>
+                  <ion-icon name="chevron-forward" style="font-size:18px;color:rgba(var(--ink),.35);"></ion-icon>
+                </button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPremium }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:6px 22px 8px;display:flex;align-items:center;gap:12px;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">KADY Premium</div>
+              </div>
+              <div style="padding:8px 22px 48px;">
+                <div style="position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 22px;border-radius:24px;background:linear-gradient(135deg,#7a4fd6,#b07bff,#e02a73);box-shadow:0 18px 34px rgba(167,139,250,.4);">
+                  <div style="width:80px;height:80px;border-radius:40px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;"><ion-icon name="diamond" style="font-size:40px;color:#fff;"></ion-icon></div>
+                  <div style="margin-top:6px;font-family:'Sora';font-weight:700;font-size:25px;color:#fff;text-align:center;">Va plus loin avec Premium</div>
+                  <div style="font-size:14px;line-height:20px;color:rgba(255,255,255,.92);text-align:center;max-width:260px;">Tout KADY, sans limites. Annulable à tout moment.</div>
+                </div>
+                <div style="margin-top:22px;display:flex;flex-direction:column;gap:16px;">
+                  <sc-for list="{{ premiumPerks }}" as="p" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:14px;"><div style="width:44px;height:44px;border-radius:14px;background:{{ p.bg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="{{ p.icon }}" style="font-size:18px;color:{{ p.color }};"></ion-icon></div><div style="flex:1;"><div style="font-size:15px;font-weight:600;color:var(--text);">{{ p.t }}</div><div style="margin-top:2px;font-size:13px;color:rgba(var(--ink),.6);">{{ p.d }}</div></div></div>
+                  </sc-for>
+                </div>
+                <div style="margin-top:24px;display:flex;flex-direction:column;align-items:center;padding:22px;border-radius:22px;background:var(--card);border:1px solid rgba(255,140,190,.3);box-shadow:0 4px 16px rgba(224,42,115,.12);">
+                  <div style="font-family:'Sora';font-weight:700;font-size:30px;color:var(--text);">2 000 FCFA<span style="font-family:'Plus Jakarta Sans';font-weight:400;font-size:16px;color:rgba(var(--ink),.6);"> / mois</span></div>
+                  <div style="margin-top:6px;font-size:13px;color:rgba(var(--ink),.6);text-align:center;">Paiement par Orange Money, Wave, MTN ou Moov.</div>
+                </div>
+                <button onClick="{{ onPremiumPay }}" style="margin-top:16px;width:100%;padding:16px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 14px 24px rgba(224,42,115,.45);"><span style="font-family:'Sora';font-weight:700;font-size:15px;color:#fff;">Continuer le paiement</span></button>
+                <div style="margin-top:14px;display:flex;align-items:center;gap:8px;justify-content:center;"><ion-icon name="shield-checkmark" style="font-size:14px;color:rgba(var(--ink),.55);"></ion-icon><span style="font-size:12px;color:rgba(var(--ink),.6);text-align:center;max-width:280px;">Paiement sécurisé via mobile money sur kady.ci. Aucune commission de store.</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isPrefs }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:6px 22px 8px;display:flex;align-items:center;gap:12px;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">Mode de connexion</div>
+              </div>
+              <div style="padding:8px 22px 48px;">
+                <div style="display:flex;align-items:flex-start;gap:9px;padding:14px;border-radius:16px;background:rgba(255,106,169,.08);border:1px solid rgba(255,140,190,.25);"><ion-icon name="sparkles" style="font-size:16px;color:var(--accent);flex-shrink:0;margin-top:1px;"></ion-icon><span style="flex:1;font-size:13px;line-height:19px;color:rgba(var(--ink),.65);">Ces préférences orientent les Cercles et profils qu'on te propose. Tu peux les changer quand tu veux.</span></div>
+                <div style="margin-top:24px;font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">Avec qui te connecter</div>
+                <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ prefFor }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div>
+                <div style="margin-top:24px;font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">Type de connexion</div>
+                <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ prefMode }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div>
+                <div style="margin-top:24px;font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">Tranche d'âge recherchée</div>
+                <div style="margin-top:12px;padding:18px 16px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                  <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:rgba(var(--ink),.6);">Entre</span><span style="font-family:'Sora';font-weight:700;font-size:17px;color:var(--accentDeep);">{{ ageMin }} – {{ ageMax }} ans</span></div>
+                  <div style="margin-top:16px;position:relative;height:7px;border-radius:99px;background:rgba(var(--ink),.12);"><div style="position:absolute;top:0;height:7px;border-radius:99px;background:var(--brand);left:{{ ageLo }}%;right:calc(100% - {{ ageHi }}%);"></div><div style="position:absolute;top:50%;left:{{ ageLo }}%;width:18px;height:18px;border-radius:9px;background:#fff;border:2px solid #ff6aa9;transform:translate(-50%,-50%);box-shadow:0 3px 8px rgba(214,40,110,.35);"></div><div style="position:absolute;top:50%;left:{{ ageHi }}%;width:18px;height:18px;border-radius:9px;background:#fff;border:2px solid #ff6aa9;transform:translate(-50%,-50%);box-shadow:0 3px 8px rgba(214,40,110,.35);"></div></div>
+                  <div style="margin-top:18px;display:flex;gap:18px;">
+                    <div style="flex:1;"><div style="font-size:11px;color:rgba(var(--ink),.45);margin-bottom:7px;">Minimum</div><div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:12px;background:var(--field);border:1px solid var(--border);"><button onClick="{{ stepAgeMinDown }}" style="width:30px;height:30px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="remove" style="font-size:17px;color:var(--text);"></ion-icon></button><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">{{ ageMin }}</span><button onClick="{{ stepAgeMinUp }}" style="width:30px;height:30px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="add" style="font-size:17px;color:var(--text);"></ion-icon></button></div></div>
+                    <div style="flex:1;"><div style="font-size:11px;color:rgba(var(--ink),.45);margin-bottom:7px;">Maximum</div><div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:12px;background:var(--field);border:1px solid var(--border);"><button onClick="{{ stepAgeMaxDown }}" style="width:30px;height:30px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="remove" style="font-size:17px;color:var(--text);"></ion-icon></button><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">{{ ageMax }}</span><button onClick="{{ stepAgeMaxUp }}" style="width:30px;height:30px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="add" style="font-size:17px;color:var(--text);"></ion-icon></button></div></div>
+                  </div>
+                </div>
+                <div style="margin-top:16px;display:flex;align-items:center;gap:7px;justify-content:center;"><ion-icon name="lock-closed" style="font-size:13px;color:rgba(var(--ink),.45);"></ion-icon><span style="font-size:12px;color:rgba(var(--ink),.45);text-align:center;">Ton âge reste visible, mais ta tranche de recherche ne l'est pas.</span></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isRelations }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:6px 22px 8px;display:flex;align-items:center;gap:12px;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">Carte des relations</div>
+              </div>
+              <div style="padding:8px 22px 48px;">
+                <div style="display:flex;padding:4px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 0;"><span style="font-family:'Sora';font-weight:700;font-size:22px;color:var(--accent);">{{ relTotal }}</span><span style="margin-top:3px;font-size:11.5px;color:rgba(var(--ink),.5);">Liens</span></div>
+                  <div style="width:1px;background:var(--border);margin:9px 0;"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 0;"><span style="font-family:'Sora';font-weight:700;font-size:22px;color:#ff6fa8;">{{ relRen }}</span><span style="margin-top:3px;font-size:11.5px;color:rgba(var(--ink),.5);">Rencontre</span></div>
+                  <div style="width:1px;background:var(--border);margin:9px 0;"></div>
+                  <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:12px 0;"><span style="font-family:'Sora';font-weight:700;font-size:22px;color:#8f9dff;">{{ relAmi }}</span><span style="margin-top:3px;font-size:11.5px;color:rgba(var(--ink),.5);">Amitié</span></div>
+                </div>
+                <div style="margin-top:22px;font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Tes liens</div>
+                <div style="margin-top:13px;display:flex;flex-direction:column;gap:13px;">
+                  <sc-for list="{{ relList }}" as="rl" hint-placeholder-count="6">
+                    <div style="padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                      <button onClick="{{ rl.onOpenProfile }}" style="width:100%;display:flex;align-items:center;gap:12px;cursor:pointer;text-align:left;">
+                        <div style="position:relative;flex-shrink:0;"><div style="width:48px;height:48px;border-radius:24px;background:{{ rl.gradCss }};display:flex;align-items:center;justify-content:center;"><span style="font-family:'Sora';font-weight:700;font-size:18px;color:#fff;">{{ rl.initial }}</span></div><sc-if value="{{ rl.online }}"><div style="position:absolute;bottom:1px;right:1px;width:12px;height:12px;border-radius:6px;background:#43e08a;border:2.5px solid var(--card);"></div></sc-if></div>
+                        <div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-size:15px;font-weight:700;color:var(--text);">{{ rl.nameAge }}</span><div style="display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:99px;background:{{ rl.tintBg }};border:1px solid {{ rl.tintBd }};"><div style="width:5px;height:5px;border-radius:3px;background:{{ rl.tint }};"></div><span style="font-size:10.5px;font-weight:700;color:{{ rl.tint }};">{{ rl.modeLabel }}</span></div></div><div style="margin-top:3px;font-size:12px;color:rgba(var(--ink),.5);">via <b style="color:rgba(var(--ink),.75);">{{ rl.via }}</b></div></div>
+                        <ion-icon name="chevron-forward" style="font-size:16px;color:rgba(var(--ink),.3);"></ion-icon>
+                      </button>
+                      <div style="margin-top:11px;display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;font-weight:700;color:{{ rl.tint }};">{{ rl.levelLabel }}</span><span style="font-size:11.5px;color:rgba(var(--ink),.45);">Niveau {{ rl.niveau }}/5</span></div>
+                      <div style="margin-top:8px;display:flex;gap:5px;"><sc-for list="{{ rl.segs }}" as="sg" hint-placeholder-count="5"><div style="{{ sg.style }}"></div></sc-for></div>
+                      <button onClick="{{ rl.onOpenChat }}" style="margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border-radius:12px;border:1px solid {{ rl.tintBd }};background:{{ rl.tint14 }};cursor:pointer;"><ion-icon name="chatbubble-ellipses-outline" style="font-size:15px;color:{{ rl.tint }};"></ion-icon><span style="font-size:13px;font-weight:700;color:{{ rl.tint }};">Ouvrir la conversation</span></button>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="margin-top:24px;font-family:'Sora';font-weight:700;font-size:16px;color:var(--text);">Comment on progresse</div>
+                <div style="margin-top:13px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><div style="width:9px;height:9px;border-radius:5px;background:#ff6fa8;"></div><span style="font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">Mode Rencontre</span></div>
+                  <sc-for list="{{ ladderRen }}" as="l" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:11px;padding:5px 0;"><div style="width:26px;height:26px;border-radius:13px;border:1.5px solid rgba(255,111,168,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:12px;font-weight:700;color:#ff6fa8;">{{ l.n }}</span></div><span style="font-size:13.5px;font-weight:600;color:var(--text);">{{ l.label }}</span></div></sc-for>
+                </div>
+                <div style="margin-top:13px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><div style="width:9px;height:9px;border-radius:5px;background:#8f9dff;"></div><span style="font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">Mode Amitié</span></div>
+                  <sc-for list="{{ ladderAmi }}" as="l" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:11px;padding:5px 0;"><div style="width:26px;height:26px;border-radius:13px;border:1.5px solid rgba(143,157,255,.4);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="font-size:12px;font-weight:700;color:#8f9dff;">{{ l.n }}</span></div><span style="font-size:13.5px;font-weight:600;color:var(--text);">{{ l.label }}</span></div></sc-for>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isParams }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:6px 22px 8px;display:flex;align-items:center;gap:12px;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">Paramètres</div>
+              </div>
+              <div style="padding:8px 22px 48px;">
+                <div style="font-size:12.5px;font-weight:700;color:rgba(var(--ink),.5);">Apparence</div>
+                <div style="margin-top:10px;display:flex;align-items:center;gap:14px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);"><div style="width:36px;height:36px;border-radius:11px;background:rgba(167,139,250,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="moon" style="font-size:17px;color:#a78bfa;"></ion-icon></div><div style="flex:1;min-width:0;"><div style="font-size:14.5px;font-weight:600;color:var(--text);">Mode sombre</div><div style="margin-top:2px;font-size:11.5px;color:rgba(var(--ink),.55);">{{ themeSub }} · s'applique à toute l'app.</div></div><button onClick="{{ toggleTheme }}" style="{{ themeTrack }}"><div style="width:21px;height:21px;border-radius:11px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);"></div></button></div>
+
+                <div style="margin-top:22px;font-size:12.5px;font-weight:700;color:rgba(var(--ink),.5);">Pause relationnelle</div>
+                <div style="margin-top:10px;display:flex;align-items:center;gap:14px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);"><div style="flex:1;min-width:0;"><div style="font-size:14.5px;font-weight:600;color:var(--text);">Activer la pause</div><div style="margin-top:2px;font-size:11.5px;line-height:17px;color:rgba(var(--ink),.55);">Tu restes dans tes Cercles mais ne reçois plus de nouveaux DM et disparais des suggestions. Réversible.</div></div><button onClick="{{ togglePause }}" style="{{ pauseTrack }}"><div style="width:21px;height:21px;border-radius:11px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);"></div></button></div>
+
+                <div style="margin-top:22px;font-size:12.5px;font-weight:700;color:rgba(var(--ink),.5);">Notifications</div>
+                <div style="margin-top:10px;display:flex;align-items:center;gap:14px;padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);"><div style="flex:1;min-width:0;"><div style="font-size:14.5px;font-weight:600;color:var(--text);">Notifications push</div><div style="margin-top:2px;font-size:11.5px;color:rgba(var(--ink),.55);">{{ pushSub }}</div></div><button onClick="{{ togglePush }}" style="{{ pushTrack }}"><div style="width:21px;height:21px;border-radius:11px;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.3);"></div></button></div>
+
+                <div style="margin-top:22px;font-size:12.5px;font-weight:700;color:rgba(var(--ink),.5);">Sécurité &amp; confidentialité</div>
+                <div style="margin-top:10px;border-radius:18px;background:var(--card);border:1px solid var(--border);overflow:hidden;">
+                  <sc-for list="{{ secItems }}" as="it" hint-placeholder-count="4"><button onClick="{{ it.onTap }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:13px 15px;border-bottom:1px solid var(--border);cursor:pointer;text-align:left;"><div style="width:32px;height:32px;border-radius:10px;background:{{ it.tintBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="{{ it.icon }}" style="font-size:16px;color:{{ it.color }};"></ion-icon></div><span style="flex:1;font-size:14.5px;color:var(--text);">{{ it.label }}</span><sc-if value="{{ it.hasValue }}"><span style="font-size:14px;font-weight:600;color:{{ it.color }};">{{ it.value }}</span></sc-if><ion-icon name="chevron-forward" style="font-size:16px;color:rgba(var(--ink),.35);"></ion-icon></button></sc-for>
+                </div>
+
+                <div style="margin-top:22px;font-size:12.5px;font-weight:700;color:rgba(var(--ink),.5);">Compte</div>
+                <div style="margin-top:10px;border-radius:18px;background:var(--card);border:1px solid var(--border);overflow:hidden;">
+                  <sc-for list="{{ acctItems }}" as="it" hint-placeholder-count="3"><button onClick="{{ it.onTap }}" style="width:100%;display:flex;align-items:center;gap:13px;padding:13px 15px;border-bottom:1px solid var(--border);cursor:pointer;text-align:left;"><div style="width:32px;height:32px;border-radius:10px;background:{{ it.tintBg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="{{ it.icon }}" style="font-size:16px;color:{{ it.tintC }};"></ion-icon></div><span style="flex:1;font-size:14.5px;color:{{ it.labelC }};">{{ it.label }}</span><ion-icon name="chevron-forward" style="font-size:16px;color:rgba(var(--ink),.35);"></ion-icon></button></sc-for>
+                </div>
+
+                <button onClick="{{ onLogout }}" style="margin-top:18px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;cursor:pointer;"><ion-icon name="log-out-outline" style="font-size:18px;color:#ef5350;"></ion-icon><span style="font-size:15px;font-weight:600;color:#ef5350;">Se déconnecter</span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isCarnet }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+              <div style="padding:6px 22px 8px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">Carnet personnel</div>
+              </div>
+              <div style="padding:6px 22px 0;flex-shrink:0;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;"><ion-icon name="lock-closed" style="font-size:13px;color:var(--accent);"></ion-icon><span style="font-size:12px;color:rgba(var(--ink),.6);">Visible uniquement par toi. Personne d'autre n'y a accès.</span></div>
+                <div style="display:flex;align-items:flex-end;gap:10px;">
+                  <input class="kinput" value="{{ noteDraft }}" onInput="{{ setNoteDraft }}" placeholder="Une note, un souvenir, un rappel…" style="flex:1;min-width:0;min-height:48px;padding:13px 14px;border-radius:14px;background:var(--card2);border:1px solid var(--border);outline:none;font-family:'Plus Jakarta Sans';font-size:15px;color:var(--text);"/>
+                  <button onClick="{{ addNote }}" style="width:48px;height:48px;border-radius:24px;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 6px 12px rgba(224,42,115,.4);"><ion-icon name="add" style="font-size:24px;color:#fff;"></ion-icon></button>
+                </div>
+              </div>
+              <div class="kscroll" style="flex:1;overflow-y:auto;padding:18px 22px 40px;display:flex;flex-direction:column;gap:12px;">
+                <sc-for list="{{ notes }}" as="n" hint-placeholder-count="3">
+                  <div style="padding:15px;border-radius:18px;background:var(--card);border:1px solid var(--border);border-left:3px solid {{ n.color }};box-shadow:var(--cardShadow);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;"><div style="display:flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;background:{{ n.colorBg }};"><ion-icon name="{{ n.icon }}" style="font-size:13px;color:{{ n.color }};"></ion-icon><span style="font-size:11px;font-weight:600;color:{{ n.color }};text-transform:capitalize;">{{ n.type }}</span></div><span style="font-size:11px;color:rgba(var(--ink),.4);">{{ n.date }}</span></div>
+                    <div style="font-size:15px;line-height:22px;color:var(--text);">{{ n.contenu }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isSplash }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:30px 26px 36px;overflow:hidden;">
+              <div style="position:absolute;top:-90px;left:50%;transform:translateX(-50%);width:420px;height:420px;pointer-events:none;">
+                <div style="position:absolute;inset:0;animation:kspin 60s linear infinite;">
+                  <svg width="420" height="420" viewBox="0 0 300 300" fill="none" style="position:absolute;inset:0;">
+                    <defs><radialGradient id="khalo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff6aa9" stop-opacity=".2"/><stop offset=".6" stop-color="#ff6aa9" stop-opacity=".07"/><stop offset="1" stop-color="#ff6aa9" stop-opacity="0"/></radialGradient></defs>
+                    <circle cx="150" cy="150" r="150" fill="url(#khalo)"/>
+                    <circle cx="150" cy="150" r="88" stroke="rgba(214,40,110,.18)" stroke-width="1.5" fill="none" stroke-dasharray="6 10"/>
+                    <circle cx="150" cy="150" r="115" stroke="var(--border)" stroke-width="1" fill="none"/>
+                    <circle cx="150" cy="150" r="140" stroke="var(--border)" stroke-width=".5" fill="none" stroke-dasharray="2 8"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div style="position:relative;display:flex;flex-direction:column;align-items:center;margin-top:54px;">
+                <svg width="86" height="54" viewBox="0 0 132 82" fill="none"><defs><linearGradient id="ksplash" x1="14" y1="6" x2="120" y2="78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffc2d6"/><stop offset=".38" stop-color="#ff5f9e"/><stop offset=".78" stop-color="#e22a72"/><stop offset="1" stop-color="#bb1659"/></linearGradient></defs><circle cx="86" cy="41" r="27" stroke="url(#ksplash)" stroke-width="13.5"/><circle cx="46" cy="41" r="27" stroke="url(#ksplash)" stroke-width="13.5"/><path d="M66 58.9 A27 27 0 0 0 80 66.4" stroke="url(#ksplash)" stroke-width="13.5" stroke-linecap="round"/></svg>
+                <div style="margin-top:18px;font-family:'Sora';font-weight:700;font-size:30px;letter-spacing:12px;color:var(--accent);padding-left:12px;">KADY</div>
+              </div>
+
+              <div style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                <div style="font-size:11px;font-weight:600;letter-spacing:2.5px;color:rgba(var(--ink),.6);">LA RENCONTRE, AUTREMENT</div>
+                <div style="margin-top:14px;font-family:'Sora';font-weight:700;font-size:29px;line-height:38px;color:var(--text);letter-spacing:.2px;">Ici, on se rencontre<br/>d'abord <span style="color:var(--accent);">en cercle.</span></div>
+                <div style="margin-top:14px;font-size:15px;line-height:23px;color:rgba(var(--ink),.6);max-width:300px;">Pas de message privé sans un Cercle partagé. On apprend à se connaître avant de se parler.</div>
+              </div>
+
+              <div style="position:relative;width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;">
+                <button onClick="{{ goRegister }}" style="width:100%;padding:16px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 14px 24px rgba(224,42,115,.45);"><span style="font-family:'Sora';font-weight:700;font-size:15.5px;color:#fff;">Créer mon compte</span></button>
+                <button onClick="{{ goLogin }}" style="padding:6px;cursor:pointer;"><span style="font-size:15px;font-weight:600;color:var(--accent);">J'ai déjà un compte</span></button>
+                <div style="font-size:12px;color:rgba(var(--ink),.42);">Réservé aux 18 ans et plus</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isApropos }}">
+            <div class="kscroll" ref="{{ viewRef }}" style="position:absolute;inset:0;overflow-y:auto;">
+              <div style="padding:6px 22px 8px;display:flex;align-items:center;gap:12px;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">Comment ça marche</div>
+              </div>
+              <div style="padding:10px 22px 48px;">
+                <div style="position:relative;overflow:hidden;padding:26px 22px;border-radius:24px;background:linear-gradient(135deg,#ff9d5c,#d34d7e,#3a1c5e);box-shadow:0 16px 30px rgba(224,42,115,.32);">
+                  <div style="position:absolute;top:-40px;right:-30px;width:150px;height:150px;border-radius:75px;background:rgba(255,255,255,.14);"></div>
+                  <div style="position:relative;display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);"><ion-icon name="sparkles" style="font-size:13px;color:#fff;"></ion-icon><span style="font-size:11.5px;font-weight:700;color:#fff;">Le principe KADY</span></div>
+                  <div style="position:relative;margin-top:14px;font-family:'Sora';font-weight:700;font-size:24px;line-height:31px;color:#fff;">On apprend à se connaître avant de se parler.</div>
+                  <div style="position:relative;margin-top:10px;font-size:13.5px;line-height:20px;color:rgba(255,255,255,.88);">KADY remplace le swipe par des vraies communautés. Les liens se construisent, ils ne se déclenchent pas d'un clic.</div>
+                </div>
+
+                <div style="margin-top:20px;display:flex;flex-direction:column;gap:13px;">
+                  <sc-for list="{{ apropos }}" as="a" hint-placeholder-count="4">
+                    <div style="display:flex;align-items:flex-start;gap:14px;padding:16px;border-radius:20px;background:var(--card);border:1px solid var(--border);box-shadow:var(--cardShadow);">
+                      <div style="position:relative;width:46px;height:46px;border-radius:15px;background:{{ a.bg }};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><ion-icon name="{{ a.icon }}" style="font-size:22px;color:{{ a.color }};"></ion-icon></div>
+                      <div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;"><span style="font-family:'Sora';font-weight:800;font-size:13px;color:{{ a.color }};">{{ a.n }}</span><span style="font-family:'Sora';font-weight:700;font-size:15.5px;color:var(--text);">{{ a.t }}</span></div><div style="margin-top:5px;font-size:13px;line-height:19px;color:rgba(var(--ink),.6);">{{ a.d }}</div></div>
+                    </div>
+                  </sc-for>
+                </div>
+
+                <div style="margin-top:20px;padding:16px;border-radius:18px;background:rgba(255,106,169,.08);border:1px solid rgba(255,140,190,.25);display:flex;align-items:center;gap:13px;">
+                  <div style="width:42px;height:42px;border-radius:13px;background:var(--brand);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 8px 14px rgba(224,42,115,.4);"><ion-icon name="compass" style="font-size:20px;color:#fff;"></ion-icon></div>
+                  <div style="flex:1;"><div style="font-size:14px;font-weight:700;color:var(--text);">Prêt à explorer ?</div><div style="margin-top:2px;font-size:12px;color:rgba(var(--ink),.55);">Trouve un Cercle qui te ressemble.</div></div>
+                </div>
+                <button onClick="{{ goDecouvrir }}" style="margin-top:14px;width:100%;padding:15px;border-radius:15px;background:var(--brand);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;box-shadow:0 12px 20px rgba(224,42,115,.4);"><span style="font-family:'Sora';font-weight:700;font-size:15px;color:#fff;">Découvrir les cercles</span><ion-icon name="arrow-forward" style="font-size:17px;color:#fff;"></ion-icon></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isLogin }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+              <div style="padding:6px 22px 0;flex-shrink:0;">
+                <button onClick="{{ back }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+              </div>
+              <div class="kscroll" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;padding:0 26px 26px;">
+                <div style="display:flex;flex-direction:column;align-items:center;margin-top:34px;">
+                  <svg width="58" height="36" viewBox="0 0 132 82" fill="none"><defs><linearGradient id="klogin" x1="14" y1="6" x2="120" y2="78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffc2d6"/><stop offset=".38" stop-color="#ff5f9e"/><stop offset=".78" stop-color="#e22a72"/><stop offset="1" stop-color="#bb1659"/></linearGradient></defs><circle cx="86" cy="41" r="27" stroke="url(#klogin)" stroke-width="13.5"/><circle cx="46" cy="41" r="27" stroke="url(#klogin)" stroke-width="13.5"/><path d="M66 58.9 A27 27 0 0 0 80 66.4" stroke="url(#klogin)" stroke-width="13.5" stroke-linecap="round"/></svg>
+                  <div style="margin-top:18px;font-family:'Sora';font-weight:700;font-size:27px;color:var(--text);">Content de te revoir</div>
+                  <div style="margin-top:7px;font-size:15px;color:rgba(var(--ink),.6);text-align:center;">Connecte-toi pour retrouver tes Cercles.</div>
+                </div>
+                <div style="margin-top:36px;display:flex;flex-direction:column;gap:13px;">
+                  <div style="display:flex;align-items:center;gap:11px;padding:15px;border-radius:14px;background:var(--field);border:1px solid var(--border);"><ion-icon name="mail-outline" style="font-size:19px;color:rgba(var(--ink),.4);flex-shrink:0;"></ion-icon><input class="kinput" value="{{ loginEmail }}" onInput="{{ onLoginEmail }}" placeholder="Adresse e-mail" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'Plus Jakarta Sans';font-size:16px;color:var(--text);padding:0;"/></div>
+                  <div style="display:flex;align-items:center;gap:11px;padding:15px;border-radius:14px;background:var(--field);border:1px solid var(--border);"><ion-icon name="lock-closed-outline" style="font-size:19px;color:rgba(var(--ink),.4);flex-shrink:0;"></ion-icon><input class="kinput" type="password" value="{{ loginMdp }}" onInput="{{ onLoginMdp }}" placeholder="Mot de passe" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:'Plus Jakarta Sans';font-size:16px;color:var(--text);padding:0;"/></div>
+                  <button onClick="{{ onForgot }}" style="align-self:flex-end;cursor:pointer;padding:2px;"><span style="font-size:13px;font-weight:600;color:var(--accent);">Mot de passe oublié ?</span></button>
+                </div>
+                <div style="flex:1;min-height:30px;"></div>
+                <button onClick="{{ enterApp }}" style="width:100%;padding:16px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 14px 24px rgba(224,42,115,.45);"><span style="font-family:'Sora';font-weight:700;font-size:15.5px;color:#fff;">Se connecter</span></button>
+                <button onClick="{{ goRegister }}" style="margin-top:16px;align-self:center;cursor:pointer;padding:4px;"><span style="font-size:14px;color:rgba(var(--ink),.55);">Pas encore de compte ? <b style="color:var(--accent);">S'inscrire</b></span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isRegister }}">
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;">
+              <div style="padding:6px 22px 8px;display:flex;align-items:center;gap:12px;flex-shrink:0;">
+                <button onClick="{{ regPrev }}" style="width:42px;height:42px;border-radius:13px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="chevron-back" style="font-size:20px;color:var(--text);"></ion-icon></button>
+                <div style="flex:1;font-family:'Sora';font-weight:700;font-size:23px;letter-spacing:-.3px;color:var(--text);">Inscription</div>
+              </div>
+              <div style="padding:6px 22px 16px;flex-shrink:0;display:flex;gap:6px;"><sc-for list="{{ regBars }}" as="b" hint-placeholder-count="4"><div style="{{ b.style }}"></div></sc-for></div>
+              <div class="kscroll" ref="{{ viewRef }}" style="flex:1;overflow-y:auto;padding:8px 22px 20px;">
+
+                <sc-if value="{{ regStep0 }}">
+                  <div style="display:flex;flex-direction:column;gap:16px;">
+                    <div style="font-family:'Sora';font-weight:700;font-size:25px;color:var(--text);">Qui es-tu ?</div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;">Prénom</div><input class="kinput" value="{{ regPrenom }}" onInput="{{ onRegPrenom }}" placeholder="Ton prénom" style="width:100%;padding:15px;border-radius:14px;background:var(--field);border:1px solid var(--border);outline:none;font-family:'Plus Jakarta Sans';font-size:16px;color:var(--text);"/></div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;">Email</div><input class="kinput" value="{{ regEmail }}" onInput="{{ onRegEmail }}" placeholder="toi@email.com" style="width:100%;padding:15px;border-radius:14px;background:var(--field);border:1px solid var(--border);outline:none;font-family:'Plus Jakarta Sans';font-size:16px;color:var(--text);"/></div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:8px;">Date de naissance</div><input class="kinput" value="{{ regDob }}" onInput="{{ onRegDob }}" placeholder="JJ/MM/AAAA" style="width:100%;padding:15px;border-radius:14px;background:var(--field);border:1px solid var(--border);outline:none;font-family:'Plus Jakarta Sans';font-size:16px;color:var(--text);"/><div style="margin-top:6px;font-size:12px;color:rgba(var(--ink),.42);">Réservé aux 18 ans et plus — vérifié à l'inscription.</div></div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ regStep1 }}">
+                  <div style="display:flex;flex-direction:column;gap:20px;">
+                    <div style="font-family:'Sora';font-weight:700;font-size:25px;color:var(--text);">Quelques détails</div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">Genre</div><div style="display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ regGenrePills }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div></div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">Ville</div><input class="kinput" value="{{ regVille }}" onInput="{{ onRegVille }}" placeholder="Abidjan, Bouaké…" style="width:100%;padding:15px;border-radius:14px;background:var(--field);border:1px solid var(--border);outline:none;font-family:'Plus Jakarta Sans';font-size:16px;color:var(--text);"/></div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">Centres d'intérêt</div><div style="display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ regInteretPills }}" as="o" hint-placeholder-count="12"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div></div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ regStep2 }}">
+                  <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div><div style="font-family:'Sora';font-weight:700;font-size:25px;color:var(--text);">Tu recherches…</div><div style="margin-top:8px;font-size:14px;line-height:21px;color:rgba(var(--ink),.6);">On s'en sert pour te proposer des Cercles et des profils qui te correspondent.</div></div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">Avec qui veux-tu te connecter ?</div><div style="display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ regForPills }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div></div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">Type de connexion</div><div style="display:flex;flex-wrap:wrap;gap:9px;"><sc-for list="{{ regModePills }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onClick }}" style="{{ o.style }}"><span style="font-size:13px;font-weight:600;color:{{ o.color }};">{{ o.label }}</span></button></sc-for></div></div>
+                    <div><div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:10px;">Tranche d'âge recherchée</div>
+                      <div style="padding:16px;border-radius:18px;background:var(--card);border:1px solid var(--border);">
+                        <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:rgba(var(--ink),.6);">Entre</span><span style="font-family:'Sora';font-weight:700;font-size:16px;color:var(--accentDeep);">{{ regAgeMin }} – {{ regAgeMax }} ans</span></div>
+                        <div style="margin-top:14px;position:relative;height:7px;border-radius:99px;background:rgba(var(--ink),.12);"><div style="position:absolute;top:0;height:7px;border-radius:99px;background:var(--brand);left:{{ regAgeLo }}%;right:calc(100% - {{ regAgeHi }}%);"></div><div style="position:absolute;top:50%;left:{{ regAgeLo }}%;width:18px;height:18px;border-radius:9px;background:#fff;border:2px solid #ff6aa9;transform:translate(-50%,-50%);box-shadow:0 3px 8px rgba(214,40,110,.35);"></div><div style="position:absolute;top:50%;left:{{ regAgeHi }}%;width:18px;height:18px;border-radius:9px;background:#fff;border:2px solid #ff6aa9;transform:translate(-50%,-50%);box-shadow:0 3px 8px rgba(214,40,110,.35);"></div></div>
+                        <div style="margin-top:16px;display:flex;gap:16px;">
+                          <div style="flex:1;"><div style="font-size:11px;color:rgba(var(--ink),.45);margin-bottom:6px;">Minimum</div><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 9px;border-radius:12px;background:var(--field);border:1px solid var(--border);"><button onClick="{{ stepRegAgeMinDown }}" style="width:28px;height:28px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="remove" style="font-size:16px;color:var(--text);"></ion-icon></button><span style="font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">{{ regAgeMin }}</span><button onClick="{{ stepRegAgeMinUp }}" style="width:28px;height:28px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="add" style="font-size:16px;color:var(--text);"></ion-icon></button></div></div>
+                          <div style="flex:1;"><div style="font-size:11px;color:rgba(var(--ink),.45);margin-bottom:6px;">Maximum</div><div style="display:flex;align-items:center;justify-content:space-between;padding:6px 9px;border-radius:12px;background:var(--field);border:1px solid var(--border);"><button onClick="{{ stepRegAgeMaxDown }}" style="width:28px;height:28px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="remove" style="font-size:16px;color:var(--text);"></ion-icon></button><span style="font-family:'Sora';font-weight:700;font-size:15px;color:var(--text);">{{ regAgeMax }}</span><button onClick="{{ stepRegAgeMaxUp }}" style="width:28px;height:28px;border-radius:9px;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;"><ion-icon name="add" style="font-size:16px;color:var(--text);"></ion-icon></button></div></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ regStep3 }}">
+                  <div style="display:flex;flex-direction:column;gap:18px;">
+                    <div style="font-family:'Sora';font-weight:700;font-size:25px;color:var(--text);">Presque fini</div>
+                    <div style="font-size:14px;line-height:22px;color:rgba(var(--ink),.6);">En rejoignant KADY, tu t'engages à respecter les autres membres. Pas de harcèlement, pas de coordonnées partagées avant la confiance établie.</div>
+                    <button onClick="{{ toggleCgu }}" style="display:flex;gap:12px;align-items:flex-start;cursor:pointer;text-align:left;background:none;border:none;padding:0;">
+                      <div style="{{ cguBox }}"><sc-if value="{{ regCgu }}"><ion-icon name="checkmark" style="font-size:16px;color:#fff;"></ion-icon></sc-if></div>
+                      <div style="flex:1;font-size:14px;line-height:20px;color:rgba(var(--ink),.6);">J'accepte les conditions d'utilisation et la politique de confidentialité.</div>
+                    </button>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ hasRegErr }}"><div style="margin-top:18px;display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:12px;background:rgba(239,83,80,.1);border:1px solid rgba(239,83,80,.25);"><ion-icon name="alert-circle" style="font-size:17px;color:#ef5350;flex-shrink:0;"></ion-icon><span style="font-size:13.5px;font-weight:600;color:#ef5350;">{{ regErr }}</span></div></sc-if>
+              </div>
+              <div style="padding:14px 22px 18px;background:var(--bg2);flex-shrink:0;border-top:1px solid var(--border);">
+                <button onClick="{{ regNext }}" style="width:100%;padding:16px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 14px 24px rgba(224,42,115,.45);"><span style="font-family:'Sora';font-weight:700;font-size:15.5px;color:#fff;">{{ regBtnLabel }}</span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ showTabBar }}">
+            <div style="position:absolute;left:0;right:0;bottom:0;background:var(--card);border-top-left-radius:28px;border-top-right-radius:28px;border:1px solid var(--border);border-bottom:none;padding:12px 12px 20px;box-shadow:0 -6px 20px rgba(40,25,80,.10);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+                <button onClick="{{ tabAccueil.onTap }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding-top:2px;"><div style="min-width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:{{ tabAccueil.wrapBg }};"><ion-icon name="{{ tabAccueil.icon }}" style="font-size:22px;color:{{ tabAccueil.iconColor }};"></ion-icon></div><span style="font-size:10.5px;letter-spacing:.2px;color:{{ tabAccueil.labelColor }};font-weight:{{ tabAccueil.labelWeight }};">Accueil</span></button>
+                <button onClick="{{ tabCercles.onTap }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding-top:2px;"><div style="min-width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:{{ tabCercles.wrapBg }};"><ion-icon name="{{ tabCercles.icon }}" style="font-size:22px;color:{{ tabCercles.iconColor }};"></ion-icon></div><span style="font-size:10.5px;letter-spacing:.2px;color:{{ tabCercles.labelColor }};font-weight:{{ tabCercles.labelWeight }};">Cercles</span></button>
+                <div style="flex:1;display:flex;justify-content:center;"><button onClick="{{ fab }}" style="margin-top:-22px;width:60px;height:60px;border-radius:22px;background:var(--brand);border:4px solid var(--card);display:flex;align-items:center;justify-content:center;box-shadow:0 10px 16px rgba(224,42,115,.5);cursor:pointer;"><ion-icon name="add" style="font-size:30px;color:#fff;"></ion-icon></button></div>
+                <button onClick="{{ tabMessages.onTap }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding-top:2px;"><div style="min-width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:{{ tabMessages.wrapBg }};position:relative;"><ion-icon name="{{ tabMessages.icon }}" style="font-size:22px;color:{{ tabMessages.iconColor }};"></ion-icon><div style="position:absolute;top:-3px;right:2px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;background:#ff4d97;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;font-weight:700;color:#fff;">4</span></div></div><span style="font-size:10.5px;letter-spacing:.2px;color:{{ tabMessages.labelColor }};font-weight:{{ tabMessages.labelWeight }};">Messages</span></button>
+                <button onClick="{{ tabProfil.onTap }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;padding-top:2px;"><div style="min-width:46px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:{{ tabProfil.wrapBg }};"><ion-icon name="{{ tabProfil.icon }}" style="font-size:22px;color:{{ tabProfil.iconColor }};"></ion-icon></div><span style="font-size:10.5px;letter-spacing:.2px;color:{{ tabProfil.labelColor }};font-weight:{{ tabProfil.labelWeight }};">Profil</span></button>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ hasToast }}">
+            <div style="position:absolute;left:50%;bottom:108px;transform:translateX(-50%);max-width:300px;background:rgba(20,12,40,.93);color:#fff;padding:11px 18px;border-radius:14px;font-size:12.5px;font-weight:600;text-align:center;animation:ktoast .25s ease;box-shadow:0 10px 30px rgba(0,0,0,.35);z-index:50;">{{ toast }}</div>
+          </sc-if>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:920}}">
+class Component extends DCLogic {
+  state = {
+    theme: 'light', screen: 'splash', chatId: 'koffi',
+    loginEmail: '', loginMdp: '',
+    regStep: 0, regPrenom: '', regEmail: '', regDob: '', regGenre: '', regVille: '', regInterets: [],
+    regFor: 'tout', regMode: 'rencontre', regAgeMin: 24, regAgeMax: 38, regCgu: false, regErr: '',
+    heroIndex: 0, discoverFilter: 'Tous', openCard: null,
+    joined: {}, msgFilter: 0, draft: '', sent: {}, bellRead: false, toast: null, search: '',
+    dSearch: '', advOpen: false, advPlaces: 'all', advGrade: 'all', advSort: 'pop',
+    pause: false, cName: '', cCat: 0, cType: 'rencontre', cMax: 10, cPriv: false,
+    cercleId: 'd1', rsvp: false,
+    stack: [], memberId: 'awa', notifsRead: false, request: 'pending',
+    pref_for: 'tout', pref_mode: 'rencontre', ageMin: 24, ageMax: 38,
+    pushNotifs: true, notes: [
+      { type: 'souvenir', date: '21 juin', contenu: "Première sortie avec le cercle Voyageurs à Assinie. Coucher de soleil incroyable 🌅" },
+      { type: 'note', date: '18 juin', contenu: "Demander à Awa l'adresse du maquis dont elle parlait." },
+      { type: 'rappel', date: '15 juin', contenu: "Soirée ciné-club samedi — réserver 2 places." }
+    ]
+  };
+
+  phoneRef = React.createRef();
+  viewRef = React.createRef();
+  chatRef = React.createRef();
+
+  NIV_R = ['Cercle', 'Connexion', 'Connaissance', 'Confiance', 'Complicité', 'Intimité'];
+  NIV_A = ['Cercle', 'Connaissance', 'Camarade', 'Ami proche', 'Complice', 'Meilleur ami'];
+
+  HERO = [
+    { grad: 'linear-gradient(135deg,#ff9d5c,#d34d7e,#3a1c5e)', chip: 'Communauté', title: 'Les cercles, au cœur de KADY', sub: 'Rejoignez des communautés, partagez et créez des liens authentiques.' },
+    { grad: 'linear-gradient(135deg,#7fe0d0,#2f9aa8,#1d3f66)', chip: '', title: 'Voyagez ensemble, créez des souvenirs', sub: 'Découvrez des cercles de voyageurs près de chez vous.' },
+    { grad: 'linear-gradient(135deg,#7be0a0,#2f9ac2,#2a2c66)', chip: '', title: 'Partagez vos passions sportives', sub: 'Bougez, progressez et rencontrez des partenaires motivés.' },
+    { grad: 'linear-gradient(135deg,#b07bff,#7a4fd6,#2a1c5e)', chip: '', title: 'Une communauté bienveillante', sub: 'Des échanges respectueux, des rencontres qui comptent.' },
+  ];
+  RAIL = [
+    { nom: 'Voyageurs', membres: 12, ring: '#ff9d5c,#d34d7e', grad: '#ff9d5c,#c2477e,#3b1f63' },
+    { nom: 'Amitiés', membres: 8, ring: '#9aa7d6,#5b6aa8', grad: '#aeb8d8,#5b6aa8,#2c2f55' },
+    { nom: 'Évasion', membres: 15, ring: '#7fe0d0,#2f9aa8', grad: '#8fe6d6,#3ba0a8,#1d5b66' },
+    { nom: 'Sport', membres: 10, ring: '#7be0a0,#2f9ac2', grad: '#86e6aa,#2fa6c2,#274a8c' },
+  ];
+  ACTS = [
+    { grad: 'linear-gradient(135deg,#7fe0d0,#2f9aa8,#1d3f66)', icon: 'chatbubble', text: 'Nouveau message dans ', strong: 'Voyageurs', time: 'Il y a 5 min', av1: '#ff9d5c', av2: '#7fe0d0', extra: '+7' },
+    { grad: 'linear-gradient(135deg,#ff9d5c,#d34d7e,#3a1c5e)', icon: 'notifications', text: 'Sophie a rejoint le cercle ', strong: 'Entrepreneurs', time: 'Il y a 1 h', av1: '#b07bff', av2: '', extra: '' },
+    { grad: 'linear-gradient(135deg,#9aa7d6,#5b6aa8,#2c2f55)', icon: 'person-add', text: 'Martin a invité 3 membres dans ', strong: 'Amitiés', time: 'Il y a 2 h', av1: '#7be0a0', av2: '#ff9d5c', extra: '+3' },
+  ];
+  AWA = { id: 'awa', name: 'Awa', age: 26, grad: '#ff9d5c,#d34d7e', mode: 'rencontre', last: 'Tu as déjà visité Assinie ? 🌴', niveauNom: 'La Connaissance', niveau: 2, cercle: 'Voyageurs', time: '12:45', unread: 2, online: true };
+  CONVS = [
+    { id: 'koffi', initial: 'K', grad: '#7be0a0,#2f9ac2', name: 'Koffi', age: 29, mode: 'amitie', last: 'On se capte ce week-end ? 🏀', niveauNom: 'Le Camarade', niveau: 3, cercle: 'Basket du dimanche', time: '11:20', unread: 0, online: true },
+    { id: 'mariam', initial: 'M', grad: '#b07bff,#7a4fd6', name: 'Mariam', age: 24, mode: 'rencontre', last: "J'ai adoré ta sélection de films 🎬", niveauNom: "L'Ami(e)", niveau: 3, cercle: "Cinéphiles d'Abidjan", time: 'Hier', unread: 1, online: false },
+    { id: 'fatou', initial: 'F', grad: '#ffb45c,#d3744d', name: 'Fatou', age: 31, mode: 'amitie', photo: true, last: 'Photo envoyée', niveauNom: "L'Ami Proche", niveau: 4, cercle: 'Brunch & bonnes adresses', time: 'Hier', unread: 0, online: false },
+    { id: 'yann', initial: 'Y', grad: '#8fd0ff,#5a7fd6', name: 'Yann', age: 27, mode: 'rencontre', last: 'Salut ! On partage le cercle business 👋', niveauNom: "L'Inconnu", niveau: 1, cercle: 'Entrepreneurs 225', time: 'Lun', unread: 1, online: false },
+    { id: 'sophie', initial: 'S', grad: '#9aa7d6,#5b6aa8', name: 'Sophie', age: 28, mode: 'amitie', last: 'Merci pour la recommandation 🙏', niveauNom: 'La Connaissance', niveau: 2, cercle: 'Entrepreneurs 225', time: 'Dim', unread: 0, online: false, dim: true },
+  ];
+  DISCOVER = [
+    { id: 'd1', emoji: '💼', icon: 'briefcase', nom: 'Entrepreneurs du Plateau', theme: 'Entrepreneuriat', grad: '#ff9d5c,#d34d7e,#3a1c5e', solid: '#c2410c', soft: '#FEF3E2', grade: 'legendaire', membres: 7, online: 3, apercu: ['Serge', 'Nadia', 'Kévin'], desc: "Porteurs de projets qui s'entraident, partagent leurs galères et avancent ensemble.", tags: ['Networking', 'Levée de fonds', 'Pitch'] },
+    { id: 'd2', emoji: '🎬', icon: 'film', nom: 'Ciné-club Treichville', theme: 'Cinéma', grad: '#b07bff,#7a4fd6,#2a1c5e', solid: '#5b6aa8', soft: '#EEF0F8', grade: 'graine', membres: 5, online: 1, apercu: ['Léa', 'Dré'], desc: "On débriefe les films, du Nollywood au cinéma d'auteur, autour d'un verre.", tags: ['Projections', 'Débats', 'Nollywood'] },
+    { id: 'd3', emoji: '🙏', icon: 'heart', nom: 'Foi & Partage', theme: 'Foi', grad: '#7be0a0,#2f9ac2,#2a2c66', solid: '#1f9d57', soft: '#E6F7EE', grade: 'etoile', membres: 10, online: 4, apercu: ['Esther', 'Paul', 'Ruth', 'Jean'], desc: 'Un espace bienveillant pour échanger, prier et grandir ensemble dans la foi.', tags: ['Bienveillance', 'Partage', 'Entraide'] },
+    { id: 'd4', emoji: '🏃', icon: 'barbell', nom: 'Sport & Bien-être', theme: 'Sport', grad: '#7be0a0,#2f9ac2,#1d3f66', solid: '#1f8aa8', soft: '#E6F6F8', grade: 'flamme', membres: 8, online: 2, apercu: ['Max', 'Bintou', 'Eli'], desc: 'Running, fitness, motivation collective. On bouge ensemble, on progresse ensemble.', tags: ['Running', 'Fitness', 'Outdoor'] },
+  ];
+  GRADES = {
+    graine: { label: 'Graine', color: '#22B36B', icon: 'leaf' },
+    flamme: { label: 'Flamme', color: '#FF6B4A', icon: 'flame' },
+    etoile: { label: 'Étoile', color: '#F5A623', icon: 'star' },
+    diamant: { label: 'Diamant', color: '#2BB7CF', icon: 'diamond' },
+    legendaire: { label: 'Légendaire', color: '#8B5CF6', icon: 'sparkles' },
+  };
+  TINTS = ['#d34d7e', '#7a4fd6', '#2f9aa8', '#ff9d5c', '#5a7fd6', '#1f9d57', '#a463ff'];
+
+  NIV_RENC = ["L'Inconnu", 'La Connaissance', "L'Ami(e)", 'La Confiance', "L'Intimité"];
+  NIV_AMI = ["L'Inconnu", 'La Connaissance', 'Le Camarade', "L'Ami Proche", 'Les Complices'];
+  RELATIONS = [
+    { id: 'awa', prenom: 'Awa', age: 26, mode: 'rencontre', niveau: 2, cercle: 'Voyageurs', online: true, grad: '#ff9d5c,#d34d7e', interets: ['Voyage', 'Cuisine', 'Photographie'] },
+    { id: 'koffi', prenom: 'Koffi', age: 29, mode: 'amitie', niveau: 3, cercle: 'Basket du dimanche', online: true, grad: '#7be0a0,#2f9ac2', interets: ['Basket', 'Musique', 'Streetwear'] },
+    { id: 'mariam', prenom: 'Mariam', age: 24, mode: 'rencontre', niveau: 3, cercle: "Cinéphiles d'Abidjan", online: false, grad: '#b07bff,#7a4fd6', interets: ['Cinéma', 'Gospel', 'Lecture'] },
+    { id: 'fatou', prenom: 'Fatou', age: 31, mode: 'amitie', niveau: 4, cercle: 'Brunch & bonnes adresses', online: false, grad: '#ffb45c,#d3744d', interets: ['Brunch', 'Mode', 'Danse'] },
+    { id: 'yann', prenom: 'Yann', age: 27, mode: 'rencontre', niveau: 1, cercle: 'Entrepreneurs 225', online: false, grad: '#8fd0ff,#5a7fd6', interets: ['Entrepreneuriat', 'Tech', 'Running'] },
+    { id: 'sophie', prenom: 'Sophie', age: 28, mode: 'amitie', niveau: 2, cercle: 'Entrepreneurs 225', online: false, grad: '#9aa7d6,#5b6aa8', interets: ['Art', 'Voyage', 'Yoga'] }
+  ];
+
+  componentDidMount() {
+    this._iv = setInterval(() => {
+      if (this.state.screen === 'accueil') this.setState(s => ({ heroIndex: (s.heroIndex + 1) % this.HERO.length }));
+    }, 4500);
+    this._fit = () => this.fit();
+    window.addEventListener('resize', this._fit);
+    this.fit();
+  }
+  componentWillUnmount() { clearInterval(this._iv); window.removeEventListener('resize', this._fit); }
+  fit() {
+    const wrap = this.phoneRef.current; if (!wrap) return;
+    const phone = wrap.firstElementChild; if (!phone) return;
+    const H = window.innerHeight, W = window.innerWidth;
+    const scale = Math.max(0.5, Math.min(1, (H - 120) / 838, (W - 24) / 401));
+    phone.style.transformOrigin = 'top left';
+    phone.style.transform = 'scale(' + scale + ')';
+    wrap.style.width = (401 * scale) + 'px';
+    wrap.style.height = (838 * scale) + 'px';
+  }
+
+  hash(n) { let h = 0; for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0; return h; }
+  now() { const d = new Date(); return ('' + d.getHours()).padStart(2, '0') + ':' + ('' + d.getMinutes()).padStart(2, '0'); }
+
+  go = (screen) => { this.setState({ screen, openCard: null, stack: [] }); this.scrollTop(); };
+  push = (screen, patch) => { this.setState(s => ({ stack: [...s.stack, s.screen], screen, openCard: null, ...(patch || {}) })); this.scrollTop(); };
+  openChat = (id) => { this.setState(s => ({ stack: [...s.stack, s.screen], screen: 'chat', chatId: id })); this.scrollChatBottom(); };
+  openMember = (id) => this.push('membre', { memberId: id });
+  back = () => { this.setState(s => {
+    if (s.stack.length) { const st = [...s.stack]; const prev = st.pop(); return { stack: st, screen: prev }; }
+    return { screen: s.screen === 'chat' ? 'messages' : (s.screen === 'cercle' ? 'decouvrir' : 'accueil') };
+  }); this.scrollTop(); };
+  bell = () => this.push('notifications');
+  markNotifsRead = () => { this.setState({ notifsRead: true, bellRead: true }); this.toast('Notifications lues ✓'); };
+  acceptRequest = () => { this.setState({ request: 'accepted' }); this.openChat('awa'); };
+  dismissRequest = () => this.setState({ request: 'dismissed' });
+  setPref = (key, val) => this.setState({ [key]: val });
+  setAge = (lo, hi) => this.setState({ ageMin: lo, ageMax: hi });
+  togglePush = () => this.setState(s => ({ pushNotifs: !s.pushNotifs }));
+  setNoteDraft = (e) => this.setState({ noteDraft: e.target.value });
+  addNote = () => { const t = (this.state.noteDraft || '').trim(); if (!t) return; this.setState(s => ({ notes: [{ type: 'note', date: "Aujourd'hui", contenu: t }, ...s.notes], noteDraft: '' })); };
+  stepAge = (key, d) => this.setState(s => {
+    if (key === 'min') return { ageMin: Math.max(18, Math.min(s.ageMax - 1, s.ageMin + d)) };
+    return { ageMax: Math.min(60, Math.max(s.ageMin + 1, s.ageMax + d)) };
+  });
+  INTERETS_REG = ['Musique', 'Sport', 'Cuisine', 'Cinéma', 'Voyage', 'Lecture', 'Mode', 'Tech', 'Foi', 'Entrepreneuriat', 'Danse', 'Jeux vidéo'];
+  goApropos = () => this.push('apropos');
+  goRegister = () => this.push('register', { regStep: 0, regErr: '' });
+  goLogin = () => this.push('login');
+  enterApp = () => { this.go('accueil'); this.toast('Connexion réussie ✓'); };
+  onField = (key) => (e) => this.setState({ [key]: e.target.value });
+  toggleRegInteret = (i) => this.setState(s => ({ regInterets: s.regInterets.includes(i) ? s.regInterets.filter(x => x !== i) : [...s.regInterets, i] }));
+  toggleCgu = () => this.setState(s => ({ regCgu: !s.regCgu }));
+  calcAge = (d) => { const m = (d || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/); if (!m) return null; const b = new Date(+m[3], +m[2] - 1, +m[1]); return Math.floor((Date.now() - b.getTime()) / (365.25 * 24 * 3600 * 1000)); };
+  stepRegAge = (key, d) => this.setState(s => {
+    if (key === 'min') return { regAgeMin: Math.max(18, Math.min(s.regAgeMax - 1, s.regAgeMin + d)) };
+    return { regAgeMax: Math.min(60, Math.max(s.regAgeMin + 1, s.regAgeMax + d)) };
+  });
+  regNext = () => {
+    const st = this.state; let err = '';
+    if (st.regStep === 0) {
+      if (!st.regPrenom.trim()) err = 'Indique ton prénom.';
+      else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(st.regEmail)) err = 'Email invalide.';
+      else { const a = this.calcAge(st.regDob); if (a === null) err = 'Date au format JJ/MM/AAAA.'; else if (a < 18) err = 'KADY est réservé aux 18 ans et plus.'; }
+    }
+    if (st.regStep === 1 && !st.regGenre) err = 'Choisis ton genre.';
+    if (st.regStep === 3 && !st.regCgu) err = 'Tu dois accepter les conditions.';
+    if (err) return this.setState({ regErr: err });
+    if (st.regStep < 3) { this.setState({ regStep: st.regStep + 1, regErr: '' }); this.scrollTop(); return; }
+    this.go('accueil'); this.toast('Bienvenue sur KADY 🎉');
+  };
+  regPrev = () => { if (this.state.regStep > 0) { this.setState(s => ({ regStep: s.regStep - 1, regErr: '' })); this.scrollTop(); } else this.back(); };
+  fab = () => this.go('creer');
+  onPremium = () => this.push('premium');
+  togglePause = () => this.setState(s => ({ pause: !s.pause }));
+  toggleTheme = () => this.setState(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' }));
+  setCName = (e) => this.setState({ cName: e.target.value });
+  setCCat = (i) => this.setState({ cCat: i });
+  setCType = (t) => this.setState({ cType: t });
+  setCMax = (n) => this.setState({ cMax: n });
+  toggleCPriv = () => this.setState(s => ({ cPriv: !s.cPriv }));
+  doCreate = () => { this.go('decouvrir'); this.toast('Cercle « ' + (this.state.cName.trim() || 'Mon cercle') + ' » créé ✓'); };
+  onLogout = () => this.toast('Déconnexion — hors périmètre de cette maquette');
+  onCreate = () => this.toast('Nouveau message — choisis un cercle partagé');
+  onVideo = () => this.toast('Appel vidéo verrouillé — niveau « La Confiance »');
+  onCall = () => this.toast('Appel audio verrouillé — niveau « La Confiance »');
+  openProfile = () => this.openMember(this.state.chatId);
+  setHero = (i) => this.setState({ heroIndex: i });
+  setFilter = (f) => this.setState({ discoverFilter: f });
+  toggleCard = (id) => this.setState(s => ({ openCard: s.openCard === id ? null : id }));
+  openCercle = (id) => { this.setState({ screen: 'cercle', cercleId: id }); this.scrollTop(); };
+  toggleRsvp = () => this.setState(s => ({ rsvp: !s.rsvp }));
+  onLeaveCercle = () => { this.go('decouvrir'); this.toast('Tu as quitté le cercle'); };
+  onInviteCercle = () => this.toast('Inviter — partage du lien du cercle');
+  onGroupChat = () => this.toast('Chat du cercle — hors périmètre de cette maquette');
+  join = (id, e) => { if (e && e.stopPropagation) e.stopPropagation(); this.setState(s => ({ joined: { ...s.joined, [id]: true } })); this.toast('Cercle rejoint ✓'); };
+  setMsgFilter = (i) => this.setState({ msgFilter: i });
+  onSearch = (e) => this.setState({ search: e.target.value });
+  clearSearch = () => this.setState({ search: '' });
+  onDSearch = (e) => this.setState({ dSearch: e.target.value });
+  clearDSearch = () => this.setState({ dSearch: '' });
+  toggleAdv = () => this.setState(s => ({ advOpen: !s.advOpen }));
+  resetAdv = () => this.setState({ advPlaces: 'all', advGrade: 'all', advSort: 'pop' });
+  setAdv = (key, val) => this.setState({ [key]: val });
+  onDraft = (e) => this.setState({ draft: e.target.value });
+  onKey = (e) => { if (e.key === 'Enter') { e.preventDefault(); this.send(); } };
+  send = () => {
+    const t = this.state.draft.trim(); if (!t) return;
+    const id = this.state.chatId, time = this.now();
+    this.setState(s => ({ sent: { ...s.sent, [id]: [...(s.sent[id] || []), { text: t, time }] }, draft: '' }));
+    this.scrollChatBottom();
+  };
+  tapTab = (name) => {
+    if (name === 'accueil') this.go('accueil');
+    else if (name === 'messages') this.go('messages');
+    else if (name === 'cercles') this.go('decouvrir');
+    else this.go('profil');
+  };
+  toast = (msg) => { clearTimeout(this._t); this.setState({ toast: msg }); this._t = setTimeout(() => this.setState({ toast: null }), 2300); };
+  scrollTop = () => setTimeout(() => { if (this.viewRef.current) this.viewRef.current.scrollTop = 0; }, 30);
+  scrollChatBottom = () => setTimeout(() => { if (this.chatRef.current) this.chatRef.current.scrollTop = this.chatRef.current.scrollHeight; }, 50);
+
+  buildThread(conv) {
+    return [
+      { in: true, isText: true, text: 'Salut Didier ! Sympa de te croiser dans le cercle 😊', time: '12:32', mb: '5px' },
+      { in: true, isText: true, text: 'On partage le cercle ' + conv.cercle + ', tu y es actif ?', time: '12:32', mb: '14px' },
+      { out: true, isText: true, text: "Salut " + conv.name + " ! Oui pas mal, j'adore l'ambiance 🙌", time: '12:38', mb: '5px' },
+      { out: true, isText: true, text: 'On pourrait organiser une sortie avec le groupe 👀', time: '12:38', mb: '14px' },
+      { in: true, isImage: true, caption: 'Le dernier event était top 🔥', time: '12:41', mb: '14px' },
+      { out: true, isVoice: true, time: '12:43', mb: '14px' },
+      { in: true, isText: true, text: 'Carrément, je suis chaud pour la prochaine !', time: '12:45', mb: '14px' },
+    ];
+  }
+
+  renderVals() {
+    const st = this.state;
+    const ink = (a) => 'rgba(var(--ink),' + a + ')';
+    const mm = (m) => m === 'rencontre' ? { color: '#ff6fa8', label: 'Rencontre' } : { color: '#8f9dff', label: 'Amitié' };
+
+    const mkTab = (name, label, base, badge) => {
+      const on = (name === 'accueil' && st.screen === 'accueil') || (name === 'messages' && st.screen === 'messages') || (name === 'cercles' && st.screen === 'decouvrir') || (name === 'profil' && st.screen === 'profil');
+      return {
+        label, icon: on ? base : base + '-outline', iconColor: on ? 'var(--accent)' : ink(0.5),
+        wrapBg: on ? 'var(--tabOn)' : 'transparent', labelColor: on ? 'var(--accent)' : ink(0.5),
+        labelWeight: on ? '700' : '600', onTap: () => this.tapTab(name)
+      };
+    };
+
+    const heroSlides = this.HERO.map(h => ({ gradCss: h.grad, hasChip: !!h.chip, chip: h.chip, title: h.title, sub: h.sub }));
+    const heroDots = this.HERO.map((_, i) => ({
+      onClick: () => this.setHero(i),
+      style: i === st.heroIndex
+        ? 'width:22px;height:7px;border-radius:99px;background:var(--brand);cursor:pointer;border:none;padding:0;'
+        : 'width:7px;height:7px;border-radius:99px;background:' + ink(0.18) + ';cursor:pointer;border:none;padding:0;'
+    }));
+
+    const rail = this.RAIL.map(r => ({ nom: r.nom, membres: r.membres, sub: r.membres + ' membres', ringCss: 'linear-gradient(135deg,' + r.ring + ')', gradCss: 'linear-gradient(150deg,' + r.grad + ')' }));
+    const acts = this.ACTS.map(a => ({ grad: a.grad, icon: a.icon, text: a.text, strong: a.strong, time: a.time, av1: a.av1, av2: a.av2, extra: a.extra, hasAv2: !!a.av2, hasExtra: !!a.extra, onTap: () => this.go('messages') }));
+
+    const dFilters = ['Tous', 'Entrepreneuriat', 'Cinéma', 'Foi', 'Sport'].map(l => {
+      const on = l === st.discoverFilter;
+      return {
+        label: l, onClick: () => this.setFilter(l),
+        boxStyle: on
+          ? 'padding:6px 12px;border-radius:99px;background:var(--brand);border:1px solid transparent;cursor:pointer;white-space:nowrap;flex-shrink:0;'
+          : 'padding:6px 12px;border-radius:99px;background:transparent;border:1px solid var(--border);cursor:pointer;white-space:nowrap;flex-shrink:0;',
+        txtColor: on ? '#fff' : ink(0.6), weight: on ? '600' : '500'
+      };
+    });
+
+    const dq = st.dSearch.trim().toLowerCase();
+    const gradeRank = { graine: 1, flamme: 2, etoile: 3, diamant: 4, legendaire: 5 };
+    let dList = this.DISCOVER
+      .filter(d => st.discoverFilter === 'Tous' || d.theme === st.discoverFilter)
+      .filter(d => !dq || d.nom.toLowerCase().includes(dq) || d.theme.toLowerCase().includes(dq) || d.tags.join(' ').toLowerCase().includes(dq))
+      .filter(d => st.advPlaces === 'all' || (st.advPlaces === 'free' ? d.membres < 10 : d.membres >= 10))
+      .filter(d => st.advGrade === 'all' || d.grade === st.advGrade);
+    if (st.advSort === 'places') dList = [...dList].sort((a, b) => (10 - b.membres) - (10 - a.membres));
+    else if (st.advSort === 'grade') dList = [...dList].sort((a, b) => gradeRank[b.grade] - gradeRank[a.grade]);
+    const cards = dList.map(d => {
+      const g = this.GRADES[d.grade];
+      const avatars = d.apercu.map((n, i) => { const t = this.TINTS[this.hash(n) % this.TINTS.length]; return { letter: n[0].toUpperCase(), bg: t, color: '#fff', ml: i === 0 ? '0' : '-10px' }; });
+      const open = st.openCard === d.id, joined = !!st.joined[d.id];
+      const full = d.membres >= 10;
+      return {
+        id: d.id, emoji: d.emoji, coverIcon: d.icon, nom: d.nom, theme: d.theme, desc: d.desc, solid: d.solid, soft: d.soft,
+        coverCss: 'radial-gradient(circle at 82% 18%,rgba(255,255,255,.28),transparent 46%),radial-gradient(circle at 12% 96%,rgba(0,0,0,.32),transparent 55%),linear-gradient(135deg,' + d.grad + ')',
+        gradCss: 'linear-gradient(135deg,' + d.grad + ')', gradeLabel: g.label, gradeColor: g.color, gradeIcon: g.icon,
+        tags: d.tags,
+        onlineLine: d.online + ' en ligne', hasOnline: d.online > 0,
+        membresLine: d.membres + '/10', avatars, extra: Math.max(0, d.membres - d.apercu.length), extraShow: d.membres > d.apercu.length,
+        open, joined, notJoined: !joined, full, chevron: open ? 'chevron-up' : 'chevron-down',
+        ctaLabel: joined ? 'Rejoint' : (full ? 'Complet' : 'Rejoindre'),
+        ctaIcon: joined ? 'checkmark' : (full ? 'lock-closed' : 'add'),
+        ctaStyle: joined
+          ? 'display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;background:var(--field);border:1px solid var(--border);cursor:default;flex-shrink:0;'
+          : (full
+            ? 'display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:99px;background:var(--field);border:1px solid var(--border);cursor:not-allowed;flex-shrink:0;opacity:.7;'
+            : 'display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:99px;background:var(--brand);border:none;cursor:pointer;flex-shrink:0;box-shadow:0 5px 12px rgba(224,42,115,.35);'),
+        ctaColor: joined ? '#1f9d57' : (full ? ink(0.5) : '#fff'),
+        onToggle: () => this.openCercle(d.id), onJoin: (e) => { if (!joined && !full) this.join(d.id, e); }
+      };
+    });
+
+    // Cercle detail
+    const cd = this.DISCOVER.find(d => d.id === st.cercleId) || this.DISCOVER[0];
+    const cdg = this.GRADES[cd.grade];
+    const cdJoined = !!st.joined[cd.id];
+    const cdMembers = [
+      { initial: 'D', grad: '#5a7fd6,#7a4fd6', name: 'Didier', sub: 'Fondateur', you: true, online: false, tag: 'Admin', tagColor: '#e0a93a', tagBg: 'rgba(255,210,122,.16)', tagBd: 'rgba(255,210,122,.35)', lien: false, onTap: () => {} },
+      { initial: 'A', grad: '#ff9d5c,#d34d7e', name: 'Awa, 26', sub: 'En ligne', subColor: '#1f9d57', you: false, online: true, tag: '', lien: true, onTap: () => this.openMember('awa') },
+      { initial: 'K', grad: '#7be0a0,#2f9ac2', name: 'Koffi, 29', sub: 'En ligne', subColor: '#1f9d57', you: false, online: true, tag: '', lien: false, onTap: () => this.openMember('koffi') },
+      { initial: 'S', grad: '#b07bff,#7a4fd6', name: 'Sophie, 28', sub: 'Vu il y a 1 h', you: false, online: false, tag: 'Nouvelle', tagColor: '#1f9d57', tagBg: 'rgba(123,224,160,.14)', tagBd: 'rgba(123,224,160,.3)', lien: false, onTap: () => this.openMember('sophie') }
+    ].map(m => ({ ...m, gradCss: 'linear-gradient(135deg,' + m.grad + ')', subColorCss: m.subColor || ink(0.45), hasTag: !!m.tag, clickable: m.you === false }));
+    const cercle = {
+      nom: cd.nom, theme: cd.theme, desc: cd.desc, coverCss: 'radial-gradient(circle at 80% 15%,rgba(255,255,255,.25),transparent 45%),linear-gradient(135deg,' + cd.grad + ')',
+      gradeChip: 'Cercle ' + cdg.label, gradeIcon: cdg.icon, gradeColor: cdg.color,
+      membresLine: cd.membres + ' / 10 membres', tags: cd.tags, members: cdMembers,
+      joined: cdJoined, notJoined: !cdJoined,
+      rsvp: st.rsvp, rsvpLabel: st.rsvp ? "J'y serai" : 'Je viens',
+      rsvpStyle: st.rsvp
+        ? 'display:flex;align-items:center;gap:4px;padding:9px 14px;border-radius:11px;background:#1f9d57;border:1px solid #1f9d57;cursor:pointer;'
+        : 'display:flex;align-items:center;gap:4px;padding:9px 14px;border-radius:11px;background:rgba(123,224,160,.16);border:1px solid rgba(123,224,160,.35);cursor:pointer;',
+      rsvpColor: st.rsvp ? '#fff' : '#1f9d57'
+    };
+
+    const segStyle = (on) => on
+      ? 'display:flex;align-items:center;gap:5px;padding:8px 13px;border-radius:11px;background:var(--accent);border:1px solid transparent;cursor:pointer;flex:0 0 auto;'
+      : 'display:flex;align-items:center;gap:5px;padding:8px 13px;border-radius:11px;background:var(--field);border:1px solid var(--border);cursor:pointer;flex:0 0 auto;';
+    const mkOpt = (key, val, label, curr, icon) => ({ label, icon, onClick: () => this.setAdv(key, val), style: segStyle(curr === val), color: curr === val ? '#fff' : ink(0.65) });
+    const advPlaces = [['all', 'Toutes'], ['free', 'Places libres'], ['full', 'Complets']].map(([v, l]) => mkOpt('advPlaces', v, l, st.advPlaces));
+    const advGrades = [['all', 'Tous', 'apps'], ['graine', 'Graine', 'leaf'], ['flamme', 'Flamme', 'flame'], ['etoile', 'Étoile', 'star'], ['legendaire', 'Légendaire', 'sparkles']].map(([v, l, ic]) => mkOpt('advGrade', v, l, st.advGrade, ic));
+    const advSorts = [['pop', 'Populaires'], ['places', 'Plus de places'], ['grade', 'Grade élevé']].map(([v, l]) => mkOpt('advSort', v, l, st.advSort));
+    const advCount = (st.advPlaces !== 'all' ? 1 : 0) + (st.advGrade !== 'all' ? 1 : 0) + (st.advSort !== 'pop' ? 1 : 0);
+
+    const sentOf = (c) => { const arr = st.sent[c.id] || []; return arr.length ? arr[arr.length - 1] : null; };
+    let convs = [this.AWA, ...this.CONVS].map(c => {
+      const m = mm(c.mode);
+      const mine = sentOf(c);
+      const last = mine ? mine.text : c.last;
+      const time = mine ? mine.time : c.time;
+      const unread = mine ? 0 : c.unread;
+      const unr = unread > 0;
+      return {
+        ...c, gradCss: 'linear-gradient(135deg,' + c.grad + ')', modeColor: m.color, modeLabel: m.label,
+        nameAge: c.name, last, time, mine: !!mine, photo: !mine && !!c.photo,
+        showUnread: unr, unread,
+        nameWeight: unr ? '800' : '700',
+        lastWeight: unr ? '700' : '500',
+        lastColor: unr ? 'var(--text)' : ink(0.55),
+        timeWeight: unr ? '700' : '500',
+        timeColor: unr ? 'var(--accent)' : ink(0.4),
+        online: !!c.online, onOpen: () => this.openChat(c.id)
+      };
+    });
+    if (st.msgFilter === 1) convs = convs.filter(c => c.mode === 'rencontre');
+    if (st.msgFilter === 2) convs = convs.filter(c => c.mode === 'amitie');
+    const q = st.search.trim().toLowerCase();
+    if (q) convs = convs.filter(c => c.name.toLowerCase().includes(q) || (c.cercle || '').toLowerCase().includes(q) || (c.last || '').toLowerCase().includes(q));
+
+    const chipsM = ['Tous', 'Rencontre', 'Amitié'].map((l, i) => {
+      const on = i === st.msgFilter;
+      return {
+        label: l, onClick: () => this.setMsgFilter(i),
+        boxStyle: on
+          ? 'padding:9px 16px;border-radius:99px;background:rgba(255,106,169,.18);border:1px solid rgba(255,140,190,.5);cursor:pointer;white-space:nowrap;flex-shrink:0;'
+          : 'padding:9px 16px;border-radius:99px;background:var(--field);border:1px solid var(--border);cursor:pointer;white-space:nowrap;flex-shrink:0;',
+        txtColor: on ? 'var(--accentDeep)' : ink(0.6)
+      };
+    });
+
+
+    const conv = [this.AWA, ...this.CONVS].find(c => c.id === st.chatId) || this.AWA;
+    const base = this.buildThread(conv);
+    const sent = (st.sent[st.chatId] || []).map(x => ({ out: true, isText: true, text: x.text, time: x.time, mb: '5px' }));
+    const thread = base.concat(sent);
+    const chatSegs = [0, 1, 2, 3, 4].map(i => ({ style: i < conv.niveau ? 'width:14px;height:4px;border-radius:99px;background:linear-gradient(90deg,#ff6fa8,#ff9d5c);' : 'width:14px;height:4px;border-radius:99px;background:' + ink(0.14) + ';' }));
+    const hasText = st.draft.trim().length > 0;
+    const chat = {
+      nameAge: conv.name, initial: conv.name[0].toUpperCase(), gradCss: 'linear-gradient(135deg,' + conv.grad + ')',
+      online: !!conv.online, status: conv.online ? 'En ligne' : 'Vu récemment', statusColor: conv.online ? '#1f9d57' : ink(0.45),
+      niveauNom: conv.niveauNom, niveau: conv.niveau, cercle: conv.cercle
+    };
+
+    // Profil
+    const interests = [
+      { label: 'Voyage', emoji: '✈️', color: '#ff9d5c' }, { label: 'Basket', emoji: '🏀', color: '#2f9ac2' },
+      { label: 'Cinéma', emoji: '🎬', color: '#7a4fd6' }, { label: 'Cuisine', emoji: '🍲', color: '#d3744d' },
+      { label: 'Musique', emoji: '🎧', color: '#d34d7e' }, { label: 'Photo', emoji: '📷', color: '#5a7fd6' }
+    ].map(i => ({ label: i.emoji + ' ' + i.label, color: i.color, bg: i.color + '22', border: i.color + '55' }));
+    const badges = [
+      { label: 'Pionnier', icon: 'flag', grad: '#ffd27a,#ff9d5c', tint: '#5a3a12', locked: false },
+      { label: 'Vérifié+', icon: 'shield-checkmark', grad: '#8fd0ff,#5a7fd6', tint: '#0c2a40', locked: false },
+      { label: 'Respectueux', icon: 'heart', grad: '#ff6fa8,#ff6aa9', tint: '#fff', locked: false },
+      { label: 'Légendaire', icon: 'lock-closed', grad: '', tint: '', locked: true }
+    ].map(b => ({ ...b, gradCss: 'linear-gradient(135deg,' + b.grad + ')', notLocked: !b.locked }));
+    const photos = [
+      { css: 'linear-gradient(150deg,#5a7fd6,#7a4fd6,#2a1c5e)', principal: true, locked: false, add: false, label: '' },
+      { css: 'linear-gradient(150deg,#ff9d5c,#d34d7e,#3a1c5e)', principal: false, locked: false, add: false, label: '' },
+      { css: 'linear-gradient(150deg,#7be0a0,#2f9ac2,#274a8c)', principal: false, locked: false, add: false, label: '' },
+      { css: '', principal: false, locked: true, add: false, label: 'Niveau 5' },
+      { css: '', principal: false, locked: true, add: false, label: 'Réciprocité' },
+      { css: '', principal: false, locked: false, add: true, label: '' }
+    ].map(p => ({ ...p, isPhoto: !p.locked && !p.add }));
+    const miniTrack = (on) => 'width:46px;height:27px;border-radius:99px;padding:3px;display:flex;align-items:center;justify-content:' + (on ? 'flex-end' : 'flex-start') + ';background:' + (on ? 'var(--accent)' : ink(0.16)) + ';flex-shrink:0;transition:all .2s;cursor:pointer;border:none;';
+    const menu = [
+      { icon: 'book-outline', tint: '#ff6fa8', title: 'Carnet personnel', sub: 'Notes & souvenirs privés', tag: 'Privé', onTap: () => this.push('carnet') },
+      { icon: 'git-network-outline', tint: '#8f9dff', title: 'Carte des relations', sub: 'Vos cercles & connexions', tag: '', onTap: () => this.push('relations') },
+      { icon: 'heart-outline', tint: '#ff9d5c', title: 'Mode de connexion', sub: 'Rencontre, Amitié & âge', tag: '', onTap: () => this.push('preferences') },
+      { icon: 'shield-outline', tint: '#43e08a', title: 'Confidentialité & sécurité', sub: 'Blocage, masquage, signalement', tag: '', onTap: () => this.push('parametres') }
+    ].map(m => ({ ...m, tintBg: m.tint + '22', hasTag: !!m.tag, noTag: !m.tag }));
+
+    // Membre (profil public)
+    const r = this.RELATIONS.find(x => x.id === st.memberId) || this.RELATIONS[0];
+    const mTint = r.mode === 'rencontre' ? '#ff6fa8' : '#8f9dff';
+    const mLabels = r.mode === 'rencontre' ? this.NIV_RENC : this.NIV_AMI;
+    const member = {
+      prenom: r.prenom, age: r.age, initial: r.prenom[0], nameAge: r.prenom + ', ' + r.age,
+      gradCss: 'linear-gradient(135deg,' + r.grad + ')', coverCss: 'radial-gradient(circle at 80% 12%,rgba(255,255,255,.22),transparent 46%),linear-gradient(135deg,' + r.grad + ',#2a1c5e)',
+      tint: mTint, tintBg: mTint + '22', tintBd: mTint + '55',
+      modeLabel: r.mode === 'rencontre' ? 'Rencontre' : 'Amitié',
+      online: r.online, status: r.online ? 'En ligne' : 'Hors ligne', statusColor: r.online ? '#1f9d57' : ink(0.5),
+      levelLabel: mLabels[r.niveau - 1], niveau: r.niveau, cercle: r.cercle,
+      bio: 'Membre de la communauté KADY. ' + r.prenom + ' aime les vraies conversations et les rencontres qui naissent dans un Cercle. 💫',
+      interets: r.interets,
+      segs: [0, 1, 2, 3, 4].map(j => ({ style: 'flex:1;height:6px;border-radius:99px;background:' + (j < r.niveau ? mTint : ink(0.12)) + ';' })),
+      photos: [['#ff9d5c', '#d34d7e'], ['#7be0a0', '#2f9ac2'], ['#b07bff', '#7a4fd6']].map((g, i) => ({ css: 'linear-gradient(150deg,' + g[0] + ',' + g[1] + ')', locked: i > 0, lockLabel: 'Niveau ' + (i + 2) })),
+      onMessage: () => this.openChat(r.id)
+    };
+
+    // Notifications
+    const reqPending = st.request === 'pending', reqAccepted = st.request === 'accepted';
+    const notif = {
+      unread: !st.notifsRead,
+      reqPending, reqHandled: !reqPending,
+      reqIcon: reqAccepted ? 'checkmark-circle' : 'time-outline',
+      reqIconColor: reqAccepted ? '#1f9d57' : ink(0.45),
+      reqHandledTxt: reqAccepted ? "Demande acceptée — vous êtes désormais L'Ami(e) avec Awa" : 'Demande reportée'
+    };
+
+    // Préférences
+    const pill = (on) => on
+      ? 'padding:10px 16px;border-radius:99px;background:var(--brand);border:1px solid transparent;cursor:pointer;'
+      : 'padding:10px 16px;border-radius:99px;background:var(--field);border:1px solid var(--border);cursor:pointer;';
+    const prefFor = [['femmes', 'Des femmes'], ['hommes', 'Des hommes'], ['tout', 'Tout le monde']].map(([v, l]) => ({ label: l, onClick: () => this.setPref('pref_for', v), style: pill(st.pref_for === v), color: st.pref_for === v ? '#fff' : ink(0.7) }));
+    const prefMode = [['rencontre', 'Rencontre'], ['amitie', 'Amitié'], ['les_deux', 'Les deux']].map(([v, l]) => ({ label: l, onClick: () => this.setPref('pref_mode', v), style: pill(st.pref_mode === v), color: st.pref_mode === v ? '#fff' : ink(0.7) }));
+    const ageLo = (st.ageMin - 18) / 42 * 100, ageHi = (st.ageMax - 18) / 42 * 100;
+
+    // Relations
+    const relTint = (m) => m === 'rencontre' ? '#ff6fa8' : '#8f9dff';
+    const relList = this.RELATIONS.map(rel => {
+      const tint = relTint(rel.mode), labels = rel.mode === 'rencontre' ? this.NIV_RENC : this.NIV_AMI;
+      return {
+        ...rel, gradCss: 'linear-gradient(135deg,' + rel.grad + ')', nameAge: rel.prenom + ', ' + rel.age, initial: rel.prenom[0],
+        tint, tintBg: tint + '22', tintBd: tint + '55', tint14: tint + '14',
+        modeLabel: rel.mode === 'rencontre' ? 'Rencontre' : 'Amitié',
+        levelLabel: labels[rel.niveau - 1], via: rel.cercle,
+        segs: [0, 1, 2, 3, 4].map(j => ({ style: 'flex:1;height:6px;border-radius:99px;background:' + (j < rel.niveau ? tint : ink(0.12)) + ';' })),
+        onOpenProfile: () => this.openMember(rel.id), onOpenChat: () => this.openChat(rel.id)
+      };
+    });
+    const relStats = { total: this.RELATIONS.length, ren: this.RELATIONS.filter(x => x.mode === 'rencontre').length, ami: this.RELATIONS.filter(x => x.mode === 'amitie').length };
+    const ladderRen = this.NIV_RENC.map((s2, i) => ({ n: i + 1, label: s2, notLast: i < 4 }));
+    const ladderAmi = this.NIV_AMI.map((s2, i) => ({ n: i + 1, label: s2, notLast: i < 4 }));
+
+    // Paramètres
+    const secItems = [
+      { icon: 'person-remove', color: '#ff9d5c', label: 'Personnes bloquées', value: '2', onTap: () => this.toast('2 personnes bloquées') },
+      { icon: 'flag', color: '#ffb45c', label: 'Mes signalements', value: '0', onTap: () => this.toast('Aucun signalement en cours 🙏') },
+      { icon: 'eye-off', color: '#a78bfa', label: 'Personnes masquées', value: '1', onTap: () => this.toast('1 personne masquée') },
+      { icon: 'document-text', color: '#2fb8c0', label: 'Politique de confidentialité', value: '', onTap: () => this.toast('kady.ci/confidentialite') }
+    ].map(m => ({ ...m, tintBg: m.color + '22', hasValue: !!m.value }));
+    const acctItems = [
+      { icon: 'mail', color: '#5a7fd6', label: "Modifier l'email", danger: false, onTap: () => this.toast('Modifier l\'email — kady.ci/compte') },
+      { icon: 'key', color: '#ffd27a', label: 'Changer le mot de passe', danger: false, onTap: () => this.toast('Changer le mot de passe') },
+      { icon: 'trash', color: '#ef5350', label: 'Supprimer mon compte', danger: true, onTap: () => this.toast('Suppression — action définitive') }
+    ].map(m => ({ ...m, tintBg: (m.danger ? '#ef5350' : m.color) + '22', tintC: m.danger ? '#ef5350' : m.color, labelC: m.danger ? '#ef5350' : 'var(--text)' }));
+
+    // Premium
+    const premiumPerks = [
+      { icon: 'infinite', t: 'Cercles illimités', d: 'Rejoins autant de Cercles que tu veux.', color: '#a78bfa' },
+      { icon: 'chatbubbles', t: 'DM illimités', d: 'Plus de limite de 3 conversations.', color: '#ff6fa8' },
+      { icon: 'stats-chart', t: 'Statistiques', d: "Vois qui s'intéresse à toi.", color: '#2fb8c0' },
+      { icon: 'color-palette', t: 'Personnalisation', d: 'Profil et thème à ton image.', color: '#ffb45c' },
+      { icon: 'time', t: 'Ton rythme', d: 'Avance dans les niveaux à ta vitesse.', color: '#5a7fd6' }
+    ].map(p => ({ ...p, bg: p.color + '24' }));
+
+    // Carnet
+    const noteTypes = { note: { icon: 'document-text', color: '#2BB7CF' }, souvenir: { icon: 'heart', color: '#EC4E86' }, rappel: { icon: 'alarm', color: '#F5A623' } };
+    const notes = st.notes.map(n => { const t = noteTypes[n.type]; return { ...n, icon: t.icon, color: t.color, colorBg: t.color + '26' }; });
+
+    // Créer
+    const CATS = [
+      { emoji: '✈️', label: 'Voyage', grad: '#ff9d5c,#d34d7e' }, { emoji: '🏀', label: 'Sport', grad: '#7be0a0,#2f9ac2' },
+      { emoji: '🎬', label: 'Cinéma', grad: '#8fd0ff,#5a7fd6' }, { emoji: '🍲', label: 'Cuisine', grad: '#ffb45c,#d3744d' },
+      { emoji: '🎨', label: 'Art', grad: '#b07bff,#7a4fd6' }
+    ];
+    const cCats = CATS.map((ct, i) => {
+      const on = i === st.cCat;
+      return { emoji: ct.emoji, label: ct.label, onClick: () => this.setCCat(i),
+        style: on ? 'display:flex;align-items:center;gap:7px;padding:10px 15px;border-radius:99px;background:rgba(255,106,169,.18);border:1px solid rgba(255,140,190,.5);cursor:pointer;flex:0 0 auto;'
+                  : 'display:flex;align-items:center;gap:7px;padding:10px 15px;border-radius:99px;background:var(--field);border:1px solid var(--border);cursor:pointer;flex:0 0 auto;',
+        color: on ? 'var(--accentDeep)' : ink(0.65) };
+    });
+    const cCoverCss = 'linear-gradient(135deg,' + CATS[st.cCat].grad + ')';
+    const isRenc = st.cType === 'rencontre';
+    const cSizes = [6, 10, 15, 20].map(n => ({ n, onClick: () => this.setCMax(n),
+      style: n === st.cMax ? 'flex:1;padding:8px;border-radius:10px;background:rgba(255,106,169,.16);border:1px solid rgba(255,140,190,.5);cursor:pointer;'
+                           : 'flex:1;padding:8px;border-radius:10px;background:var(--field);border:1px solid var(--border);cursor:pointer;',
+      color: n === st.cMax ? 'var(--accentDeep)' : ink(0.55) }));
+    const cMaxPct = ((st.cMax - 4) / 16) * 100;
+
+    // Register / Login
+    const regBars = [0, 1, 2, 3].map(i => ({ style: 'flex:1;height:3px;border-radius:2px;background:' + (i <= st.regStep ? 'var(--accent)' : 'var(--field)') + ';' }));
+    const regGenrePills = [['femme', 'Femme'], ['homme', 'Homme']].map(([v, l]) => ({ label: l, onClick: () => this.setState({ regGenre: v }), style: pill(st.regGenre === v), color: st.regGenre === v ? '#fff' : ink(0.7) }));
+    const regForPills = [['femmes', 'Des femmes'], ['hommes', 'Des hommes'], ['tout', 'Tout le monde']].map(([v, l]) => ({ label: l, onClick: () => this.setState({ regFor: v }), style: pill(st.regFor === v), color: st.regFor === v ? '#fff' : ink(0.7) }));
+    const regModePills = [['rencontre', 'Rencontre'], ['amitie', 'Amitié'], ['les_deux', 'Les deux']].map(([v, l]) => ({ label: l, onClick: () => this.setState({ regMode: v }), style: pill(st.regMode === v), color: st.regMode === v ? '#fff' : ink(0.7) }));
+    const regInteretPills = this.INTERETS_REG.map(i => { const on = st.regInterets.includes(i); return { label: i, onClick: () => this.toggleRegInteret(i), style: pill(on), color: on ? '#fff' : ink(0.7) }; });
+    const regAgeLo = (st.regAgeMin - 18) / 42 * 100, regAgeHi = (st.regAgeMax - 18) / 42 * 100;
+
+    // À propos / comment ça marche
+    const apropos = [
+      { icon: 'people', color: '#ff6fa8', n: '01', t: 'Rejoignez des Cercles', d: "Des petites communautés (max 10) autour d'une passion : voyage, sport, foi, ciné… On s'y retrouve, on échange, on crée du lien." },
+      { icon: 'lock-closed', color: '#8f9dff', n: '02', t: 'Pas de message sans Cercle partagé', d: "Impossible d'écrire à quelqu'un en privé tant que vous ne partagez pas un Cercle. Fini les DM non sollicités." },
+      { icon: 'trending-up', color: '#ff9d5c', n: '03', t: 'Des niveaux de connexion', d: "Chaque lien progresse par étapes — de L'Inconnu à L'Intimité. Photos et fonctions se débloquent à mesure que la confiance grandit." },
+      { icon: 'heart', color: '#43e08a', n: '04', t: 'Rencontre ou Amitié', d: "À toi de choisir le mode de chaque connexion. KADY te propose des Cercles et des profils qui correspondent à ce que tu cherches." }
+    ].map(a => ({ ...a, bg: a.color + '22' }));
+
+    const segOn = "padding:7px 14px;border-radius:99px;border:none;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:700;font-size:12.5px;background:var(--brand);color:#fff;display:flex;align-items:center;gap:6px;";
+    const segOff = "padding:7px 14px;border-radius:99px;border:none;cursor:pointer;font-family:'Plus Jakarta Sans';font-weight:600;font-size:12.5px;background:transparent;color:" + ink(0.55) + ";display:flex;align-items:center;gap:6px;";
+
+    return {
+      theme: st.theme, themeLight: st.theme === 'light',
+      lightBtn: st.theme === 'light' ? segOn : segOff, darkBtn: st.theme === 'light' ? segOff : segOn,
+      isAccueil: st.screen === 'accueil', isDecouvrir: st.screen === 'decouvrir', isMessages: st.screen === 'messages', isChat: st.screen === 'chat', isProfil: st.screen === 'profil', isCreer: st.screen === 'creer', isCercle: st.screen === 'cercle',
+      isMembre: st.screen === 'membre', isNotifs: st.screen === 'notifications', isPremium: st.screen === 'premium', isPrefs: st.screen === 'preferences', isRelations: st.screen === 'relations', isParams: st.screen === 'parametres', isCarnet: st.screen === 'carnet',
+      isSplash: st.screen === 'splash', isApropos: st.screen === 'apropos', isLogin: st.screen === 'login', isRegister: st.screen === 'register',
+      goApropos: this.goApropos, goRegister: this.goRegister, goLogin: this.goLogin, enterApp: this.enterApp,
+      onForgot: () => this.toast('Lien de réinitialisation envoyé par e-mail'),
+      loginEmail: st.loginEmail, loginMdp: st.loginMdp, onLoginEmail: this.onField('loginEmail'), onLoginMdp: this.onField('loginMdp'),
+      apropos,
+      regStep: st.regStep, regBars, regErr: st.regErr, hasRegErr: !!st.regErr,
+      regStep0: st.regStep === 0, regStep1: st.regStep === 1, regStep2: st.regStep === 2, regStep3: st.regStep === 3,
+      regNext: this.regNext, regPrev: this.regPrev, regBtnLabel: st.regStep < 3 ? 'Continuer' : 'Créer mon compte',
+      regPrenom: st.regPrenom, regEmail: st.regEmail, regDob: st.regDob, regVille: st.regVille,
+      onRegPrenom: this.onField('regPrenom'), onRegEmail: this.onField('regEmail'), onRegDob: this.onField('regDob'), onRegVille: this.onField('regVille'),
+      regGenrePills, regForPills, regModePills, regInteretPills,
+      regAgeMin: st.regAgeMin, regAgeMax: st.regAgeMax, regAgeLo, regAgeHi,
+      stepRegAgeMinDown: () => this.stepRegAge('min', -1), stepRegAgeMinUp: () => this.stepRegAge('min', 1), stepRegAgeMaxDown: () => this.stepRegAge('max', -1), stepRegAgeMaxUp: () => this.stepRegAge('max', 1),
+      regCgu: st.regCgu, toggleCgu: this.toggleCgu,
+      cguBox: 'width:24px;height:24px;border-radius:7px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;border:1.5px solid ' + (st.regCgu ? 'var(--accent)' : 'var(--border)') + ';background:' + (st.regCgu ? 'var(--accent)' : 'transparent') + ';',
+      member, openMember: this.openMember,
+      notif, markNotifsRead: this.markNotifsRead, acceptRequest: this.acceptRequest, dismissRequest: this.dismissRequest,
+      prefFor, prefMode, ageMin: st.ageMin, ageMax: st.ageMax, ageLo, ageHi,
+      stepAgeMinDown: () => this.stepAge('min', -1), stepAgeMinUp: () => this.stepAge('min', 1), stepAgeMaxDown: () => this.stepAge('max', -1), stepAgeMaxUp: () => this.stepAge('max', 1),
+      relList, relTotal: relStats.total, relRen: relStats.ren, relAmi: relStats.ami, ladderRen, ladderAmi,
+      secItems, acctItems, pushOn: st.pushNotifs, togglePush: this.togglePush, pushTrack: miniTrack(st.pushNotifs), pushSub: st.pushNotifs ? 'Activées' : 'Désactivées',
+      notes, noteDraft: st.noteDraft || '', setNoteDraft: this.setNoteDraft, addNote: this.addNote,
+      premiumPerks, onPremiumPay: () => this.toast('Paiement mobile money — démo'),
+      cercle, toggleRsvp: this.toggleRsvp, onLeaveCercle: this.onLeaveCercle, onInviteCercle: this.onInviteCercle, onGroupChat: this.onGroupChat,
+      showTabBar: st.screen === 'accueil' || st.screen === 'messages' || st.screen === 'decouvrir' || st.screen === 'profil',
+      showBellDot: !st.bellRead, toast: st.toast, hasToast: !!st.toast,
+      phoneRef: this.phoneRef, viewRef: this.viewRef, chatRef: this.chatRef,
+      setLight: () => this.setState({ theme: 'light' }), setDark: () => this.setState({ theme: 'dark' }),
+      goDecouvrir: () => this.go('decouvrir'), goAccueil: () => this.go('accueil'), back: this.back,
+      onBell: this.bell, fab: this.fab, onPremium: this.onPremium, onCreate: this.onCreate, onVideo: this.onVideo, onCall: this.onCall, openProfile: this.openProfile,
+      heroOffset: st.heroIndex * 25, heroSlides, heroDots,
+      rail, acts, dFilters, cards, cardCount: cards.length, resultWord: cards.length <= 1 ? 'résultat' : 'résultats',
+      dSearch: st.dSearch, hasDSearch: st.dSearch.length > 0, onDSearch: this.onDSearch, clearDSearch: this.clearDSearch,
+      advOpen: st.advOpen, toggleAdv: this.toggleAdv, resetAdv: this.resetAdv,
+      advPlaces, advGrades, advSorts, advCount, advCountShow: advCount > 0,
+      advBtnStyle: (st.advOpen || advCount > 0)
+        ? 'position:relative;width:46px;height:46px;border-radius:14px;background:var(--brand);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;box-shadow:0 6px 14px rgba(224,42,115,.35);'
+        : 'position:relative;width:46px;height:46px;border-radius:14px;background:var(--field);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;',
+      advIconColor: (st.advOpen || advCount > 0) ? '#fff' : 'var(--text)',
+      dNoResults: cards.length === 0,
+      chipsM, convs, search: st.search, hasSearch: st.search.length > 0, noResults: convs.length === 0,
+      onSearch: this.onSearch, clearSearch: this.clearSearch,
+      chat, chatSegs, thread, draft: st.draft, hasText, sendIcon: hasText ? 'send' : 'mic',
+      onDraft: this.onDraft, onKey: this.onKey, send: this.send,
+      tabAccueil: mkTab('accueil', 'Accueil', 'home'), tabCercles: mkTab('cercles', 'Cercles', 'people'),
+      tabMessages: mkTab('messages', 'Messages', 'chatbubble'), tabProfil: mkTab('profil', 'Profil', 'person'),
+      goProfil: () => this.go('profil'), goCreer: () => this.go('creer'),
+      themeToggleIcon: st.theme === 'dark' ? 'sunny-outline' : 'moon-outline',
+      onSettings: () => this.push('parametres'),
+      onEditProfile: () => this.toast('Modifier le profil — hors périmètre'),
+      onAddPhoto: () => this.toast('Ajouter une photo — hors périmètre'),
+      onActivity: () => this.toast('Proposer une activité — hors périmètre'),
+      onInvite: () => this.toast('Inviter des amis — partage du lien KADY'),
+      pauseSubColor: st.pause ? '#ff6fa8' : ink(0.45), cPrivSubColor: st.cPriv ? '#1f9d57' : ink(0.45),
+      interests, badges, photos, menu,
+      pause: st.pause, togglePause: this.togglePause, pauseTrack: miniTrack(st.pause), pauseSub: st.pause ? 'Activée · nouveaux DM en pause' : 'Désactivée',
+      darkOn: st.theme === 'dark', toggleTheme: this.toggleTheme, themeTrack: miniTrack(st.theme === 'dark'), themeSub: st.theme === 'dark' ? 'Activé' : 'Désactivé',
+      onLogout: this.onLogout,
+      cName: st.cName, cNamePreview: st.cName.trim() || 'Aperçu du cercle', setCName: this.setCName,
+      cCats, cCoverCss, cType: st.cType, isRenc, notRenc: !isRenc, setRenc: () => this.setCType('rencontre'), setAmitie: () => this.setCType('amitie'),
+      cMax: st.cMax, cSizes, cMaxPct, cPriv: st.cPriv, toggleCPriv: this.toggleCPriv, cPrivTrack: miniTrack(st.cPriv), cPrivSub: st.cPriv ? 'Sur invitation uniquement' : 'Visible et ouvert à tous',
+      doCreate: this.doCreate,
+      typeRencStyle: isRenc ? 'flex:1;padding:14px;border-radius:15px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:rgba(255,111,168,.14);border:1.5px solid rgba(255,111,168,.5);' : 'flex:1;padding:14px;border-radius:15px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:var(--field);border:1.5px solid var(--border);',
+      typeAmitieStyle: !isRenc ? 'flex:1;padding:14px;border-radius:15px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:rgba(143,157,255,.14);border:1.5px solid rgba(143,157,255,.5);' : 'flex:1;padding:14px;border-radius:15px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;background:var(--field);border:1.5px solid var(--border);',
+      rencColor: isRenc ? '#ff6fa8' : ink(0.35), amitieColor: !isRenc ? '#8f9dff' : ink(0.35),
+    };
+  }
+}
+</script>
+</body>
+</html>
