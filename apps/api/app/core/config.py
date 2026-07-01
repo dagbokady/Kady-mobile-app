@@ -15,7 +15,8 @@ class Settings(BaseSettings):
     MAX_LOGIN_ATTEMPTS: int = 5
     LOCKOUT_MINUTES: int = 15
 
-    CORS_ORIGINS: str = "http://localhost:8081,http://localhost:8083,http://localhost:19006"
+    CORS_ORIGINS: str = "http://localhost:8081,http://localhost:8083,http://localhost:19006,http://localhost:5173,http://localhost:5174"
+    ADMIN_TOKEN: str = "kady-admin"
 
     CLOUDINARY_CLOUD_NAME: str = ""
     CLOUDINARY_API_KEY: str = ""

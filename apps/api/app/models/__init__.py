@@ -5,6 +5,8 @@ from app.models.relation import Conversation, DmMessage, Relation
 from app.models.securite import Blocage, CarnetEntree, Masquage, Notification, Signalement
 from app.models.user import Badge, Photo, Profil, User, UserBadge
 from app.models.ville import Ville
+from app.models.config import AppConfig
+from app.models.decouverte import Decouverte, ProfilFait
 
 __all__ = [
     "User", "Profil", "Photo", "Badge", "UserBadge",

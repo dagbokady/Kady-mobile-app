@@ -45,6 +45,14 @@ export const meta = {
     },
 };
 
+export type ChampApi = { champ: string; label: string; revele: boolean; valeur?: string; options?: string[] };
+export type DecouverteApi = { points: number; total: number; decouverts: number; champs: ChampApi[] };
+export const decouverte = {
+    etat: async (cibleId: string): Promise<DecouverteApi> => (await api.get(`/decouverte/${cibleId}`)).data,
+    deviner: async (cibleId: string, champ: string, valeur: string): Promise<{ correct: boolean; valeur?: string }> =>
+        (await api.post(`/decouverte/${cibleId}/deviner`, null, { params: { champ, valeur } })).data,
+};
+
 export const cercles = {
     list: async (q?: string): Promise<CercleApi[]> => (await api.get('/cercles', { params: { q } })).data,
     get: async (id: string): Promise<CercleApi> => (await api.get(`/cercles/${id}`)).data,

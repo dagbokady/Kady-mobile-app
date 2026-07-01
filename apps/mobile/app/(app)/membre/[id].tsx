@@ -2,7 +2,7 @@
 // Accessible depuis un Cercle, la Carte des relations ou l'en-tête d'un DM.
 // Le bouton « message » respecte l'invariant KADY : il n'apparaît que si un
 // Cercle est partagé (ici matérialisé par r.cercle).
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable, StatusBar, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,6 +13,7 @@ import { fonts } from '../../../src/theme/typography';
 import { useColors, type Palette } from '../../../src/theme/theme';
 import { relations, NIVEAUX_RENCONTRE, NIVEAUX_AMITIE, DISC_FIELDS, DISC_DATA } from '../../../src/data/mock';
 import { useStore, useToast } from '../../../src/store/app';
+import { decouverte, type DecouverteApi } from '../../../src/api';
 
 const INTERETS: Record<string, string[]> = {
     awa: ['Voyage', 'Cuisine', 'Photographie'],
@@ -39,24 +40,33 @@ export default function Membre() {
     const niveauOverride = useStore((st) => st.niveaux[r.id]);
     const niveau = Math.min(niveauOverride ?? r.niveau, 5);
 
-    // Jeu de découverte : infos révélées + points (persistés dans le store).
-    const revealed = useStore((st) => st.disc[r.id] ?? []);
-    const points = useStore((st) => st.discPoints[r.id] ?? 0);
+    // Jeu de découverte : API persistante si le membre est réel, sinon repli mock (store).
+    const [apiDisc, setApiDisc] = useState<DecouverteApi | null>(null);
+    const revealedStore = useStore((st) => st.disc[r.id] ?? []);
+    const pointsStore = useStore((st) => st.discPoints[r.id] ?? 0);
     const revealDisc = useStore((st) => st.revealDisc);
-    const discData = DISC_DATA[r.id] ?? {};
-    const discTotal = DISC_FIELDS.length;
-    const discDone = revealed.length;
-    const discPct = Math.round((discDone / discTotal) * 100);
     const [openField, setOpenField] = useState<string | null>(null);
+    useEffect(() => { decouverte.etat(r.id).then((d) => { if (d.total > 0) setApiDisc(d); }).catch(() => {}); }, [r.id]);
 
-    const guess = (field: string, option: string) => {
-        const correct = discData[field]?.[0];
+    const ICONS: Record<string, string> = Object.fromEntries(DISC_FIELDS.map((f) => [f.key, f.icon]));
+    const useApi = !!apiDisc;
+    const fields = useApi
+        ? apiDisc!.champs.map((cc) => ({ key: cc.champ, label: cc.label, icon: (ICONS[cc.champ] ?? 'help-outline'), revele: cc.revele, value: cc.valeur ?? '', options: cc.options ?? [] }))
+        : DISC_FIELDS.map((f) => ({ key: f.key, label: f.label, icon: f.icon, revele: revealedStore.includes(f.key), value: DISC_DATA[r.id]?.[f.key]?.[0] ?? '???', options: DISC_DATA[r.id]?.[f.key]?.[1] ?? [] }));
+    const discTotal = useApi ? apiDisc!.total : DISC_FIELDS.length;
+    const discDone = useApi ? apiDisc!.decouverts : revealedStore.length;
+    const points = useApi ? apiDisc!.points : pointsStore;
+    const discPct = discTotal ? Math.round((discDone / discTotal) * 100) : 0;
+
+    const guess = async (field: string, option: string) => {
         setOpenField(null);
-        if (option === correct) {
-            revealDisc(r.id, field);
-            useToast.getState().show('Bien vu ! +10 points de découverte 🎉');
+        if (useApi) {
+            const res = await decouverte.deviner(r.id, field, option);
+            if (res.correct) { useToast.getState().show('Bien vu ! +10 points de découverte 🎉'); decouverte.etat(r.id).then(setApiDisc).catch(() => {}); }
+            else useToast.getState().show('Pas encore… continue la conversation 💬');
         } else {
-            useToast.getState().show('Pas encore… continue la conversation 💬');
+            if (option === DISC_DATA[r.id]?.[field]?.[0]) { revealDisc(r.id, field); useToast.getState().show('Bien vu ! +10 points de découverte 🎉'); }
+            else useToast.getState().show('Pas encore… continue la conversation 💬');
         }
     };
 
@@ -160,11 +170,11 @@ export default function Membre() {
                         </View>
 
                         <View style={s.discGrid}>
-                            {DISC_FIELDS.map((f) => {
-                                const isRevealed = revealed.includes(f.key);
+                            {fields.map((f) => {
+                                const isRevealed = f.revele;
                                 const isOpen = openField === f.key;
-                                const value = discData[f.key]?.[0] ?? '???';
-                                const options = discData[f.key]?.[1] ?? [];
+                                const value = f.value || '???';
+                                const options = f.options;
                                 return (
                                     <View key={f.key} style={[s.discCase, isOpen && { borderColor: tint }]}>
                                         <Pressable
