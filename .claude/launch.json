@@ -20,13 +20,22 @@
       "port": 8090
     },
     {
-      "name": "waitlist",
+      "name": "web",
       "runtimeExecutable": "bash",
       "runtimeArgs": [
         "-c",
-        "cd apps/waitlist && npm run dev -- --port 5173"
+        "cd apps/web && npm run dev -- --port 5173"
       ],
       "port": 5173
+    },
+    {
+      "name": "backoffice",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd apps/backoffice && npm run dev -- --port 5174"
+      ],
+      "port": 5174
     }
   ]
 }
