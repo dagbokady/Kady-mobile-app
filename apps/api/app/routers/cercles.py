@@ -37,7 +37,7 @@ def lister(user: CurrentUser, db: Db, q: str | None = None):
         like = f"%{q.lower()}%"
         stmt = stmt.where(func.lower(Cercle.nom).like(like) | func.lower(Cercle.theme).like(like))
     out = []
-    for c in db.execute(stmt.order_by(Cercle.created_at.desc())).scalars():
+    for c in db.execute(stmt.order_by(Cercle.mis_en_avant.desc(), Cercle.created_at.desc())).scalars():
         out.append(CercleOut(id=c.id, nom=c.nom, theme=c.theme, description=c.description,
                              niveau=c.niveau, statut=c.statut, capacite_max=c.capacite_max,
                              membres=_nb_membres(db, c.id), expire_le=c.expire_le,

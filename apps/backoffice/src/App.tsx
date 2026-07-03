@@ -5,9 +5,11 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Users from './pages/Users'
+import Verifications from './pages/Verifications'
 import Cercles from './pages/Cercles'
 import Signalements from './pages/Signalements'
-import Config from './pages/Config'
+import Premium from './pages/Premium'
+import Reglages from './pages/Reglages'
 
 function LoginRoute() {
   const { status } = useAdminAuth()
@@ -24,9 +26,12 @@ export default function App() {
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/utilisateurs" element={<Users />} />
+            <Route path="/verifications" element={<Verifications />} />
             <Route path="/cercles" element={<Cercles />} />
             <Route path="/signalements" element={<Signalements />} />
-            <Route path="/config" element={<Config />} />
+            <Route path="/premium" element={<Premium />} />
+            <Route path="/reglages" element={<Reglages />} />
+            <Route path="/config" element={<Navigate to="/reglages" replace />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

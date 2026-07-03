@@ -28,6 +28,11 @@ def main() -> None:
     init_db()
     db = SessionLocal()
     try:
+        from sqlalchemy import text
+
+        # Migrations additives idempotentes (create_all ne modifie pas les tables existantes).
+        db.execute(text("ALTER TABLE cercles ADD COLUMN IF NOT EXISTS mis_en_avant BOOLEAN NOT NULL DEFAULT FALSE"))
+        db.commit()
         for code, libelle in BADGES:
             if db.get(Badge, code) is None:
                 db.add(Badge(code=code, libelle=libelle))

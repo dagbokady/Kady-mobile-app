@@ -28,13 +28,25 @@ export function apiError(e: unknown): string {
   return err.response?.data?.detail ?? 'Une erreur est survenue.'
 }
 
+export interface ChartPoint {
+  d: string
+  n: number
+}
+
 export interface Stats {
   users: number
-  actifs: number
+  users_delta: string | null
   cercles: number
+  cercles_delta: string | null
   premium: number
-  waitlist: number
+  premium_delta: string | null
+  taux_actifs: number
+  actifs_7j: number
   reports: number
+  verifs: number
+  cercles_signales: number
+  waitlist: number
+  chart: ChartPoint[]
 }
 
 export interface AdminUser {
@@ -46,6 +58,34 @@ export interface AdminUser {
   joined: string
   status: string
   is_active: boolean
+  photo: string | null
+}
+
+export interface AdminUserDetail {
+  id: string
+  name: string
+  email: string
+  ville: string | null
+  bio: string | null
+  genre: string | null
+  centres_interet: string[]
+  age: number | null
+  joined: string
+  status: string
+  is_active: boolean
+  is_deleted: boolean
+  verification: string
+  cercles: number
+  relations: number
+  photo: string | null
+  en_pause: boolean
+}
+
+export interface AdminVerif {
+  id: string
+  name: string
+  meta: string
+  photo: string | null
 }
 
 export interface AdminCercle {
@@ -54,19 +94,39 @@ export interface AdminCercle {
   theme: string | null
   membres: number
   statut: string
+  signale: boolean
+  mis_en_avant: boolean
 }
 
 export interface AdminSignalement {
   id: string
+  target: string
+  signale_id: string
+  by: string
+  reason: string
   contexte: string
-  motif: string | null
   time: string
+}
+
+export interface AdminPremium {
+  abonnes: number
+  mrr: number
+  prix: number
+  nouveaux_30j: number
+  delta: string | null
+  conversion: number
+  plans: Array<{ label: string; count: number; pct: number }>
 }
 
 export interface AppConfigState {
   waitlist_mode: boolean
   maintenance: boolean
+  auto_verif: boolean
+  premium_promo: boolean
+  waitlist_count: number
 }
+
+export type ConfigKey = 'waitlist_mode' | 'maintenance' | 'auto_verif' | 'premium_promo'
 
 export const admin = {
   async stats(): Promise<Stats> {
@@ -77,8 +137,28 @@ export const admin = {
     const { data } = await api.get('/admin/users', { params: q ? { q } : {} })
     return data
   },
+  async userDetail(userId: string): Promise<AdminUserDetail> {
+    const { data } = await api.get(`/admin/users/${userId}`)
+    return data
+  },
   async suspend(userId: string): Promise<{ is_active: boolean }> {
     const { data } = await api.post(`/admin/users/${userId}/suspend`)
+    return data
+  },
+  async ban(userId: string): Promise<{ is_deleted: boolean }> {
+    const { data } = await api.post(`/admin/users/${userId}/ban`)
+    return data
+  },
+  async verifications(): Promise<AdminVerif[]> {
+    const { data } = await api.get('/admin/verifications')
+    return data
+  },
+  async approveVerif(userId: string) {
+    const { data } = await api.post(`/admin/verifications/${userId}/approve`)
+    return data
+  },
+  async rejectVerif(userId: string) {
+    const { data } = await api.post(`/admin/verifications/${userId}/reject`)
     return data
   },
   async cercles(): Promise<AdminCercle[]> {
@@ -89,19 +169,27 @@ export const admin = {
     const { data } = await api.post(`/admin/cercles/${cercleId}/toggle`)
     return data
   },
+  async featureCercle(cercleId: string): Promise<{ mis_en_avant: boolean }> {
+    const { data } = await api.post(`/admin/cercles/${cercleId}/feature`)
+    return data
+  },
   async signalements(): Promise<AdminSignalement[]> {
     const { data } = await api.get('/admin/signalements')
     return data
   },
-  async resolveSignalement(id: string, statut: 'traite' | 'rejete'): Promise<{ statut: string }> {
-    const { data } = await api.post(`/admin/signalements/${id}/resolve`, null, { params: { statut } })
+  async actionSignalement(id: string, action: 'ignorer' | 'avertir' | 'suspendre') {
+    const { data } = await api.post(`/admin/signalements/${id}/action`, null, { params: { action } })
+    return data as { statut: string; action: string }
+  },
+  async premium(): Promise<AdminPremium> {
+    const { data } = await api.get('/admin/premium')
     return data
   },
   async getConfig(): Promise<AppConfigState> {
     const { data } = await api.get('/admin/config')
     return data
   },
-  async setConfig(cle: 'waitlist_mode' | 'maintenance', valeur: boolean) {
+  async setConfig(cle: ConfigKey, valeur: boolean) {
     const { data } = await api.post('/admin/config', null, { params: { cle, valeur } })
     return data
   },

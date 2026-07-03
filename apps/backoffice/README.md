@@ -1,32 +1,41 @@
-# React + TypeScript + Vite
+# KADY Admin — back-office
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Back-office de modération et de pilotage de KADY (React + Vite + TypeScript), fidèle à la
+maquette Claude Design `KADY Admin.dc.html`.
 
-Currently, two official plugins are available:
+## Sections
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Tableau de bord** — KPIs (utilisateurs, cercles actifs, abonnés Premium, actifs / 7 j)
+  avec variations semaine/semaine, graphe des inscriptions sur 14 jours, files « À traiter ».
+- **Utilisateurs** — recherche (header), filtres (Tous / Actifs / Premium / Suspendus),
+  fiche détaillée en drawer (stats, infos, intérêts), suspendre / réactiver / bannir.
+- **Vérifications** — file des selfies en attente : approuver (badge « Vérifié » +
+  notification) ou rejeter (notification de reprise).
+- **Cercles** — cartes par thème, statut (Actif / Signalé / Archivé), suspendre / réactiver,
+  mise en avant (étoile) qui remonte le cercle dans Découvrir côté app.
+- **Signalements** — ignorer / avertir (notification) / suspendre (compte désactivé + notification).
+- **Premium & revenus** — MRR réel (abonnés actifs × `PREMIUM_AMOUNT_XOF`), nouveaux abonnés
+  sur 30 j, taux de conversion, répartition par formule.
+- **Réglages** — inscriptions ouvertes (waitlist), vérification auto (IA), promo Premium,
+  mode maintenance — persistés dans `app_config`.
 
-## React Compiler
+## Lancer en dev
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```bash
+npm install
+npm run dev -- --port 5174
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+L'API doit tourner (par défaut `http://localhost:8000`, configurable via `VITE_API_URL`).
+
+## Authentification
+
+Connexion par jeton d'administration : la valeur de `ADMIN_TOKEN` côté API
+(`apps/api/app/core/config.py`, défaut dev `kady-admin`), envoyée en header `X-Admin-Token`.
+**En production, définir un `ADMIN_TOKEN` fort.**
+
+## Build
+
+```bash
+npm run build   # tsc -b && vite build → dist/
+```
