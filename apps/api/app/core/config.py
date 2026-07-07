@@ -34,5 +34,20 @@ class Settings(BaseSettings):
     def cors_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
+    @property
+    def sqlalchemy_url(self) -> str:
+        """URL normalisée pour SQLAlchemy + psycopg 3.
+
+        Railway (et Heroku) exposent `postgres://` ou `postgresql://`, mais
+        SQLAlchemy a besoin du driver explicite `postgresql+psycopg://`.
+        On peut donc coller `${{Postgres.DATABASE_URL}}` de Railway tel quel.
+        """
+        url = self.DATABASE_URL
+        if url.startswith("postgres://"):
+            url = "postgresql://" + url[len("postgres://"):]
+        if url.startswith("postgresql://"):
+            url = "postgresql+psycopg://" + url[len("postgresql://"):]
+        return url
+
 
 settings = Settings()
