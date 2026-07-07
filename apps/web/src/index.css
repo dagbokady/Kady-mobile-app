@@ -111,6 +111,11 @@ ion-icon{pointer-events:none;}
 .input::placeholder,.textarea::placeholder{color:rgba(var(--ink),.42);}
 .textarea{resize:vertical;min-height:80px;}
 select.select option{color:#211633;}
+/* Variante « sur fond sombre » (splash/waitlist) : champs blancs sur voile translucide. */
+.field-dark{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.22)!important;}
+.field-dark ion-icon{color:rgba(255,255,255,.6);}
+.field-dark .input,.field-dark .textarea,.field-dark .select{color:#fff;}
+.field-dark .input::placeholder,.field-dark .textarea::placeholder{color:rgba(255,255,255,.55);}
 
 .btn{border:none;border-radius:14px;padding:14px 20px;font-weight:700;font-size:14.5px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s ease,transform .1s ease;}
 .btn:active{transform:scale(.98);}

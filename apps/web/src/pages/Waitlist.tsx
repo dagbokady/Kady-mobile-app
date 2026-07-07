@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import type { AxiosError } from 'axios'
 import { site, type WaitlistStatut } from '../api'
 import { apiError } from '../api/client'
 import { toast } from '../store/toast'
@@ -48,26 +49,48 @@ export default function Waitlist() {
     setCategories((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
   }
 
+  function memoriser(res: WaitlistStatut, mailNettoye: string) {
+    // Mémorisé pour le retour ET pour préremplir l'inscription à l'ouverture.
+    localStorage.setItem('kady.waitlist', JSON.stringify({
+      prenom: (res.prenom ?? prenom).trim(),
+      email: mailNettoye,
+      genre: res.genre ?? genre,
+      categories,
+      code: res.code_parrainage,
+    } satisfies WaitlistLocal))
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError('')
     if (!genre) return setError('Indique ton genre.')
     if (categories.length === 0) return setError('Choisis au moins une catégorie de cercles.')
+    const mailNettoye = email.trim().toLowerCase()
     setLoading(true)
     try {
       const res = await site.rejoindreWaitlist({
         prenom: prenom.trim(),
-        email: email.trim().toLowerCase(),
+        email: mailNettoye,
         genre,
         centres_interet: categories,
         parraine_par: codeParrain.trim() || undefined,
       })
       setStatut(res)
-      // Mémorisé pour le retour ET pour préremplir l'inscription à l'ouverture.
-      localStorage.setItem('kady.waitlist', JSON.stringify({
-        prenom: prenom.trim(), email: email.trim().toLowerCase(), genre, categories, code: res.code_parrainage,
-      } satisfies WaitlistLocal))
+      memoriser(res, mailNettoye)
     } catch (err) {
+      // Déjà sur la liste ? On lui remontre directement son rang + code plutôt qu'une erreur.
+      const ax = err as AxiosError<{ code?: string }>
+      if (ax.response?.status === 409 && ax.response.data?.code === 'EMAIL_DEJA_INSCRIT') {
+        try {
+          const existant = await site.statutWaitlist(mailNettoye)
+          setStatut(existant)
+          memoriser(existant, mailNettoye)
+          toast('Tu es déjà sur la liste — voici ta place ✓')
+          return
+        } catch {
+          /* on retombe sur l'erreur générique ci-dessous */
+        }
+      }
       setError(apiError(err))
     } finally {
       setLoading(false)
@@ -145,11 +168,11 @@ export default function Waitlist() {
             <form onSubmit={onSubmit} style={{ width: 420, maxWidth: '92vw', marginTop: 22, display: 'flex', flexDirection: 'column', gap: 12 }}>
               {error && <div className="error-banner">{error}</div>}
               <div className="row" style={{ gap: 10 }}>
-                <div className="field-box" style={{ flex: 1 }}>
+                <div className="field-box field-dark" style={{ flex: 1 }}>
                   <ion-icon name="person-outline" />
                   <input className="input" type="text" required value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Ton prénom" />
                 </div>
-                <div className="field-box" style={{ flex: 1.4 }}>
+                <div className="field-box field-dark" style={{ flex: 1.4 }}>
                   <ion-icon name="mail-outline" />
                   <input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="toi@email.com" />
                 </div>
@@ -198,11 +221,10 @@ export default function Waitlist() {
                 })}
               </div>
 
-              <div className="field-box" style={{ background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.22)' }}>
-                <ion-icon name="gift-outline" style={{ color: 'rgba(255,255,255,.6)' }} />
+              <div className="field-box field-dark">
+                <ion-icon name="gift-outline" />
                 <input
                   className="input"
-                  style={{ color: '#fff' }}
                   type="text"
                   value={codeParrain}
                   onChange={(e) => setCodeParrain(e.target.value.toUpperCase())}
