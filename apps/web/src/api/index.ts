@@ -188,3 +188,16 @@ export const decouverte = {
     return data
   },
 }
+
+export type SiteMode = 'open' | 'waitlist' | 'maintenance'
+
+export const site = {
+  async config(): Promise<{ mode: SiteMode; waitlist_mode: boolean; maintenance: boolean }> {
+    const { data } = await api.get('/config')
+    return data
+  },
+  async rejoindreWaitlist(payload: { prenom: string; email: string }): Promise<{ code_parrainage: string; rang: number | null; nb_parrainages: number }> {
+    const { data } = await api.post('/waitlist', payload)
+    return data
+  },
+}

@@ -36,5 +36,7 @@ def public_config(db: Db):
     from app.models.config import AppConfig
 
     rows = {c.cle: c.valeur for c in db.execute(select(AppConfig)).scalars().all()}
-    return {"waitlist_mode": rows.get("waitlist_mode", "true") == "true",
-            "maintenance": rows.get("maintenance", "false") == "true"}
+    maintenance = rows.get("maintenance", "false") == "true"
+    waitlist = rows.get("waitlist_mode", "true") == "true"
+    mode = "maintenance" if maintenance else "waitlist" if waitlist else "open"
+    return {"mode": mode, "waitlist_mode": waitlist, "maintenance": maintenance}

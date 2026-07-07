@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Logo from '../components/Logo'
+import Wordmark from '../components/Wordmark'
 import HowModal from '../components/HowModal'
 
 export default function Splash() {
@@ -12,9 +13,14 @@ export default function Splash() {
       <div className="splash-aura splash-aura-1" />
       <div className="splash-aura splash-aura-2" />
       <div className="splash-inner">
-        <Logo size={74} />
-        <div className="splash-title">KADY</div>
-        <div className="splash-tagline">Des liens qui comptent, en cercle.</div>
+        <Logo size={92} glow />
+        <div style={{ marginTop: 26 }}>
+          <Wordmark height={44} />
+        </div>
+        <div style={{ marginTop: 12, fontSize: 13, fontWeight: 600, letterSpacing: 4, color: '#ef8fbb' }}>
+          CRÉATEUR DE RENCONTRES
+        </div>
+        <div className="splash-tagline" style={{ marginTop: 22 }}>Des liens qui comptent, en cercle.</div>
         <p className="splash-desc">
           Rejoignez de petites communautés autour de vos passions. Pas de swipe, pas de messages non sollicités — la
           confiance se construit, niveau après niveau.

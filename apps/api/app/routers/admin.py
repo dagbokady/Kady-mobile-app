@@ -179,6 +179,8 @@ def user_detail(user_id: str, db: Db, _: None = Depends(guard)):
     cercles = db.execute(select(func.count(CercleMembre.id)).where(CercleMembre.user_id == u.id)).scalar_one()
     relations = db.execute(select(func.count(Relation.id)).where(
         or_(Relation.user_a_id == u.id, Relation.user_b_id == u.id))).scalar_one()
+    signalements_recus = db.execute(select(func.count(Signalement.id)).where(
+        Signalement.signale_id == u.id)).scalar_one()
     verif_label = {"none": "Non vérifié", "selfie": "Vérifié", "id_document": "Vérifié+"}
     return {
         "id": u.id, "name": p.prenom if p else u.email.split("@")[0], "email": u.email,
@@ -189,6 +191,9 @@ def user_detail(user_id: str, db: Db, _: None = Depends(guard)):
         "verification": verif_label.get(u.verification_level, "Non vérifié"),
         "cercles": cercles, "relations": relations, "photo": _photo_url(db, u.id),
         "en_pause": u.en_pause,
+        # Signaux internes réservés à l'admin (jamais exposés à l'utilisateur).
+        "score_comportemental": float(p.score_comportemental) if p else 0.0,
+        "signalements_recus": signalements_recus,
     }
 
 
@@ -366,13 +371,32 @@ def premium(db: Db, _: None = Depends(guard)):
 # ── Configuration ────────────────────────────────────────────────────────────
 
 CONFIG_KEYS = ("waitlist_mode", "maintenance", "auto_verif", "premium_promo")
+SITE_MODES = ("open", "waitlist", "maintenance")
+
+
+def site_mode(rows: dict[str, str]) -> str:
+    """Mode effectif du site — maintenance prime sur waitlist prime sur open."""
+    if rows.get("maintenance", "false") == "true":
+        return "maintenance"
+    if rows.get("waitlist_mode", "true") == "true":
+        return "waitlist"
+    return "open"
+
+
+def _write_config(db: Db, cle: str, valeur: bool) -> None:
+    row = db.get(AppConfig, cle)
+    if row is None:
+        row = AppConfig(cle=cle)
+        db.add(row)
+    row.valeur = "true" if valeur else "false"
 
 
 @router.get("/config")
 def get_config(db: Db, _: None = Depends(guard)):
     rows = {c.cle: c.valeur for c in db.execute(select(AppConfig)).scalars().all()}
     waitlist = db.execute(select(func.count(Waitlist.id))).scalar_one()
-    return {"waitlist_mode": rows.get("waitlist_mode", "true") == "true",
+    return {"mode": site_mode(rows),
+            "waitlist_mode": rows.get("waitlist_mode", "true") == "true",
             "maintenance": rows.get("maintenance", "false") == "true",
             "auto_verif": rows.get("auto_verif", "false") == "true",
             "premium_promo": rows.get("premium_promo", "false") == "true",
@@ -383,10 +407,17 @@ def get_config(db: Db, _: None = Depends(guard)):
 def set_config(cle: str, valeur: bool, db: Db, _: None = Depends(guard)):
     if cle not in CONFIG_KEYS:
         raise err(422, "CLE_INCONNUE", "Clé de configuration inconnue.")
-    row = db.get(AppConfig, cle)
-    if row is None:
-        row = AppConfig(cle=cle)
-        db.add(row)
-    row.valeur = "true" if valeur else "false"
+    _write_config(db, cle, valeur)
     db.commit()
-    return {"cle": cle, "valeur": row.valeur}
+    return {"cle": cle, "valeur": "true" if valeur else "false"}
+
+
+@router.post("/config/mode")
+def set_mode(mode: str, db: Db, _: None = Depends(guard)):
+    """Bascule le site en open / waitlist / maintenance de façon atomique."""
+    if mode not in SITE_MODES:
+        raise err(422, "MODE_INCONNU", "Mode de site inconnu.")
+    _write_config(db, "maintenance", mode == "maintenance")
+    _write_config(db, "waitlist_mode", mode == "waitlist")
+    db.commit()
+    return {"mode": mode}

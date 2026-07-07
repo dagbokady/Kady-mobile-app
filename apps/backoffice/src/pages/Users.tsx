@@ -177,6 +177,25 @@ export default function Users() {
                 ))}
               </div>
 
+              <div style={{ marginTop: 18, display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted)' }}>
+                <ion-icon name="eye-off-outline" style={{ fontSize: 13 }} />
+                Signaux internes · non visibles par l’utilisateur
+              </div>
+              <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div style={{ padding: 13, borderRadius: 13, background: 'var(--card)', border: '1px solid var(--border)', textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 800, fontSize: 19 }}>
+                    {detail.score_comportemental.toFixed(1)}
+                  </div>
+                  <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>Score comportemental</div>
+                </div>
+                <div style={{ padding: 13, borderRadius: 13, background: 'var(--card)', border: `1px solid ${detail.signalements_recus > 0 ? 'var(--danger, #e5484d)' : 'var(--border)'}`, textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 800, fontSize: 19, color: detail.signalements_recus > 0 ? 'var(--danger, #e5484d)' : undefined }}>
+                    {detail.signalements_recus}
+                  </div>
+                  <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>Signalements reçus</div>
+                </div>
+              </div>
+
               <div style={{ marginTop: 18, fontSize: 11, fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted)' }}>Infos</div>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 9 }}>
                 {[

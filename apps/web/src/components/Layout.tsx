@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import Logo from './Logo'
+import Wordmark from './Wordmark'
 import NotificationsBell from './NotificationsBell'
 import { useAuth } from '../store/auth'
 import { useTheme } from '../store/theme'
@@ -40,8 +41,8 @@ export default function Layout() {
       <header className="navbar">
         <div className="navbar-inner">
           <button className="navbar-logo" type="button" onClick={() => navigate('/')}>
-            <Logo size={22} />
-            <span className="knav-name">KADY</span>
+            <Logo size={24} />
+            <Wordmark height={14} color="var(--text)" className="knav-name" />
           </button>
 
           <nav className="knav">

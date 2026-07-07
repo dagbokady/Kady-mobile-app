@@ -79,6 +79,8 @@ export interface AdminUserDetail {
   relations: number
   photo: string | null
   en_pause: boolean
+  score_comportemental: number
+  signalements_recus: number
 }
 
 export interface AdminVerif {
@@ -118,7 +120,10 @@ export interface AdminPremium {
   plans: Array<{ label: string; count: number; pct: number }>
 }
 
+export type SiteMode = 'open' | 'waitlist' | 'maintenance'
+
 export interface AppConfigState {
+  mode: SiteMode
   waitlist_mode: boolean
   maintenance: boolean
   auto_verif: boolean
@@ -191,6 +196,10 @@ export const admin = {
   },
   async setConfig(cle: ConfigKey, valeur: boolean) {
     const { data } = await api.post('/admin/config', null, { params: { cle, valeur } })
+    return data
+  },
+  async setMode(mode: SiteMode): Promise<{ mode: SiteMode }> {
+    const { data } = await api.post('/admin/config/mode', null, { params: { mode } })
     return data
   },
 }

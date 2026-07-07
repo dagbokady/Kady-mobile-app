@@ -4,6 +4,8 @@ import { admin } from '../api'
 import { useAdminAuth } from '../AdminAuth'
 import { useTheme } from '../theme'
 import { Toast } from '../toast'
+import Logo from './Logo'
+import Wordmark from './Wordmark'
 
 const NAV = [
   { to: '/', label: 'Tableau de bord', icon: 'grid', key: 'dash' },
@@ -56,22 +58,11 @@ export default function Layout() {
   return (
     <div className="admin-shell">
       <aside className="sb">
-        <div style={{ padding: '24px 22px 18px', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="32" height="20" viewBox="0 0 132 82" fill="none">
-            <defs>
-              <linearGradient id="ka" x1="14" y1="6" x2="120" y2="78" gradientUnits="userSpaceOnUse">
-                <stop offset="0" stopColor="#ffc2d6" />
-                <stop offset=".5" stopColor="#ff5f9e" />
-                <stop offset="1" stopColor="#bb1659" />
-              </linearGradient>
-            </defs>
-            <circle cx="86" cy="41" r="27" stroke="url(#ka)" strokeWidth="13.5" />
-            <circle cx="46" cy="41" r="27" stroke="url(#ka)" strokeWidth="13.5" />
-            <path d="M66 58.9 A27 27 0 0 0 80 66.4" stroke="url(#ka)" strokeWidth="13.5" strokeLinecap="round" />
-          </svg>
+        <div style={{ padding: '24px 22px 18px', display: 'flex', alignItems: 'center', gap: 11 }}>
+          <Logo size={24} />
           <div>
-            <div style={{ fontFamily: 'Sora,sans-serif', fontWeight: 700, fontSize: 17, letterSpacing: 3 }}>KADY</div>
-            <div style={{ fontSize: 10, letterSpacing: 2, color: 'rgba(var(--sbink),.5)' }}>ADMIN</div>
+            <Wordmark height={12} color="#fff" />
+            <div style={{ fontSize: 10, letterSpacing: 2, color: 'rgba(var(--sbink),.5)', marginTop: 2 }}>ADMIN</div>
           </div>
         </div>
 

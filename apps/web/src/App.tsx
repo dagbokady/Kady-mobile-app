@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useAuth } from './store/auth'
+import { useConfig } from './store/config'
 import './store/theme'
 import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import Splash from './pages/Splash'
+import Maintenance from './pages/Maintenance'
+import Waitlist from './pages/Waitlist'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Onboarding from './pages/Onboarding'
@@ -27,24 +30,35 @@ import Toast from './components/Toast'
 export default function App() {
   const status = useAuth((s) => s.status)
   const bootstrap = useAuth((s) => s.bootstrap)
+  const mode = useConfig((s) => s.mode)
+  const configLoaded = useConfig((s) => s.loaded)
+  const loadConfig = useConfig((s) => s.load)
 
   useEffect(() => {
     bootstrap()
-  }, [bootstrap])
+    loadConfig()
+  }, [bootstrap, loadConfig])
 
-  if (status === 'loading') {
+  if (status === 'loading' || !configLoaded) {
     return <div className="empty">Chargement…</div>
   }
 
   const guest = status !== 'authed'
 
+  // Maintenance : coupe l'accès à tout le monde (l'admin passe par le back-office séparé).
+  if (mode === 'maintenance') {
+    return <Maintenance />
+  }
+
+  const waitlist = mode === 'waitlist'
+
   return (
     <>
       <Toast />
       <Routes>
-      <Route path="/bienvenue" element={guest ? <Splash /> : <Navigate to="/" replace />} />
+      <Route path="/bienvenue" element={guest ? (waitlist ? <Waitlist /> : <Splash />) : <Navigate to="/" replace />} />
       <Route path="/login" element={guest ? <Login /> : <Navigate to="/" replace />} />
-      <Route path="/inscription" element={guest ? <Register /> : <Navigate to="/" replace />} />
+      <Route path="/inscription" element={guest ? (waitlist ? <Navigate to="/bienvenue" replace /> : <Register />) : <Navigate to="/" replace />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/onboarding" element={<Onboarding />} />
         <Route element={<Layout />}>

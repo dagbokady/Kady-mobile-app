@@ -5,6 +5,7 @@ import { apiError } from '../api/client'
 import { useAuth } from '../store/auth'
 import { toast } from '../store/toast'
 import Logo from '../components/Logo'
+import Wordmark from '../components/Wordmark'
 
 const POINTS = [
   { icon: 'shield-checkmark', text: 'Profils vérifiés par selfie vivant' },
@@ -230,9 +231,9 @@ export default function Register() {
   return (
     <div className="ksplit">
       <div className="ksplit-art split-art">
-        <div className="row" style={{ gap: 10, position: 'relative' }}>
-          <Logo size={22} />
-          <span style={{ fontFamily: 'Sora,sans-serif', fontWeight: 700, fontSize: 19, letterSpacing: 4 }}>KADY</span>
+        <div className="row" style={{ gap: 11, position: 'relative' }}>
+          <Logo size={24} />
+          <Wordmark height={14} color="#fff" />
         </div>
         <div style={{ position: 'relative' }}>
           <div className="split-headline" style={{ fontSize: 36, lineHeight: '44px' }}>Rejoins une communauté qui te ressemble.</div>
