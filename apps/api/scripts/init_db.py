@@ -32,6 +32,9 @@ def main() -> None:
 
         # Migrations additives idempotentes (create_all ne modifie pas les tables existantes).
         db.execute(text("ALTER TABLE cercles ADD COLUMN IF NOT EXISTS mis_en_avant BOOLEAN NOT NULL DEFAULT FALSE"))
+        db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS telephone VARCHAR(30)"))
+        db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS banni BOOLEAN NOT NULL DEFAULT FALSE"))
+        db.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_users_telephone ON users (telephone)"))
         db.commit()
         for code, libelle in BADGES:
             if db.get(Badge, code) is None:

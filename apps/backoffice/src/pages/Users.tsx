@@ -5,7 +5,7 @@ import type { AdminOutletContext } from '../components/Layout'
 import { avatarGrad, statusColors } from '../visuals'
 import { toast } from '../toast'
 
-const FILTERS = ['Tous', 'Actifs', 'Premium', 'Suspendus'] as const
+const FILTERS = ['Tous', 'Actifs', 'Premium', 'Suspendus', 'Bannis'] as const
 
 export default function Users() {
   const { q, refreshBadges } = useOutletContext<AdminOutletContext>()
@@ -14,21 +14,33 @@ export default function Users() {
   const [detail, setDetail] = useState<AdminUserDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [page, setPage] = useState(1)
+  const [pages, setPages] = useState(1)
+  const [total, setTotal] = useState(0)
+
+  // Recherche côté serveur : un changement de q ramène à la page 1.
+  useEffect(() => {
+    setPage(1)
+  }, [q])
 
   useEffect(() => {
+    setLoading(true)
     admin
-      .users()
-      .then(setUsers)
+      .users(q.trim() || undefined, page)
+      .then((res) => {
+        setUsers(res.items)
+        setPages(res.pages)
+        setTotal(res.total)
+      })
       .catch((err) => setError(apiError(err)))
       .finally(() => setLoading(false))
-  }, [])
+  }, [q, page])
 
-  const query = q.trim().toLowerCase()
   const displayed = users.filter((u) => {
     if (filter === 'Actifs' && u.status !== 'Actif' && u.status !== 'Premium') return false
     if (filter === 'Premium' && u.status !== 'Premium') return false
     if (filter === 'Suspendus' && u.status !== 'Suspendu') return false
-    if (query && !(u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query))) return false
+    if (filter === 'Bannis' && u.status !== 'Banni') return false
     return true
   })
 
@@ -56,8 +68,8 @@ export default function Users() {
     if (!window.confirm(`Bannir définitivement ${d.name} ? Le compte sera désactivé et retiré de la plateforme.`)) return
     try {
       await admin.ban(d.id)
-      toast(`⛔ ${d.name} banni·e définitivement`)
-      setUsers((prev) => prev.filter((u) => u.id !== d.id))
+      toast(`⛔ ${d.name} banni·e définitivement — email et numéro bloqués`)
+      setUsers((prev) => prev.map((u) => (u.id === d.id ? { ...u, is_active: false, status: 'Banni' } : u)))
       setDetail(null)
       refreshBadges()
     } catch (err) {
@@ -131,6 +143,34 @@ export default function Users() {
             )
           })
         )}
+
+        <div className="row" style={{ padding: '13px 18px', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 12, color: 'var(--muted)' }}>
+            {total} utilisateur{total > 1 ? 's' : ''} · page {page} / {pages}
+          </span>
+          <div className="row" style={{ gap: 8 }}>
+            <button
+              type="button"
+              className="filter-chip"
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              style={{ opacity: page <= 1 ? 0.4 : 1 }}
+              aria-label="Page précédente"
+            >
+              <ion-icon name="chevron-back" style={{ fontSize: 14 }} />
+            </button>
+            <button
+              type="button"
+              className="filter-chip"
+              disabled={page >= pages}
+              onClick={() => setPage((p) => Math.min(pages, p + 1))}
+              style={{ opacity: page >= pages ? 0.4 : 1 }}
+              aria-label="Page suivante"
+            >
+              <ion-icon name="chevron-forward" style={{ fontSize: 14 }} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {detail && (
@@ -199,6 +239,7 @@ export default function Users() {
               <div style={{ marginTop: 18, fontSize: 11, fontWeight: 700, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted)' }}>Infos</div>
               <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 9 }}>
                 {[
+                  { icon: 'call-outline', l: 'Téléphone', v: detail.telephone ?? '—' },
                   { icon: 'location-outline', l: 'Ville', v: detail.ville ?? '—' },
                   { icon: 'shield-checkmark-outline', l: 'Vérif.', v: detail.verification },
                   { icon: 'calendar-outline', l: 'Inscrit', v: detail.joined },

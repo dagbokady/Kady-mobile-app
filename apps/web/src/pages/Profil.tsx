@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import { type ChangeEvent, type FormEvent, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { cercles as cerclesApi, profils as profilsApi, relations as relationsApi } from '../api'
 import { apiError } from '../api/client'
@@ -25,8 +25,8 @@ export default function Profil() {
   const [error, setError] = useState('')
 
   const [photos, setPhotos] = useState<Photo[]>([])
-  const [publicId, setPublicId] = useState('')
-  const [addPhotoOpen, setAddPhotoOpen] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   const [cerclesCount, setCerclesCount] = useState(0)
   const [relations, setRelations] = useState<Relation[]>([])
@@ -63,17 +63,19 @@ export default function Profil() {
     setInteretInput('')
   }
 
-  async function ajouterPhoto(e: FormEvent) {
-    e.preventDefault()
-    if (!publicId.trim()) return
+  async function onChoisirPhoto(e: ChangeEvent<HTMLInputElement>) {
+    const fichier = e.target.files?.[0]
+    e.target.value = '' // autorise à re-sélectionner le même fichier
+    if (!fichier) return
+    setUploading(true)
     try {
-      const photo = await profilsApi.ajouterPhoto(publicId.trim(), photos.length === 0)
+      const photo = await profilsApi.uploadPhoto(fichier, photos.length === 0)
       setPhotos((prev) => [...prev, photo])
-      setPublicId('')
-      setAddPhotoOpen(false)
       toast('Photo ajoutée ✓')
     } catch (err) {
       toast(apiError(err))
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -338,28 +340,25 @@ export default function Profil() {
           {photos.length < photoSlots && (
             <button
               type="button"
-              onClick={() => setAddPhotoOpen((v) => !v)}
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
               style={{
                 aspectRatio: '3/4', borderRadius: 16, background: 'rgba(255,106,169,.06)', border: '1.5px dashed rgba(255,140,190,.4)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: uploading ? 'wait' : 'pointer',
               }}
               aria-label="Ajouter une photo"
             >
-              <ion-icon name="add" style={{ fontSize: 26, color: 'var(--accent)' }} />
+              <ion-icon name={uploading ? 'hourglass-outline' : 'add'} style={{ fontSize: 26, color: 'var(--accent)' }} />
             </button>
           )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            onChange={onChoisirPhoto}
+            style={{ display: 'none' }}
+          />
         </div>
-        {addPhotoOpen && (
-          <form className="row" style={{ marginTop: 12 }} onSubmit={ajouterPhoto}>
-            <div className="field-box" style={{ flex: 1 }}>
-              <ion-icon name="cloud-upload-outline" />
-              <input className="input" placeholder="Identifiant Cloudinary (public_id)" value={publicId} onChange={(e) => setPublicId(e.target.value)} />
-            </div>
-            <button className="btn btn-primary btn-sm" type="submit">
-              Ajouter
-            </button>
-          </form>
-        )}
 
         {/* Intérêts */}
         {(me?.centres_interet?.length ?? 0) > 0 && (

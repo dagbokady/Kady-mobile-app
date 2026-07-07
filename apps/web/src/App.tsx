@@ -25,6 +25,8 @@ import PremiumRetour from './pages/PremiumRetour'
 import Reglages from './pages/Reglages'
 import Creer from './pages/Creer'
 import APropos from './pages/APropos'
+import Conditions from './pages/Conditions'
+import Confidentialite from './pages/Confidentialite'
 import Toast from './components/Toast'
 
 export default function App() {
@@ -58,6 +60,8 @@ export default function App() {
       <Routes>
       <Route path="/bienvenue" element={guest ? (waitlist ? <Waitlist /> : <Splash />) : <Navigate to="/" replace />} />
       <Route path="/login" element={guest ? <Login /> : <Navigate to="/" replace />} />
+      <Route path="/conditions" element={<Conditions />} />
+      <Route path="/confidentialite" element={<Confidentialite />} />
       <Route path="/inscription" element={guest ? (waitlist ? <Navigate to="/bienvenue" replace /> : <Register />) : <Navigate to="/" replace />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/onboarding" element={<Onboarding />} />

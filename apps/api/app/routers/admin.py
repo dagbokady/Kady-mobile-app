@@ -1,4 +1,5 @@
 # app/routers/admin.py — back-office (protégé par en-tête X-Admin-Token).
+import hmac
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
@@ -20,7 +21,11 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 def guard(x_admin_token: Annotated[str | None, Header()] = None) -> None:
-    if x_admin_token != settings.ADMIN_TOKEN:
+    # .strip() des deux côtés : un espace/retour-ligne parasite (copier-coller
+    # d'une variable d'env) ne doit pas casser silencieusement l'auth admin.
+    # compare_digest : comparaison en temps constant (anti timing-attack).
+    recu = (x_admin_token or "").strip()
+    if not recu or not hmac.compare_digest(recu, settings.ADMIN_TOKEN.strip()):
         raise err(403, "ADMIN_REQUIS", "Accès back-office refusé.")
 
 
@@ -56,6 +61,8 @@ def _age(date_naissance) -> int | None:
 
 
 def _statut_user(u: User, prem: set[str]) -> str:
+    if u.banni or u.is_deleted:
+        return "Banni"
     if not u.is_active:
         return "Suspendu"
     if u.id in prem:
@@ -151,22 +158,32 @@ def stats(db: Db, _: None = Depends(guard)):
 # ── Utilisateurs ─────────────────────────────────────────────────────────────
 
 @router.get("/users")
-def users(db: Db, _: None = Depends(guard), q: str | None = None):
+def users(db: Db, _: None = Depends(guard), q: str | None = None, page: int = 1, limit: int = 20):
+    """Tous les comptes (bannis inclus), paginés, recherche côté SQL."""
+    page = max(1, page)
+    limit = min(max(1, limit), 50)
+
+    base = select(User)
+    if q:
+        par_prenom = select(Profil.user_id).where(Profil.prenom.ilike(f"%{q}%"))
+        base = base.where(or_(User.email.ilike(f"%{q}%"), User.id.in_(par_prenom)))
+    total = db.execute(select(func.count()).select_from(base.subquery())).scalar_one()
+    rows = db.execute(base.order_by(User.created_at.desc())
+                      .limit(limit).offset((page - 1) * limit)).scalars().all()
+
     prem = _premium_ids(db)
     profils = _profils(db)
-    rows = db.execute(select(User).where(User.is_deleted.is_(False)).order_by(User.created_at.desc())).scalars().all()
-    out = []
+    items = []
     for u in rows:
         p = profils.get(u.id)
         nom = p.prenom if p else u.email.split("@")[0]
-        if q and q.lower() not in (nom + u.email).lower():
-            continue
         nb = db.execute(select(func.count(CercleMembre.id)).where(CercleMembre.user_id == u.id)).scalar_one()
-        out.append({"id": u.id, "name": nom, "email": u.email, "ville": p.ville if p else None,
-                    "cercles": nb, "joined": u.created_at.strftime("%d/%m/%y"),
-                    "status": _statut_user(u, prem), "is_active": u.is_active,
-                    "photo": _photo_url(db, u.id)})
-    return out
+        items.append({"id": u.id, "name": nom, "email": u.email, "telephone": u.telephone,
+                      "ville": p.ville if p else None,
+                      "cercles": nb, "joined": u.created_at.strftime("%d/%m/%y"),
+                      "status": _statut_user(u, prem), "is_active": u.is_active,
+                      "photo": _photo_url(db, u.id)})
+    return {"items": items, "total": total, "page": page, "pages": max(1, -(-total // limit))}
 
 
 @router.get("/users/{user_id}")
@@ -184,6 +201,7 @@ def user_detail(user_id: str, db: Db, _: None = Depends(guard)):
     verif_label = {"none": "Non vérifié", "selfie": "Vérifié", "id_document": "Vérifié+"}
     return {
         "id": u.id, "name": p.prenom if p else u.email.split("@")[0], "email": u.email,
+        "telephone": u.telephone, "banni": u.banni,
         "ville": p.ville if p else None, "bio": p.bio if p else None,
         "genre": p.genre if p else None, "centres_interet": p.centres_interet if p else [],
         "age": _age(u.date_naissance), "joined": u.created_at.strftime("%d/%m/%Y"),
@@ -216,6 +234,7 @@ def ban(user_id: str, db: Db, _: None = Depends(guard)):
         raise err(404, "INTROUVABLE", "Utilisateur introuvable.")
     u.is_active = False
     u.is_deleted = True
+    u.banni = True  # bloque définitivement email + téléphone à la ré-inscription
     db.commit()
     return {"is_deleted": True}
 

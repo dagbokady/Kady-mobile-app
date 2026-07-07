@@ -5,6 +5,7 @@ export function statusColors(status: string): [string, string] {
   const M: Record<string, [string, string]> = {
     Actif: ['#1f9d57', 'rgba(31,157,87,.12)'],
     Premium: ['#b01b5c', 'rgba(214,40,110,.12)'],
+    Banni: ['#e02a2a', 'rgba(224,42,42,.12)'],
     Suspendu: ['#c2740d', 'rgba(224,138,27,.14)'],
     'En attente': ['#5a7fd6', 'rgba(90,127,214,.14)'],
     Signalé: ['#e02a2a', 'rgba(224,42,42,.1)'],

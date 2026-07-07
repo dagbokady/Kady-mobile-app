@@ -16,6 +16,8 @@ class WaitlistOut(BaseModel):
     code_parrainage: str
     rang: int | None
     nb_parrainages: int
+    prenom: str | None = None
+    genre: str | None = None
 
 
 class SignalementIn(BaseModel):

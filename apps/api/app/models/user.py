@@ -15,10 +15,12 @@ class User(Base, PkMixin, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
+    telephone: Mapped[str | None] = mapped_column(String(30), unique=True, nullable=True, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     date_naissance: Mapped[date] = mapped_column(Date, nullable=False)
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    banni: Mapped[bool] = mapped_column(Boolean, default=False)  # bannissement définitif (email+téléphone bloqués)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     verification_level: Mapped[str] = mapped_column(VERIF, default="none")
     en_pause: Mapped[bool] = mapped_column(Boolean, default=False)

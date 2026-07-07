@@ -5,6 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
+    # "prod" durcit l'app : docs désactivées, secrets par défaut refusés, HSTS.
+    ENV: str = "dev"
+
     DATABASE_URL: str = "postgresql+psycopg://kady:kady@localhost:5432/kady"
 
     JWT_SECRET: str = "dev-secret-change-me"
@@ -32,7 +35,13 @@ class Settings(BaseSettings):
 
     @property
     def cors_list(self) -> list[str]:
-        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
+        # .rstrip("/") : une origine CORS ne contient jamais de slash final —
+        # on tolère le copier-coller d'URL avec slash dans la variable d'env.
+        return [o.strip().rstrip("/") for o in self.CORS_ORIGINS.split(",") if o.strip()]
+
+    @property
+    def est_prod(self) -> bool:
+        return self.ENV.strip().lower() in ("prod", "production")
 
     @property
     def sqlalchemy_url(self) -> str:

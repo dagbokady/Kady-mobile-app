@@ -11,10 +11,15 @@ from app.utils.codes import code_parrainage
 router = APIRouter(prefix="/waitlist", tags=["waitlist"])
 
 
+def _score(w: Waitlist) -> int:
+    # Chaque parrainage compte double pour les femmes (équilibre des Cercles).
+    return w.nb_parrainages * (2 if w.genre == "femme" else 1)
+
+
 def _recalculer_rangs(db) -> None:
-    # Rang = ordre par (nb_parrainages décroissant, created_at croissant).
-    rows = db.execute(select(Waitlist).order_by(
-        Waitlist.nb_parrainages.desc(), Waitlist.created_at.asc())).scalars().all()
+    # Rang = ordre par (score décroissant, created_at croissant).
+    rows = db.execute(select(Waitlist)).scalars().all()
+    rows.sort(key=lambda w: (-_score(w), w.created_at))
     for i, w in enumerate(rows, start=1):
         w.rang = i
 
@@ -44,4 +49,15 @@ def inscrire(data: WaitlistIn, db: Db):
     _recalculer_rangs(db)
     db.commit()
     db.refresh(w)
-    return WaitlistOut(code_parrainage=w.code_parrainage, rang=w.rang, nb_parrainages=w.nb_parrainages)
+    return WaitlistOut(code_parrainage=w.code_parrainage, rang=w.rang, nb_parrainages=w.nb_parrainages,
+                       prenom=w.prenom, genre=w.genre)
+
+
+@router.get("/statut", response_model=WaitlistOut)
+def statut(email: str, db: Db):
+    """Retrouve sa place dans la liste d'attente (retour sur le site)."""
+    w = db.execute(select(Waitlist).where(Waitlist.email == email.lower().strip())).scalars().first()
+    if w is None:
+        raise err(404, "INTROUVABLE", "Cet email n'est pas sur la liste d'attente.")
+    return WaitlistOut(code_parrainage=w.code_parrainage, rang=w.rang, nb_parrainages=w.nb_parrainages,
+                       prenom=w.prenom, genre=w.genre)

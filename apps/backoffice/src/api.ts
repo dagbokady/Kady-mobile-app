@@ -53,6 +53,7 @@ export interface AdminUser {
   id: string
   name: string
   email: string
+  telephone: string | null
   ville: string | null
   cercles: number
   joined: string
@@ -61,10 +62,19 @@ export interface AdminUser {
   photo: string | null
 }
 
+export interface AdminUsersPage {
+  items: AdminUser[]
+  total: number
+  page: number
+  pages: number
+}
+
 export interface AdminUserDetail {
   id: string
   name: string
   email: string
+  telephone: string | null
+  banni: boolean
   ville: string | null
   bio: string | null
   genre: string | null
@@ -138,8 +148,8 @@ export const admin = {
     const { data } = await api.get('/admin/stats')
     return data
   },
-  async users(q?: string): Promise<AdminUser[]> {
-    const { data } = await api.get('/admin/users', { params: q ? { q } : {} })
+  async users(q?: string, page = 1, limit = 20): Promise<AdminUsersPage> {
+    const { data } = await api.get('/admin/users', { params: { ...(q ? { q } : {}), page, limit } })
     return data
   },
   async userDetail(userId: string): Promise<AdminUserDetail> {

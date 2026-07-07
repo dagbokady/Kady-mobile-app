@@ -20,10 +20,20 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def register(data: RegisterIn, db: Db):
     if calc_age(data.date_naissance) < 18:
         raise err(422, "MINEUR_INTERDIT", "KADY est réservé aux personnes majeures (18 ans et plus).")
-    if db.execute(select(User.id).where(User.email == data.email.lower())).first():
-        raise err(409, "EMAIL_DEJA_UTILISE", "Un compte existe déjà avec cet email.")
 
-    user = User(email=data.email.lower(), password_hash=hash_password(data.password),
+    # Email et téléphone bloquent la ré-inscription — y compris pour un compte banni.
+    existant = db.execute(select(User).where(User.email == data.email.lower())).scalars().first()
+    if existant is not None:
+        if existant.banni:
+            raise err(403, "COMPTE_BANNI", "Ce compte a été banni de KADY. Inscription impossible.")
+        raise err(409, "EMAIL_DEJA_UTILISE", "Un compte existe déjà avec cet email.")
+    meme_tel = db.execute(select(User).where(User.telephone == data.telephone)).scalars().first()
+    if meme_tel is not None:
+        if meme_tel.banni:
+            raise err(403, "COMPTE_BANNI", "Ce numéro est associé à un compte banni. Inscription impossible.")
+        raise err(409, "TELEPHONE_DEJA_UTILISE", "Un compte existe déjà avec ce numéro de téléphone.")
+
+    user = User(email=data.email.lower(), telephone=data.telephone, password_hash=hash_password(data.password),
                 date_naissance=data.date_naissance, dernier_acces=datetime.now(timezone.utc))
     db.add(user)
     db.flush()
@@ -39,6 +49,12 @@ def login(data: LoginIn, db: Db):
     now = datetime.now(timezone.utc)
     if user is None:
         raise err(401, "IDENTIFIANTS_INVALIDES", "Email ou mot de passe incorrect.")
+    if user.banni:
+        raise err(403, "COMPTE_BANNI", "Ce compte a été banni de KADY.")
+    if user.is_deleted:
+        raise err(401, "IDENTIFIANTS_INVALIDES", "Email ou mot de passe incorrect.")
+    if not user.is_active:
+        raise err(403, "COMPTE_SUSPENDU", "Ton compte est suspendu. Contacte le support.")
     if user.locked_until and user.locked_until > now:
         raise err(403, "COMPTE_VERROUILLE", "Trop de tentatives. Réessaie dans quelques minutes.")
 
@@ -78,7 +94,7 @@ def refresh(data: RefreshIn, db: Db):
 def me(user: CurrentUser, db: Db):
     p = db.execute(select(Profil).where(Profil.user_id == user.id)).scalars().first()
     return MeOut(
-        id=user.id, email=user.email, is_verified=user.is_verified,
+        id=user.id, email=user.email, telephone=user.telephone, is_verified=user.is_verified,
         verification_level=user.verification_level, en_pause=user.en_pause,
         prenom=p.prenom if p else None, ville=p.ville if p else None, bio=p.bio if p else None,
         genre=p.genre if p else None, centres_interet=p.centres_interet if p else [],
