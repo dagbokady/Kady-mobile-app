@@ -220,6 +220,10 @@ def suspend(user_id: str, db: Db, _: None = Depends(guard)):
     u = db.get(User, user_id)
     if u is None:
         raise err(404, "INTROUVABLE", "Utilisateur introuvable.")
+    # Un compte banni est irréversible : le débannir romprait la promesse
+    # « email + téléphone bloqués à la ré-inscription » et créerait un compte fantôme.
+    if u.banni:
+        raise err(409, "COMPTE_BANNI", "Ce compte est banni définitivement — action impossible.")
     u.is_active = not u.is_active
     if not u.is_active:
         _notifier(db, u.id, "Compte suspendu", "Ton compte a été suspendu par la modération. Contacte le support KADY.")

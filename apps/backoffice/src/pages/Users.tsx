@@ -268,14 +268,32 @@ export default function Users() {
                 </div>
               )}
 
-              <div style={{ marginTop: 20, display: 'flex', gap: 9 }}>
-                <button type="button" className="btn btn-warn-soft" style={{ flex: 1, padding: 12, borderRadius: 12 }} onClick={() => suspendre(detail)}>
-                  {detail.is_active ? 'Suspendre' : 'Réactiver'}
-                </button>
-                <button type="button" className="btn btn-danger-soft" style={{ flex: 1, padding: 12, borderRadius: 12 }} onClick={() => bannir(detail)}>
-                  Bannir
-                </button>
-              </div>
+              {detail.banni ? (
+                <div
+                  style={{
+                    marginTop: 20, padding: '14px 16px', borderRadius: 12,
+                    background: 'rgba(224,42,42,.08)', border: '1px solid rgba(224,42,42,.35)',
+                    display: 'flex', alignItems: 'center', gap: 11,
+                  }}
+                >
+                  <ion-icon name="ban" style={{ fontSize: 20, color: '#e02a2a', flexShrink: 0 }} />
+                  <div style={{ fontSize: 12.5, lineHeight: '18px', color: 'var(--text)' }}>
+                    <b>Compte banni définitivement.</b><br />
+                    <span style={{ color: 'var(--muted)' }}>
+                      L'email et le numéro sont bloqués pour toute future inscription.
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ marginTop: 20, display: 'flex', gap: 9 }}>
+                  <button type="button" className="btn btn-warn-soft" style={{ flex: 1, padding: 12, borderRadius: 12 }} onClick={() => suspendre(detail)}>
+                    {detail.is_active ? 'Suspendre' : 'Réactiver'}
+                  </button>
+                  <button type="button" className="btn btn-danger-soft" style={{ flex: 1, padding: 12, borderRadius: 12 }} onClick={() => bannir(detail)}>
+                    Bannir
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </>
