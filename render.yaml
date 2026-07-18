@@ -1,0 +1,41 @@
+# Blueprint Render pour le backend KADY (FastAPI).
+# Doc : https://render.com/docs/blueprint-spec
+#
+# La start command lance `python -m scripts.init_db` AVANT uvicorn : c'est ce qui
+# crée les tables (create_all) et seed les badges + villes. Sans ça, la base est
+# vide et l'API crashe avec `relation "users" does not exist`.
+services:
+  - type: web
+    name: kady-api
+    runtime: python
+    rootDir: apps/api
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m scripts.init_db && uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips=*
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      # DATABASE_URL : renseigne l'URL de ta base Postgres Render (Internal Database URL).
+      # Le backend normalise postgres:// / postgresql:// -> postgresql+psycopg:// tout seul.
+      - key: DATABASE_URL
+        sync: false
+      # Secrets à poser dans le dashboard (ne pas committer). ENV=prod active le durcissement
+      # sécurité : refuse de démarrer si JWT_SECRET/ADMIN_TOKEN sont faibles.
+      - key: ENV
+        value: prod
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_TOKEN
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: APP_RETURN_URL
+        sync: false
+      # Cloudinary (upload photos) — optionnel, sans ces clés l'upload renvoie 503 + placeholders.
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
