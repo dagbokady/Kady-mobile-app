@@ -1,4 +1,6 @@
 # app/main.py — création de l'app, sécurité (headers, rate-limit, garde-fous prod), CORS, routers.
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -18,7 +20,22 @@ if settings.est_prod:
 
 # En prod, pas de documentation publique de l'API.
 _docs = {"docs_url": None, "redoc_url": None, "openapi_url": None} if settings.est_prod else {}
-app = FastAPI(title="KADY API", version="1.0.0", **_docs)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Crée le schéma + seed au démarrage : garantit que les tables existent quel que
+    # soit le Start Command de l'hébergeur (Render, Railway…). Idempotent.
+    from app.core.bootstrap import bootstrap
+
+    try:
+        bootstrap()
+    except Exception as exc:  # noqa: BLE001 — on ne veut pas empêcher le boot si la DB est déjà OK
+        print(f"⚠️ bootstrap au démarrage a échoué : {exc!r}")
+    yield
+
+
+app = FastAPI(title="KADY API", version="1.0.0", lifespan=lifespan, **_docs)
 
 app.add_middleware(
     CORSMiddleware,
